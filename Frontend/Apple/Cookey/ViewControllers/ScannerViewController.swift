@@ -34,6 +34,10 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
         }
         containerView.layer.cornerRadius = 16
         containerView.clipsToBounds = true
+        containerView.onOpenSettings = {
+            guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+            UIApplication.shared.open(url)
+        }
 
         containerView.previewLayer.session = captureSession
         startCamera()
@@ -42,6 +46,9 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         stopCamera()
+        if isMovingFromParent, sessionModel.phase == .scanning {
+            sessionModel.resetToIdle()
+        }
     }
 
     // MARK: - Camera
@@ -56,12 +63,12 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
                     self?.configureSession()
                 } else {
                     DispatchQueue.main.async {
-                        self?.containerView.showMessage(String(localized: "Camera access is required to scan Cookey QR codes."))
+                        self?.containerView.showMessage(String(localized: "Camera access is required to scan Cookey QR codes."), showSettingsButton: true)
                     }
                 }
             }
         default:
-            containerView.showMessage(String(localized: "Camera access is required to scan Cookey QR codes."))
+            containerView.showMessage(String(localized: "Camera access is required to scan Cookey QR codes."), showSettingsButton: true)
         }
     }
 
