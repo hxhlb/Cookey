@@ -91,54 +91,6 @@ struct DeepLink: Equatable {
         self.requestSecret = requestSecret
     }
 
-    init?(url: URL) {
-        guard
-            let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-            components.scheme?.lowercased() == "cookey",
-            components.host?.lowercased() == "login"
-        else {
-            return nil
-        }
-
-        var values: [String: String] = [:]
-        for item in components.queryItems ?? [] {
-            guard let value = item.value else { continue }
-            values[item.name] = value.removingPercentEncoding ?? value
-        }
-
-        let serverURL: URL = if let serverValue = values["server"], let parsed = URL(string: serverValue) {
-            parsed
-        } else {
-            AppEnvironment.effectiveAPIBaseURL
-        }
-
-        guard
-            let rid = values["rid"], !rid.isEmpty,
-            let targetValue = values["target"], let targetURL = URL(string: targetValue),
-            let publicKey = values["pubkey"], !publicKey.isEmpty,
-            let deviceID = values["device_id"], !deviceID.isEmpty
-        else {
-            return nil
-        }
-
-        guard
-            Self.isAllowedRelayURL(serverURL),
-            Self.isAllowedTargetURL(targetURL)
-        else {
-            return nil
-        }
-
-        self.rid = rid
-        self.serverURL = serverURL
-        self.targetURL = targetURL
-        recipientPublicKeyBase64 = publicKey
-        self.deviceID = deviceID
-        requestType = RequestType(rawValue: values["request_type"]?.lowercased() ?? "") ?? .login
-        expiresAt = ISO8601DateFormatter().date(from: values["expires_at"] ?? "")
-        requestProof = values["request_proof"]
-        requestSecret = values["request_secret"]
-    }
-
     static func isAllowedRelayURL(_ url: URL) -> Bool {
         isAllowedURL(url)
     }

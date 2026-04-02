@@ -49,20 +49,13 @@ final class SessionUploadModel: ObservableObject {
     }
 
     func handleURL(_ url: URL) {
-        if let pairKeyDeepLink = PairKeyDeepLink(url: url) {
-            handlePairKey(pairKeyDeepLink.pairKey, serverURL: pairKeyDeepLink.serverURL)
-            return
-        }
-
-        guard let deepLink = DeepLink(url: url) else {
+        guard let pairKeyDeepLink = PairKeyDeepLink(url: url) else {
             Logger.model.errorFile("Rejected invalid Cookey URL: \(url.absoluteString)")
             phase = .failed("Invalid Cookey login link.")
             return
         }
 
-        Logger.model.infoFile("Handling deep link rid=\(deepLink.rid) requestType=\(deepLink.requestType.rawValue) target=\(deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString)")
-        phase = .validating(deepLink)
-        Task { await validateAndProceed(deepLink) }
+        handlePairKey(pairKeyDeepLink.pairKey, serverURL: pairKeyDeepLink.serverURL)
     }
 
     func handleManualPairKey(_ pairKey: String) {

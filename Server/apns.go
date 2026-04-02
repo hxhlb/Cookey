@@ -78,12 +78,8 @@ func (c *APNSClient) sendNotification(request *StoredRequest, serverURL string, 
 			},
 			Sound: "default",
 		},
-		DeviceID:    request.DeviceID,
-		Pubkey:      request.CLIPublicKey,
-		RequestType: request.RequestType,
-		RID:         request.RID,
-		ServerURL:   serverURL,
-		TargetURL:   request.TargetURL,
+		PairKey:   request.PairKey,
+		ServerURL: serverURL,
 	}
 
 	body, err := json.Marshal(payload)
@@ -230,13 +226,9 @@ func base64URLEncode(data []byte) string {
 
 // APNs payload types — fields ordered alphabetically by JSON tag
 type apnsNotificationPayload struct {
-	APS         apsPayload `json:"aps"`
-	DeviceID    string     `json:"device_id"`
-	Pubkey      string     `json:"pubkey"`
-	RequestType string     `json:"request_type,omitempty"`
-	RID         string     `json:"rid"`
-	ServerURL   string     `json:"server_url"`
-	TargetURL   string     `json:"target_url"`
+	APS       apsPayload `json:"aps"`
+	PairKey   string     `json:"pair_key"`
+	ServerURL string     `json:"server_url"`
 }
 
 type apsPayload struct {

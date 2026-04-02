@@ -29,9 +29,11 @@ private final class LockedBox<Value>: @unchecked Sendable {
 @Suite(.serialized)
 @MainActor
 struct CookeyTests {
-    @Test("DeepLink parses a valid login URL")
-    func parsesDeepLink() throws {
+    @Test("DeepLink verifies with valid proof and secret")
+    func verifiesDeepLink() throws {
         let expiresAt = try #require(ISO8601DateFormatter().date(from: "2026-04-02T12:00:00Z"))
+        let serverURL = try #require(URL(string: "https://api.cookey.sh"))
+        let targetURL = try #require(URL(string: "https://www.qaq.wiki/wp-admin"))
         let requestSecret = Data(repeating: 0x42, count: 32)
             .base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")
@@ -39,22 +41,29 @@ struct CookeyTests {
             .replacingOccurrences(of: "=", with: "")
         let requestProof = try RequestAuthenticator.requestProof(
             rid: "r_123",
-            serverURL: #require(URL(string: "https://api.cookey.sh")),
-            targetURL: #require(URL(string: "https://www.qaq.wiki/wp-admin")),
+            serverURL: serverURL,
+            targetURL: targetURL,
             recipientPublicKeyBase64: "U/uenIM6CaBBb3VLlp94N44EPuF8vQacUuzRfo27Lxk=",
             deviceID: "device-123",
             requestType: .login,
             expiresAt: expiresAt,
             requestSecret: requestSecret
         )
-        let url = try #require(
-            URL(string: "cookey://login?rid=r_123&server=https%3A%2F%2Fapi.cookey.sh&target=https%3A%2F%2Fwww.qaq.wiki%2Fwp-admin&pubkey=U%2FuenIM6CaBBb3VLlp94N44EPuF8vQacUuzRfo27Lxk%3D&device_id=device-123&expires_at=2026-04-02T12%3A00%3A00Z&request_proof=\(requestProof)&request_secret=\(requestSecret)")
-        )
 
-        let deepLink = try #require(DeepLink(url: url))
+        let deepLink = DeepLink(
+            rid: "r_123",
+            serverURL: serverURL,
+            targetURL: targetURL,
+            recipientPublicKeyBase64: "U/uenIM6CaBBb3VLlp94N44EPuF8vQacUuzRfo27Lxk=",
+            deviceID: "device-123",
+            requestType: .login,
+            expiresAt: expiresAt,
+            requestProof: requestProof,
+            requestSecret: requestSecret
+        )
         #expect(deepLink.rid == "r_123")
-        #expect(deepLink.serverURL == URL(string: "https://api.cookey.sh"))
-        #expect(deepLink.targetURL == URL(string: "https://www.qaq.wiki/wp-admin"))
+        #expect(deepLink.serverURL == serverURL)
+        #expect(deepLink.targetURL == targetURL)
         #expect(deepLink.recipientPublicKeyBase64 == "U/uenIM6CaBBb3VLlp94N44EPuF8vQacUuzRfo27Lxk=")
         #expect(deepLink.deviceID == "device-123")
         #expect(deepLink.requestType == .login)
@@ -177,22 +186,17 @@ struct CookeyTests {
             requestSecret: requestSecret
         )
 
-        var components = URLComponents()
-        components.scheme = "cookey"
-        components.host = "login"
-        components.queryItems = [
-            URLQueryItem(name: "rid", value: "r_test_upload"),
-            URLQueryItem(name: "server", value: serverURL.absoluteString),
-            URLQueryItem(name: "target", value: "https://www.qaq.wiki/wp-admin"),
-            URLQueryItem(name: "pubkey", value: Data(recipient.publicKey).base64EncodedString()),
-            URLQueryItem(name: "device_id", value: "device-test"),
-            URLQueryItem(name: "expires_at", value: "2026-04-02T12:00:00Z"),
-            URLQueryItem(name: "request_proof", value: requestProof),
-            URLQueryItem(name: "request_secret", value: requestSecret),
-        ]
-
-        let deepLinkURL = try #require(components.url)
-        let deepLink = try #require(DeepLink(url: deepLinkURL))
+        let deepLink = DeepLink(
+            rid: "r_test_upload",
+            serverURL: serverURL,
+            targetURL: try #require(URL(string: "https://www.qaq.wiki/wp-admin")),
+            recipientPublicKeyBase64: Data(recipient.publicKey).base64EncodedString(),
+            deviceID: "device-test",
+            requestType: .login,
+            expiresAt: expiresAt,
+            requestProof: requestProof,
+            requestSecret: requestSecret
+        )
 
         let capturedSession = CapturedSession(
             cookies: [
