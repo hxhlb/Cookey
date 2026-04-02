@@ -60,4 +60,67 @@ struct CapturedSessionCodingTests {
         #expect(decoded.cookies.isEmpty)
         #expect(decoded.origins.isEmpty)
     }
+
+    @Test("CapturedSession decoding treats null localStorage as empty array")
+    func decodesNullLocalStorageAsEmptyArray() throws {
+        let payload = """
+        {
+          "cookies": [],
+          "origins": [
+            {
+              "origin": "https://example.com",
+              "localStorage": null
+            }
+          ]
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(CapturedSession.self, from: Data(payload.utf8))
+        #expect(decoded.origins.count == 1)
+        #expect(decoded.origins[0].origin == "https://example.com")
+        #expect(decoded.origins[0].localStorage.isEmpty)
+    }
+
+    @Test("CapturedSession decoding treats null cookies as empty array")
+    func decodesNullCookiesAsEmptyArray() throws {
+        let payload = """
+        {
+          "cookies": null,
+          "origins": []
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(CapturedSession.self, from: Data(payload.utf8))
+        #expect(decoded.cookies.isEmpty)
+        #expect(decoded.origins.isEmpty)
+    }
+
+    @Test("CapturedCookie decoding defaults null fields")
+    func decodesCookieWithNullFieldsUsingDefaults() throws {
+        let payload = """
+        {
+          "cookies": [
+            {
+              "name": "session",
+              "value": "abc",
+              "domain": "example.com",
+              "path": null,
+              "expires": null,
+              "httpOnly": null,
+              "secure": null,
+              "sameSite": null
+            }
+          ],
+          "origins": []
+        }
+        """
+
+        let decoded = try JSONDecoder().decode(CapturedSession.self, from: Data(payload.utf8))
+        let cookie = try #require(decoded.cookies.first)
+        #expect(cookie.path == "/")
+        #expect(cookie.expires == -1)
+        #expect(cookie.httpOnly == false)
+        #expect(cookie.secure == false)
+        #expect(cookie.sameSite.isEmpty)
+    }
 }

@@ -4,7 +4,7 @@ import Then
 import UIKit
 import UserNotifications
 
-final class SettingsViewController: ConfigurableViewController {
+final class SettingsViewController: StackScrollController {
     static let allowRefreshKey = "wiki.qaq.cookey.settings.allow-refresh"
     static let feedbackURL = URL(string: "https://feedback.qaq.wiki/")!
 
@@ -35,11 +35,8 @@ final class SettingsViewController: ConfigurableViewController {
     )
 
     init() {
-        let manifest = ConfigurableManifest(
-            title: "Settings",
-            list: [Self.object, Self.logsObject, Self.feedbackObject]
-        )
-        super.init(manifest: manifest)
+        super.init(nibName: nil, bundle: nil)
+        title = String(localized: "Settings")
     }
 
     @available(*, unavailable)
@@ -49,6 +46,7 @@ final class SettingsViewController: ConfigurableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "ellipsis.circle"),
@@ -83,6 +81,27 @@ final class SettingsViewController: ConfigurableViewController {
 
     override func setupContentViews() {
         super.setupContentViews()
+
+        // MARK: - General
+
+        stackView.addArrangedSubviewWithMargin(
+            ConfigurableSectionHeaderView().with(header: String(localized: "General"))
+        ) { $0.bottom /= 2 }
+        stackView.addArrangedSubview(SeparatorView())
+        stackView.addArrangedSubviewWithMargin(Self.object.createView())
+        stackView.addArrangedSubview(SeparatorView())
+
+        // MARK: - Contact Us
+
+        stackView.addArrangedSubviewWithMargin(
+            ConfigurableSectionHeaderView().with(header: String(localized: "Contact Us"))
+        ) { $0.bottom /= 2 }
+        stackView.addArrangedSubview(SeparatorView())
+        for object in [Self.logsObject, Self.feedbackObject] {
+            stackView.addArrangedSubviewWithMargin(object.createView())
+            stackView.addArrangedSubview(SeparatorView())
+        }
+
         buildBuildInfoFooter()
     }
 

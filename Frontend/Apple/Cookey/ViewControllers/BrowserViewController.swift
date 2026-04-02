@@ -85,6 +85,13 @@ class BrowserViewController: UIViewController {
                 UIView.animate(withDuration: 0.5) {
                     self.browser.webView.alpha = 1
                 }
+                let alert = AlertViewController(
+                    title: String(localized: "Getting Started"),
+                    message: String(localized: "Please log in or complete the required actions on this page. When you are done, tap the send button in the top-right corner to package and deliver the session data to the requester.")
+                ) { context in
+                    context.addAction(title: String(localized: "OK"), attribute: .dangerous) { context.dispose() }
+                }
+                present(alert, animated: true)
             }
             .store(in: &cancellables)
 

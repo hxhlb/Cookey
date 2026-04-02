@@ -261,6 +261,16 @@
         }
       }
     },
+    "Contact Us" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "联系我们"
+          }
+        }
+      }
+    },
     "Continue" : {
       "localizations" : {
         "en" : {
@@ -505,6 +515,16 @@
         }
       }
     },
+    "General" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通用"
+          }
+        }
+      }
+    },
     "Get Started" : {
       "localizations" : {
         "en" : {
@@ -520,6 +540,9 @@
           }
         }
       }
+    },
+    "Getting Started" : {
+
     },
     "Inspect recent application logs for troubleshooting." : {
       "localizations" : {
@@ -852,6 +875,9 @@
           }
         }
       }
+    },
+    "Please log in or complete the required actions on this page. When you are done, tap the send button in the top-right corner to package and deliver the session data to the requester." : {
+
     },
     "Privacy Policy" : {
       "localizations" : {
