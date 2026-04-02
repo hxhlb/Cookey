@@ -13,6 +13,7 @@ final class SessionUploadModel: ObservableObject {
     enum Phase: Equatable {
         case idle
         case scanning
+        case resolvingPairKey(serverHost: String)
         case validating(DeepLink)
         case browsing(DeepLink)
         case uploading
@@ -79,7 +80,9 @@ final class SessionUploadModel: ObservableObject {
         let normalized = pairKey
             .uppercased()
             .filter { $0.isLetter || $0.isNumber }
-        Logger.model.infoFile("Resolving pair key \(normalized) via \(serverURL.host() ?? serverURL.absoluteString)")
+        let host = serverURL.host() ?? serverURL.absoluteString
+        Logger.model.infoFile("Resolving pair key \(normalized) via \(host)")
+        phase = .resolvingPairKey(serverHost: host)
         Task {
             do {
                 let response = try await relayClientFactory(serverURL)

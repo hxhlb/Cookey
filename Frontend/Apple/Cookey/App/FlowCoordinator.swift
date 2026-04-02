@@ -37,6 +37,10 @@ final class FlowCoordinator {
             let vc = ScannerViewController(sessionModel: sessionModel)
             pushAndTrimStack(vc)
 
+        case let .resolvingPairKey(serverHost):
+            let vc = PairKeyLoadingViewController(serverHost: serverHost)
+            pushAndTrimStack(vc)
+
         case let .validating(deepLink):
             let vc = SeedLoadingViewController(deepLink: deepLink, sessionModel: sessionModel)
             pushAndTrimStack(vc)
@@ -89,6 +93,8 @@ private extension SessionUploadModel.Phase {
             "idle"
         case .scanning:
             "scanning"
+        case let .resolvingPairKey(serverHost):
+            "resolvingPairKey(\(serverHost))"
         case let .validating(deepLink):
             "validating(\(deepLink.rid), \(deepLink.requestType.rawValue))"
         case let .browsing(deepLink):

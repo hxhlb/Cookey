@@ -431,6 +431,38 @@
         }
       }
     },
+    "Encrypting and sending your browser session." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encrypting and sending your browser session."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在加密并发送浏览器会话。"
+          }
+        }
+      }
+    },
+    "End-to-end Encrypted" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End-to-end Encrypted"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "端到端加密"
+          }
+        }
+      }
+    },
     "Enter" : {
       "localizations" : {
         "en" : {
@@ -475,38 +507,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "输入终端中显示的配对码。"
-          }
-        }
-      }
-    },
-    "Encrypting and sending your browser session." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encrypting and sending your browser session."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在加密并发送浏览器会话。"
-          }
-        }
-      }
-    },
-    "End-to-end Encrypted" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "End-to-end Encrypted"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "端到端加密"
           }
         }
       }
@@ -1005,6 +1005,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "报告错误、请求新功能或分享您对 Cookey 的想法。"
+          }
+        }
+      }
+    },
+    "Resolving pair key…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resolving pair key…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在解析配对码…"
           }
         }
       }
