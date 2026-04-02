@@ -109,10 +109,11 @@ docker compose up api
 
 ## Trust Model Notes
 
-- **QR / deep-link flow**: the app receives the authenticated request metadata directly from the CLI-generated link.
-- **Manual pair-key flow**: the relay temporarily stores request metadata in memory so the app can resolve the short pair key. This includes the CLI public key and request authentication material used for pair-key resolution.
+- **QR / deep-link flow**: the CLI-generated deep link now carries only the short pair key plus relay host, for example `cookey://SM8ND67N?host=api.cookey.sh`.
+- **Metadata resolution**: after scanning that link, the app resolves the full request metadata from the relay's temporary in-memory store. This includes the CLI public key and request authentication material.
+- **Manual pair-key flow**: manual entry uses the same resolution flow; the only difference is how the app learns the pair key.
 - **What the relay still cannot do**: decrypt uploaded browser sessions. The X25519 private key stays on the CLI, so stored ciphertext remains unreadable to the relay.
-- **What changes**: manual pair-key entry is not equivalent to the pure QR / deep-link flow. Because the relay reconstructs the request metadata for the app, this mode requires trusting the relay not to tamper with the resolved metadata.
+- **What changes**: QR/deep-link pairing and manual pair-key entry now share the same relay trust assumption for request metadata integrity.
 
 ## Security
 

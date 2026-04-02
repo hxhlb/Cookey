@@ -40,13 +40,12 @@ type Client struct {
 	httpClient *http.Client
 }
 
+const registerRetryLimit = 3
+
 func NewClient(rawBaseURL string) (*Client, error) {
-	parsed, err := url.Parse(rawBaseURL)
+	parsed, err := parseRelayBaseURL(rawBaseURL)
 	if err != nil {
-		return nil, fmt.Errorf("invalid relay server URL: %w", err)
-	}
-	if !isAllowedRelayURL(parsed) {
-		return nil, fmt.Errorf("relay server URL must use https or loopback http")
+		return nil, err
 	}
 
 	return &Client{
@@ -55,6 +54,14 @@ func NewClient(rawBaseURL string) (*Client, error) {
 			Timeout: 15 * time.Second,
 		},
 	}, nil
+}
+
+func CanonicalBaseURL(rawBaseURL string) (string, error) {
+	parsed, err := parseRelayBaseURL(rawBaseURL)
+	if err != nil {
+		return "", err
+	}
+	return parsed.String(), nil
 }
 
 func (c *Client) Register(manifest models.LoginManifest) (string, error) {
@@ -75,32 +82,40 @@ func (c *Client) Register(manifest models.LoginManifest) (string, error) {
 		return "", err
 	}
 
-	request, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.url("v1/requests").String(), bytes.NewReader(body))
-	if err != nil {
-		return "", err
-	}
-	request.Header.Set("Content-Type", "application/json")
+	var lastErr error
+	for attempt := 0; attempt < registerRetryLimit; attempt++ {
+		request, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.url("v1/requests").String(), bytes.NewReader(body))
+		if err != nil {
+			return "", err
+		}
+		request.Header.Set("Content-Type", "application/json")
 
-	responseBody, statusCode, err := c.do(request, 15*time.Second)
-	if err != nil {
-		return "", err
-	}
+		responseBody, statusCode, err := c.do(request, 15*time.Second)
+		if err != nil {
+			return "", err
+		}
 
-	if statusCode < 200 || statusCode >= 300 {
-		return "", HTTPStatusError{Code: statusCode, Body: responseBody}
-	}
+		if statusCode < 200 || statusCode >= 300 {
+			lastErr = HTTPStatusError{Code: statusCode, Body: responseBody}
+			if shouldRetryRegister(lastErr) {
+				continue
+			}
+			return "", lastErr
+		}
 
-	var response models.RelayStatusResponse
-	if err := json.Unmarshal([]byte(responseBody), &response); err != nil {
-		// Server registered successfully but response couldn't be parsed;
-		// fall back to full deeplink (old server or unexpected format).
-		return "", nil
+		var response models.RelayStatusResponse
+		if err := json.Unmarshal([]byte(responseBody), &response); err != nil {
+			return "", fmt.Errorf("relay server returned an invalid response: %w", err)
+		}
+		if response.PairKey != nil && *response.PairKey != "" {
+			return *response.PairKey, nil
+		}
+		return "", ErrInvalidResponse
 	}
-
-	if response.PairKey != nil {
-		return *response.PairKey, nil
+	if lastErr != nil {
+		return "", lastErr
 	}
-	return "", nil
+	return "", ErrInvalidResponse
 }
 
 func (c *Client) UploadSeedSession(rid string, envelope models.EncryptedSessionEnvelope) error {
@@ -295,6 +310,32 @@ func isAllowedRelayURL(parsed *url.URL) bool {
 	default:
 		return false
 	}
+}
+
+func parseRelayBaseURL(rawBaseURL string) (*url.URL, error) {
+	parsed, err := url.Parse(rawBaseURL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid relay server URL: %w", err)
+	}
+	if !isAllowedRelayURL(parsed) {
+		return nil, fmt.Errorf("relay server URL must use https or loopback http")
+	}
+	if parsed.User != nil || parsed.RawQuery != "" || parsed.Fragment != "" || (parsed.Path != "" && parsed.Path != "/") {
+		return nil, fmt.Errorf("relay server URL must not include a custom path, query, or fragment")
+	}
+	parsed.Path = ""
+	parsed.RawPath = ""
+	parsed.RawQuery = ""
+	parsed.Fragment = ""
+	return parsed, nil
+}
+
+func shouldRetryRegister(err error) bool {
+	httpErr, ok := err.(HTTPStatusError)
+	if !ok || httpErr.Code != http.StatusConflict {
+		return false
+	}
+	return strings.Contains(strings.ToLower(httpErr.Body), "pair key collision")
 }
 
 func (c *Client) url(path string) *url.URL {

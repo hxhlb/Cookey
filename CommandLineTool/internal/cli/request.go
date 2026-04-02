@@ -3,6 +3,7 @@ package cli
 import (
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -60,6 +61,14 @@ func runRequestCapture(args []string, mode requestMode) error {
 	}
 
 	serverURL := firstNonEmpty(*server, stringPtrValue(context.Config.DefaultServer), defaultServerURL)
+	serverURL, err = relay.CanonicalBaseURL(serverURL)
+	if err != nil {
+		return cliError{message: "invalid --server value: " + err.Error()}
+	}
+	parsedServerURL, err := url.Parse(serverURL)
+	if err != nil || parsedServerURL.Scheme != "https" {
+		return cliError{message: "invalid --server value: relay server URL must use https"}
+	}
 	timeoutSeconds, err := resolvePositiveInt(*timeout, context.Config.TimeoutSeconds, 300, "timeout")
 	if err != nil {
 		return err
@@ -110,7 +119,7 @@ func runRequestCapture(args []string, mode requestMode) error {
 
 	client, err := relay.NewClient(serverURL)
 	if err != nil {
-		return cliError{message: "invalid --server value: " + serverURL}
+		return cliError{message: "invalid --server value: " + err.Error()}
 	}
 	pairKey, err := client.Register(manifest)
 	if err != nil {
@@ -122,7 +131,7 @@ func runRequestCapture(args []string, mode requestMode) error {
 		}
 	}
 
-	deepLink := qrcode.PairKeyDeepLink(pairKey, serverURL, manifest.RequestSecret)
+	deepLink := qrcode.PairKeyDeepLink(pairKey, serverURL)
 
 	qrText := ""
 	if *qr {

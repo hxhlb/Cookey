@@ -68,7 +68,15 @@ func (rt *Routes) handleCreateRequest(w http.ResponseWriter, r *http.Request) {
 		req.ExpiresAt = ISO8601Time{Time: maxExpiry}
 	}
 
-	stored := rt.storage.Store(req)
+	stored, err := rt.storage.Store(req)
+	if err != nil {
+		if err == ErrPairKeyCollision {
+			writeJSON(w, http.StatusConflict, map[string]string{"error": "Pair key collision"})
+			return
+		}
+		writeJSON(w, http.StatusInternalServerError, map[string]string{"error": "Failed to create request"})
+		return
+	}
 
 	writeJSON(w, http.StatusCreated, NewRequestStatusResponse(stored))
 }

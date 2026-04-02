@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -11,31 +12,41 @@ import (
 const pairKeyAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
 const pairKeyLength = 8
 
+var ErrPairKeyCollision = errors.New("pair key collision")
+
 // Storage is the in-memory store for requests, APN registrations, and WebSocket waiters.
 type Storage struct {
-	mu             sync.RWMutex
-	requests       map[string]*StoredRequest
-	pairKeys       map[string]string                           // pair_key -> rid
-	waiters        map[string]map[string]chan WebSocketMessage // rid -> waiterID -> ch
-	maxPayloadSize int
+	mu               sync.RWMutex
+	requests         map[string]*StoredRequest
+	pairKeys         map[string]string                           // pair_key -> rid
+	waiters          map[string]map[string]chan WebSocketMessage // rid -> waiterID -> ch
+	maxPayloadSize   int
+	pairKeyGenerator func() string
 }
 
 // NewStorage creates a new Storage instance.
 func NewStorage(maxPayloadSize int) *Storage {
 	return &Storage{
-		requests:       make(map[string]*StoredRequest),
-		pairKeys:       make(map[string]string),
-		waiters:        make(map[string]map[string]chan WebSocketMessage),
-		maxPayloadSize: maxPayloadSize,
+		requests:         make(map[string]*StoredRequest),
+		pairKeys:         make(map[string]string),
+		waiters:          make(map[string]map[string]chan WebSocketMessage),
+		maxPayloadSize:   maxPayloadSize,
+		pairKeyGenerator: randomPairKey,
 	}
 }
 
 // Store adds a new pending request.
-func (s *Storage) Store(req LoginRequest) *StoredRequest {
+func (s *Storage) Store(req LoginRequest) (*StoredRequest, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	pairKey := s.generatePairKeyLocked()
+	pairKey := strings.ToUpper(strings.TrimSpace(s.pairKeyGenerator()))
+	if pairKey == "" {
+		return nil, fmt.Errorf("failed to generate pair key")
+	}
+	if _, exists := s.pairKeys[pairKey]; exists {
+		return nil, ErrPairKeyCollision
+	}
 
 	stored := &StoredRequest{
 		RID:               req.RID,
@@ -54,24 +65,8 @@ func (s *Storage) Store(req LoginRequest) *StoredRequest {
 		Status:            StatusPending,
 	}
 	s.requests[req.RID] = stored
-	if pairKey != "" {
-		s.pairKeys[pairKey] = req.RID
-	}
-	return stored
-}
-
-// generatePairKeyLocked generates a unique 8-char pair key. Must be called with s.mu held.
-func (s *Storage) generatePairKeyLocked() string {
-	for attempt := 0; attempt < 10; attempt++ {
-		key := randomPairKey()
-		if key == "" {
-			continue
-		}
-		if _, exists := s.pairKeys[key]; !exists {
-			return key
-		}
-	}
-	return ""
+	s.pairKeys[pairKey] = req.RID
+	return stored, nil
 }
 
 func randomPairKey() string {
