@@ -48,14 +48,15 @@ final class SessionUploadModel: ObservableObject {
     }
 
     func handleURL(_ url: URL) {
+        // Compact pair key format: cookey://p/{pairKey}?s={secret}&h={server}
         if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
            components.scheme?.lowercased() == "cookey",
-           components.host?.lowercased() == "login",
-           let pairKey = components.queryItems?.first(where: { $0.name == "pair" })?.value,
-           let requestSecret = components.queryItems?.first(where: { $0.name == "request_secret" })?.value,
+           components.host?.lowercased() == "p",
+           let pairKey = components.path.split(separator: "/").first.map(String.init),
+           let requestSecret = components.queryItems?.first(where: { $0.name == "s" })?.value,
            !pairKey.isEmpty
         {
-            let serverValue = components.queryItems?.first(where: { $0.name == "server" })?.value
+            let serverValue = components.queryItems?.first(where: { $0.name == "h" })?.value
             let serverURL = serverValue.flatMap { URL(string: $0) } ?? AppEnvironment.apiBaseURL
             guard DeepLink.isAllowedRelayURL(serverURL) else {
                 phase = .failed("Invalid Cookey login link.")

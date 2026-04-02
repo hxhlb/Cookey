@@ -61,14 +61,7 @@ func rootUsage() string {
   cookey session clean [--json]
   cookey config get [key] [--json]
   cookey config set <key> <value> [--json]
-
-Legacy aliases:
-  cookey login            -> cookey request start
-  cookey status           -> cookey request status
-  cookey export           -> cookey session export
-  cookey list             -> cookey session list
-  cookey delete           -> cookey session delete
-  cookey clean            -> cookey session clean`
+`
 }
 
 func requestUsage() string {
