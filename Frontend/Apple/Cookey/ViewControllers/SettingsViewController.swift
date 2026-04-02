@@ -25,10 +25,19 @@ final class SettingsViewController: ConfigurableViewController {
         ephemeralAnnotation: .action(handler: openFeedback)
     )
 
+    static let logsObject = ConfigurableObject(
+        icon: "doc.text.magnifyingglass",
+        title: "View Logs",
+        explain: "Inspect recent application logs for troubleshooting.",
+        ephemeralAnnotation: .action { controller in
+            controller.navigationController?.pushViewController(LogViewerController(), animated: true)
+        }
+    )
+
     init() {
         let manifest = ConfigurableManifest(
             title: "Settings",
-            list: [Self.object, Self.feedbackObject]
+            list: [Self.object, Self.logsObject, Self.feedbackObject]
         )
         super.init(manifest: manifest)
     }
@@ -138,29 +147,36 @@ final class SettingsViewController: ConfigurableViewController {
 
     @MainActor
     private static func openFeedback(_: UIViewController) async {
+        Logger.ui.infoFile("Opening feedback URL from settings")
         await UIApplication.shared.open(feedbackURL)
     }
 
     nonisolated static func whenValueChanged(_ newValue: Bool?) -> Bool? {
         let enabled = newValue == true
+        Logger.ui.infoFile("Allow Refresh Requests toggled to \(enabled)")
         Task {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
             switch settings.authorizationStatus {
             case .authorized, .provisional:
+                Logger.push.infoFile("Notification permission already granted; registering for remote notifications")
                 await MainActor.run { UIApplication.shared.registerForRemoteNotifications() }
             case .notDetermined:
                 do {
+                    Logger.push.infoFile("Notification permission not determined; requesting authorization")
                     let granted = try await UNUserNotificationCenter.current()
                         .requestAuthorization(options: [.alert, .sound, .badge])
                     await MainActor.run {
                         if granted {
+                            Logger.push.infoFile("Notification permission granted from settings flow")
                             UIApplication.shared.registerForRemoteNotifications()
                         } else if enabled {
+                            Logger.push.errorFile("Notification permission denied from settings flow; resetting toggle")
                             ConfigurableKit.set(value: false, forKey: allowRefreshKey)
                         }
                     }
                 } catch {
                     if enabled {
+                        Logger.push.errorFile("Notification authorization request failed: \(error.localizedDescription)")
                         await MainActor.run {
                             ConfigurableKit.set(value: false, forKey: allowRefreshKey)
                         }
@@ -168,6 +184,7 @@ final class SettingsViewController: ConfigurableViewController {
                 }
             default:
                 if enabled {
+                    Logger.push.errorFile("Notifications unavailable for Cookey; resetting refresh toggle")
                     await MainActor.run {
                         ConfigurableKit.set(value: false, forKey: allowRefreshKey)
                     }

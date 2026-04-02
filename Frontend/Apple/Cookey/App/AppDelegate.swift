@@ -11,6 +11,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         _ application: UIApplication,
         didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        _ = LogStore.shared
+        Logger.app.infoFile("Application finished launching")
         UNUserNotificationCenter.current().delegate = self
         configureAlertController()
         refreshPushTokenIfAuthorized(application)
@@ -22,10 +24,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
             forKey: SettingsViewController.allowRefreshKey,
             defaultValue: false
         )
-        guard allowed else { return }
+        guard allowed else {
+            Logger.push.debugFile("Skipping launch APNs refresh because refresh requests are disabled")
+            return
+        }
         Task {
             let settings = await UNUserNotificationCenter.current().notificationSettings()
-            guard settings.authorizationStatus == .authorized else { return }
+            guard settings.authorizationStatus == .authorized else {
+                Logger.push.debugFile("Skipping launch APNs refresh because authorization status is \(settings.authorizationStatus.rawValue)")
+                return
+            }
+            Logger.push.infoFile("Refreshing APNs registration on launch")
             await MainActor.run { application.registerForRemoteNotifications() }
         }
     }
@@ -51,6 +60,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         _: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
+        Logger.push.infoFile("Received APNs device token callback with \(deviceToken.count) bytes")
         Task { await pushCoordinator.handleRegisteredDeviceToken(deviceToken) }
     }
 
@@ -58,6 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         _: UIApplication,
         didFailToRegisterForRemoteNotificationsWithError error: Error
     ) {
+        Logger.push.errorFile("APNs registration failed: \(error.localizedDescription)")
         pushCoordinator.handleRegistrationFailure(error)
     }
 
@@ -66,6 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         willPresent _: UNNotification,
         withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
     ) {
+        Logger.push.infoFile("Foreground push notification will be presented")
         completionHandler([.banner, .sound])
     }
 
@@ -74,6 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
+        Logger.push.infoFile("User tapped push notification with keys: \(response.notification.request.content.userInfo.keys.map(String.init(describing:)).sorted())")
         pushCoordinator.handleNotificationUserInfo(response.notification.request.content.userInfo)
         completionHandler()
     }

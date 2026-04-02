@@ -27,6 +27,7 @@ final class FlowCoordinator {
         guard !isPushing else { return }
         isPushing = true
         defer { isPushing = false }
+        Logger.ui.infoFile("FlowCoordinator handling phase \(phase.logDescription)")
 
         switch phase {
         case .idle:
@@ -61,6 +62,7 @@ final class FlowCoordinator {
             let alert = AlertViewController(title: String(localized: "Error"), message: message) { [weak self] context in
                 context.addAction(title: String(localized: "OK"), attribute: .dangerous) {
                     context.dispose {
+                        Logger.ui.infoFile("Dismissed flow error alert and resetting to idle")
                         self?.sessionModel.resetToIdle()
                     }
                 }
@@ -72,9 +74,31 @@ final class FlowCoordinator {
     /// Push the new VC with animation, then trim the stack to [root, vc] so
     /// intermediate screens are removed without a visible flicker.
     private func pushAndTrimStack(_ vc: UIViewController) {
+        Logger.ui.debugFile("Pushing \(String(describing: type(of: vc))) and trimming navigation stack")
         navigationController.pushViewController(vc, animated: true)
         if let root = navigationController.viewControllers.first, root !== vc {
             navigationController.viewControllers = [root, vc]
+        }
+    }
+}
+
+private extension SessionUploadModel.Phase {
+    var logDescription: String {
+        switch self {
+        case .idle:
+            "idle"
+        case .scanning:
+            "scanning"
+        case let .validating(deepLink):
+            "validating(\(deepLink.rid), \(deepLink.requestType.rawValue))"
+        case let .browsing(deepLink):
+            "browsing(\(deepLink.rid), \(deepLink.requestType.rawValue))"
+        case .uploading:
+            "uploading"
+        case .done:
+            "done"
+        case let .failed(message):
+            "failed(\(message))"
         }
     }
 }

@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         options connectionOptions: UIScene.ConnectionOptions
     ) {
         guard let windowScene = scene as? UIWindowScene else { return }
+        Logger.ui.infoFile("Scene will connect")
 
         let homeVC = HomeViewController(sessionModel: appDelegate.sessionModel)
         let nav = UINavigationController(rootViewController: homeVC)
@@ -36,6 +37,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         #endif
 
         if let url = connectionOptions.urlContexts.first?.url {
+            Logger.ui.infoFile("Scene received launch URL: \(url.absoluteString)")
             appDelegate.sessionModel.handleURL(url)
         }
 
@@ -53,6 +55,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         guard let url = URLContexts.first?.url else { return }
+        Logger.ui.infoFile("Scene opened URL context: \(url.absoluteString)")
         appDelegate.sessionModel.handleURL(url)
     }
 }
