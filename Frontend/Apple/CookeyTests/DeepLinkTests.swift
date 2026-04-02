@@ -12,6 +12,15 @@ struct DeepLinkTests {
         #expect(deepLink.serverURL == URL(string: "https://api.cookey.sh"))
     }
 
+    @Test("PairKeyDeepLink uses default server when host is omitted")
+    func parsesPairKeyDeepLinkWithoutHost() throws {
+        let url = try #require(URL(string: "cookey://SM8ND67N"))
+
+        let deepLink = try #require(PairKeyDeepLink(url: url))
+        #expect(deepLink.pairKey == "SM8ND67N")
+        #expect(deepLink.serverURL == AppEnvironment.effectiveAPIBaseURL)
+    }
+
     @Test("PairKeyDeepLink rejects custom server paths")
     func rejectsPairKeyDeepLinkWithPath() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N?host=api.cookey.sh/path"))

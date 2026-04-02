@@ -1,3 +1,4 @@
+import AlertController
 import ConfigurableKit
 import SnapKit
 import Then
@@ -9,14 +10,7 @@ final class SettingsViewController: StackScrollController {
     static let defaultServerKey = "wiki.qaq.cookey.settings.default-server"
     static let feedbackURL = URL(string: "https://feedback.qaq.wiki/")!
 
-    static let defaultServerObject = ConfigurableObject(
-        icon: "server.rack",
-        title: "Default Server",
-        explain: "The server used when no relay is specified. Enter a domain name — HTTPS is enforced automatically.",
-        key: defaultServerKey,
-        defaultValue: "",
-        annotation: .textInput(placeholder: "api.cookey.sh")
-    )
+    static let defaultServerPlaceholder = defaultServerEndpoint.host() ?? "api.cookey.sh"
 
     static let object = ConfigurableObject(
         icon: "arrow.trianglehead.2.clockwise",
@@ -98,7 +92,7 @@ final class SettingsViewController: StackScrollController {
             ConfigurableSectionHeaderView().with(header: String(localized: "General"))
         ) { $0.bottom /= 2 }
         stackView.addArrangedSubview(SeparatorView())
-        stackView.addArrangedSubviewWithMargin(Self.defaultServerObject.createView())
+        stackView.addArrangedSubviewWithMargin(makeDefaultServerView())
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(Self.object.createView())
         stackView.addArrangedSubview(SeparatorView())
@@ -115,6 +109,78 @@ final class SettingsViewController: StackScrollController {
         }
 
         buildBuildInfoFooter()
+    }
+
+    // MARK: - Default Server
+
+    private func makeDefaultServerView() -> ConfigurableInfoView {
+        let view = ConfigurableInfoView()
+        view.configure(icon: .init(systemName: "server.rack"))
+        view.configure(title: "Default Server")
+        view.configure(
+            description: "The server used when no relay is specified. HTTPS is enforced automatically."
+        )
+
+        let currentValue: String = ConfigurableKit.value(
+            forKey: Self.defaultServerKey,
+            defaultValue: ""
+        )
+        view.configure(value: currentValue.isEmpty ? Self.defaultServerPlaceholder : currentValue)
+
+        view.use { [weak self, weak view] in
+            guard let self, let view else { return [] }
+            return buildDefaultServerMenu(view: view)
+        }
+        return view
+    }
+
+    private func buildDefaultServerMenu(view: ConfigurableInfoView) -> [UIMenuElement] {
+        let currentValue: String = ConfigurableKit.value(
+            forKey: Self.defaultServerKey,
+            defaultValue: ""
+        )
+
+        let editAction = UIAction(
+            title: String(localized: "Edit"),
+            image: UIImage(systemName: "character.cursor.ibeam")
+        ) { [weak self, weak view] _ in
+            guard let self, let view else { return }
+            let input = AlertInputViewController(
+                title: String(localized: "Edit Default Server"),
+                message: String(localized: "Enter a domain name — HTTPS is enforced automatically."),
+                placeholder: Self.defaultServerPlaceholder,
+                text: currentValue
+            ) { [weak view] newValue in
+                let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+                ConfigurableKit.set(value: trimmed, forKey: Self.defaultServerKey)
+                view?.configure(value: trimmed.isEmpty ? Self.defaultServerPlaceholder : trimmed)
+            }
+            present(input, animated: true)
+        }
+
+        var menuElements: [UIMenuElement] = [editAction]
+
+        if !currentValue.isEmpty {
+            let copyAction = UIAction(
+                title: String(localized: "Copy"),
+                image: UIImage(systemName: "doc.on.doc")
+            ) { _ in
+                UIPasteboard.general.string = currentValue
+            }
+            menuElements.append(copyAction)
+        }
+
+        let useDefaultAction = UIAction(
+            title: String(localized: "Use Default (\(Self.defaultServerPlaceholder))"),
+            image: UIImage(systemName: "arrow.counterclockwise")
+        ) { [weak view] _ in
+            ConfigurableKit.set(value: "", forKey: Self.defaultServerKey)
+            view?.configure(value: Self.defaultServerPlaceholder)
+        }
+
+        menuElements.append(UIMenu(options: .displayInline, children: [useDefaultAction]))
+
+        return menuElements
     }
 
     // MARK: - Menu Actions

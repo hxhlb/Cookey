@@ -12,10 +12,16 @@ func PairKeyDeepLink(pairKey string, serverURL string) string {
 		Scheme: "cookey",
 		Host:   pairKey,
 	}
-	query := url.Values{}
-	query.Set("host", RelayHost(serverURL))
-	components.RawQuery = query.Encode()
+	if !IsDefaultServer(serverURL) {
+		query := url.Values{}
+		query.Set("host", RelayHost(serverURL))
+		components.RawQuery = query.Encode()
+	}
 	return components.String()
+}
+
+func IsDefaultServer(serverURL string) bool {
+	return RelayHost(serverURL) == RelayHost(DefaultServerURL)
 }
 
 func RelayHost(serverURL string) string {

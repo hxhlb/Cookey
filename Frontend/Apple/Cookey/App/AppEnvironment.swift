@@ -2,8 +2,6 @@ import ConfigurableKit
 import Foundation
 
 enum AppEnvironment {
-    static let apiBaseURL = URL(string: "https://api.cookey.sh")!
-
     static var effectiveAPIBaseURL: URL {
         let domain: String = ConfigurableKit.value(
             forKey: SettingsViewController.defaultServerKey,
@@ -14,7 +12,7 @@ enum AppEnvironment {
               let url = URL(string: "https://\(trimmed)"),
               url.host() != nil
         else {
-            return apiBaseURL
+            return defaultServerEndpoint
         }
         return url
     }

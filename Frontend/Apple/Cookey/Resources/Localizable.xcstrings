@@ -319,22 +319,6 @@
         }
       }
     },
-    "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开启推送通知后，未来 %@ 的登录或会话刷新请求可直接发送到此设备，无需再次扫描二维码或手动输入配对码。继续操作将弹出系统通知权限提示。"
-          }
-        }
-      }
-    },
     "Cookey could not start the camera scanner." : {
       "localizations" : {
         "en" : {
@@ -347,6 +331,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cookey 无法启动相机扫描器。"
+          }
+        }
+      }
+    },
+    "Copy" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拷贝"
           }
         }
       }
@@ -399,18 +393,22 @@
         }
       }
     },
-    "Enable Push Notifications for Cookey?" : {
+    "Edit" : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enable Push Notifications for Cookey?"
-          }
-        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "要为 Cookey 启用推送通知吗？"
+            "value" : "编辑"
+          }
+        }
+      }
+    },
+    "Edit Default Server" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑默认服务器"
           }
         }
       }
@@ -443,6 +441,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "启用通知"
+          }
+        }
+      }
+    },
+    "Enable Push Notifications for Cookey?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enable Push Notifications for Cookey?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "要为 Cookey 启用推送通知吗？"
           }
         }
       }
@@ -491,6 +505,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "输入"
+          }
+        }
+      }
+    },
+    "Enter a domain name — HTTPS is enforced automatically." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请输入域名，HTTPS 连接将自动启用。"
           }
         }
       }
@@ -615,6 +639,22 @@
         }
       }
     },
+    "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开启推送通知后，未来 %@ 的登录或会话刷新请求可直接发送到此设备，无需再次扫描二维码或手动输入配对码。继续操作将弹出系统通知权限提示。"
+          }
+        }
+      }
+    },
     "Inspect recent application logs for troubleshooting." : {
       "localizations" : {
         "zh-Hans" : {
@@ -689,6 +729,16 @@
         }
       }
     },
+    "Logs" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日志"
+          }
+        }
+      }
+    },
     "Logs may contain sensitive information such as session tokens and request details. Sharing or taking screenshots could expose your credentials." : {
       "localizations" : {
         "en" : {
@@ -701,16 +751,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "日志中可能包含会话令牌、请求详情等敏感数据。截图或分享可能导致您的凭据隐私泄露。"
-          }
-        }
-      }
-    },
-    "Logs" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "日志"
           }
         }
       }
@@ -1407,18 +1447,12 @@
         }
       }
     },
-    "The server used when no relay is specified. Enter a domain name — HTTPS is enforced automatically." : {
+    "The server used when no relay is specified. HTTPS is enforced automatically." : {
       "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The server used when no relay is specified. Enter a domain name — HTTPS is enforced automatically."
-          }
-        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未指定中继服务器时的默认选项。只需输入域名，HTTPS 连接将自动启用。"
+            "value" : "未指定中继服务器时的默认选项。HTTPS 连接将自动启用。"
           }
         }
       }
@@ -1563,6 +1597,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在上传会话…"
+          }
+        }
+      }
+    },
+    "Use Default (%@)" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用默认 (%@)"
           }
         }
       }

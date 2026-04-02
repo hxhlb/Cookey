@@ -169,7 +169,6 @@ final class PushRegistrationCoordinator: ObservableObject {
     private func deepLinkURL(from userInfo: [AnyHashable: Any]) -> URL? {
         guard
             let rid = userInfo["rid"] as? String,
-            let serverURL = userInfo["server_url"] as? String,
             let targetURL = userInfo["target_url"] as? String,
             let publicKey = userInfo["pubkey"] as? String,
             let deviceID = userInfo["device_id"] as? String
@@ -182,11 +181,13 @@ final class PushRegistrationCoordinator: ObservableObject {
         components.host = "login"
         components.queryItems = [
             URLQueryItem(name: "rid", value: rid),
-            URLQueryItem(name: "server", value: serverURL),
             URLQueryItem(name: "target", value: targetURL),
             URLQueryItem(name: "pubkey", value: publicKey),
             URLQueryItem(name: "device_id", value: deviceID),
         ]
+        if let serverURL = userInfo["server_url"] as? String {
+            components.queryItems?.append(URLQueryItem(name: "server", value: serverURL))
+        }
         if let requestType = userInfo["request_type"] as? String {
             components.queryItems?.append(URLQueryItem(name: "request_type", value: requestType))
         }

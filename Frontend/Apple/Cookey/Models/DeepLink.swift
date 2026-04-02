@@ -10,11 +10,17 @@ struct PairKeyDeepLink: Equatable {
             components.scheme?.lowercased() == "cookey",
             let pairKey = components.host,
             !pairKey.isEmpty,
-            components.path.isEmpty || components.path == "/",
-            let serverHost = components.queryItems?.first(where: { $0.name == "host" })?.value,
-            let serverURL = Self.httpsRelayURL(from: serverHost)
+            components.path.isEmpty || components.path == "/"
         else {
             return nil
+        }
+
+        let serverURL: URL = if let serverHost = components.queryItems?.first(where: { $0.name == "host" })?.value,
+                                let resolved = Self.httpsRelayURL(from: serverHost)
+        {
+            resolved
+        } else {
+            AppEnvironment.effectiveAPIBaseURL
         }
 
         self.pairKey = pairKey
@@ -100,9 +106,14 @@ struct DeepLink: Equatable {
             values[item.name] = value.removingPercentEncoding ?? value
         }
 
+        let serverURL: URL = if let serverValue = values["server"], let parsed = URL(string: serverValue) {
+            parsed
+        } else {
+            AppEnvironment.effectiveAPIBaseURL
+        }
+
         guard
             let rid = values["rid"], !rid.isEmpty,
-            let serverValue = values["server"], let serverURL = URL(string: serverValue),
             let targetValue = values["target"], let targetURL = URL(string: targetValue),
             let publicKey = values["pubkey"], !publicKey.isEmpty,
             let deviceID = values["device_id"], !deviceID.isEmpty
