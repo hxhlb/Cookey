@@ -66,67 +66,22 @@ struct RelayClient {
     }
 
     func resolvePairKey(_ pairKey: String) async throws -> PairKeyResolveResponse {
-        let endpoint = baseURL.appending(path: "v1/pair/\(pairKey)")
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "GET"
         Logger.network.infoFile("Resolving pair key \(pairKey)")
-
-        let (data, response) = try await perform(request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        Logger.network.infoFile("Pair key resolve returned HTTP \(httpResponse.statusCode)")
-
-        guard (200 ..< 300).contains(httpResponse.statusCode) else {
-            let body = String(decoding: data, as: UTF8.self)
-            throw NSError(
-                domain: "Cookey.RelayClient",
-                code: httpResponse.statusCode,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode): \(body)",
-                ]
-            )
-        }
-
-        return try decoder.decode(PairKeyResolveResponse.self, from: data)
+        let result: PairKeyResolveResponse = try await performGET("v1/pair/\(pairKey)")
+        Logger.network.infoFile("Pair key resolve succeeded for \(pairKey)")
+        return result
     }
 
     func fetchRequestStatus(rid: String) async throws -> RequestStatusResponse {
-        let endpoint = baseURL.appending(path: "v1/requests/\(rid)")
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "GET"
         Logger.network.debugFile("Fetching request status for rid \(rid)")
-
-        let (data, response) = try await perform(request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
-        Logger.network.infoFile("Request status for rid \(rid) returned HTTP \(httpResponse.statusCode)")
-
-        guard (200 ..< 300).contains(httpResponse.statusCode) else {
-            let body = String(decoding: data, as: UTF8.self)
-            throw NSError(
-                domain: "Cookey.RelayClient",
-                code: httpResponse.statusCode,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode): \(body)",
-                ]
-            )
-        }
-
-        return try decoder.decode(RequestStatusResponse.self, from: data)
+        let result: RequestStatusResponse = try await performGET("v1/requests/\(rid)")
+        Logger.network.infoFile("Request status for rid \(rid) fetched successfully")
+        return result
     }
 
     func fetchSeedSession(rid: String) async throws -> EncryptedSessionEnvelope? {
-        let endpoint = baseURL.appending(path: "v1/requests/\(rid)/seed-session")
-        var request = URLRequest(url: endpoint)
-        request.httpMethod = "GET"
         Logger.network.infoFile("Fetching seed session for rid \(rid)")
-
-        let (data, response) = try await perform(request)
-        guard let httpResponse = response as? HTTPURLResponse else {
-            throw URLError(.badServerResponse)
-        }
+        let (data, httpResponse) = try await performGETRaw("v1/requests/\(rid)/seed-session")
         Logger.network.infoFile("Seed session fetch for rid \(rid) returned HTTP \(httpResponse.statusCode) with \(data.count) bytes")
 
         switch httpResponse.statusCode {
@@ -136,14 +91,7 @@ struct RelayClient {
         case 200 ..< 300:
             return try decoder.decode(EncryptedSessionEnvelope.self, from: data)
         default:
-            let body = String(decoding: data, as: UTF8.self)
-            throw NSError(
-                domain: "Cookey.RelayClient",
-                code: httpResponse.statusCode,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode): \(body)",
-                ]
-            )
+            throw relayError(httpResponse.statusCode, data: data)
         }
     }
 
@@ -169,17 +117,38 @@ struct RelayClient {
         Logger.network.infoFile("\(method) \(url.lastPathComponent) returned HTTP \(httpResponse.statusCode)")
 
         guard (200 ..< 300).contains(httpResponse.statusCode) else {
-            let body = String(decoding: data, as: UTF8.self)
-            throw NSError(
-                domain: "Cookey.RelayClient",
-                code: httpResponse.statusCode,
-                userInfo: [
-                    NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode): \(body)",
-                ]
-            )
+            throw relayError(httpResponse.statusCode, data: data)
         }
 
         return httpResponse
+    }
+
+    private func performGET<T: Decodable>(_ path: String) async throws -> T {
+        let (data, httpResponse) = try await performGETRaw(path)
+        guard (200 ..< 300).contains(httpResponse.statusCode) else {
+            throw relayError(httpResponse.statusCode, data: data)
+        }
+        return try decoder.decode(T.self, from: data)
+    }
+
+    private func performGETRaw(_ path: String) async throws -> (Data, HTTPURLResponse) {
+        let endpoint = baseURL.appending(path: path)
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        let (data, response) = try await perform(request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        return (data, httpResponse)
+    }
+
+    private func relayError(_ statusCode: Int, data: Data) -> NSError {
+        let body = String(decoding: data, as: UTF8.self)
+        return NSError(
+            domain: "Cookey.RelayClient",
+            code: statusCode,
+            userInfo: [NSLocalizedDescriptionKey: "Unexpected status code \(statusCode): \(body)"]
+        )
     }
 
     private func perform(_ request: URLRequest) async throws -> (Data, URLResponse) {

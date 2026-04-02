@@ -9,13 +9,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"golang.org/x/crypto/curve25519"
 	"golang.org/x/crypto/nacl/box"
 
+	"cookey/internal/fileutil"
 	"cookey/internal/models"
 )
 
@@ -51,7 +51,7 @@ func LoadOrCreate(path string) (models.KeypairFile, error) {
 	}
 	data = append(data, '\n')
 
-	if err := writeFileAtomically(path, data, 0o600); err != nil {
+	if err := fileutil.WriteFileAtomically(path, data, 0o600); err != nil {
 		return models.KeypairFile{}, err
 	}
 
@@ -219,44 +219,3 @@ func RandomBytes(length int) ([]byte, error) {
 	return buf, nil
 }
 
-func writeFileAtomically(path string, data []byte, permissions os.FileMode) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return err
-	}
-
-	tempFile, err := os.CreateTemp(dir, "."+filepath.Base(path)+".tmp-*")
-	if err != nil {
-		return err
-	}
-
-	tempPath := tempFile.Name()
-	cleanup := func() {
-		_ = tempFile.Close()
-		_ = os.Remove(tempPath)
-	}
-
-	if _, err := tempFile.Write(data); err != nil {
-		cleanup()
-		return err
-	}
-	if err := tempFile.Sync(); err != nil {
-		cleanup()
-		return err
-	}
-	if err := tempFile.Chmod(permissions); err != nil {
-		cleanup()
-		return err
-	}
-	if err := tempFile.Close(); err != nil {
-		_ = os.Remove(tempPath)
-		return err
-	}
-
-	if err := os.Rename(tempPath, path); err != nil {
-		_ = os.Remove(tempPath)
-		return err
-	}
-
-	return nil
-}

@@ -709,20 +709,23 @@ func renderSummary(summary models.StatusSummary) string {
 	return strings.Join(lines, "\n")
 }
 
-func renderDeleteOutput(output models.DeleteOutput) string {
-	deleted := make([]string, 0, 2)
+func deletedComponents(output models.DeleteOutput) []string {
+	var parts []string
 	if output.SessionDeleted {
-		deleted = append(deleted, "session")
+		parts = append(parts, "session")
 	}
 	if output.DaemonDeleted {
-		deleted = append(deleted, "daemon")
+		parts = append(parts, "daemon")
 	}
+	return parts
+}
 
-	if len(deleted) == 0 {
+func renderDeleteOutput(output models.DeleteOutput) string {
+	parts := deletedComponents(output)
+	if len(parts) == 0 {
 		return "rid: " + output.RID + "\ndeleted: none"
 	}
-
-	return "rid: " + output.RID + "\ndeleted: " + strings.Join(deleted, ", ")
+	return "rid: " + output.RID + "\ndeleted: " + strings.Join(parts, ", ")
 }
 
 func renderCleanOutput(output models.CleanOutput) string {
@@ -734,7 +737,8 @@ func renderCleanOutput(output models.CleanOutput) string {
 	if len(output.Deleted) > 0 {
 		lines = append(lines, "deleted:")
 		for _, item := range output.Deleted {
-			lines = append(lines, "  "+item.RID+" ("+strings.TrimPrefix(renderDeleteOutputDetails(item), ", ")+")")
+			parts := deletedComponents(item)
+			lines = append(lines, "  "+item.RID+" ("+strings.Join(parts, ", ")+")")
 		}
 	}
 	if len(output.Skipped) > 0 {
@@ -744,17 +748,6 @@ func renderCleanOutput(output models.CleanOutput) string {
 		}
 	}
 	return strings.Join(lines, "\n")
-}
-
-func renderDeleteOutputDetails(output models.DeleteOutput) string {
-	deleted := make([]string, 0, 2)
-	if output.SessionDeleted {
-		deleted = append(deleted, "session")
-	}
-	if output.DaemonDeleted {
-		deleted = append(deleted, "daemon")
-	}
-	return strings.Join(deleted, ", ")
 }
 
 func parseFlags(arguments []string) (map[string]string, error) {

@@ -85,6 +85,20 @@ func randomPairKey() string {
 	return string(result)
 }
 
+// copy returns a shallow copy of the request with deep-copied session pointers.
+func (r *StoredRequest) copy() *StoredRequest {
+	cp := *r
+	if r.EncryptedSession != nil {
+		es := *r.EncryptedSession
+		cp.EncryptedSession = &es
+	}
+	if r.EncryptedSeedSession != nil {
+		seed := *r.EncryptedSeedSession
+		cp.EncryptedSeedSession = &seed
+	}
+	return &cp
+}
+
 // GetRequestByPairKey looks up a request by its short pair key.
 func (s *Storage) GetRequestByPairKey(pairKey string) *StoredRequest {
 	s.mu.RLock()
@@ -99,16 +113,7 @@ func (s *Storage) GetRequestByPairKey(pairKey string) *StoredRequest {
 	if r == nil {
 		return nil
 	}
-	cp := *r
-	if r.EncryptedSession != nil {
-		es := *r.EncryptedSession
-		cp.EncryptedSession = &es
-	}
-	if r.EncryptedSeedSession != nil {
-		seed := *r.EncryptedSeedSession
-		cp.EncryptedSeedSession = &seed
-	}
-	return &cp
+	return r.copy()
 }
 
 // GetRequest retrieves a stored request by ID.
@@ -119,17 +124,7 @@ func (s *Storage) GetRequest(rid string) *StoredRequest {
 	if r == nil {
 		return nil
 	}
-	// Return a copy to avoid races
-	cp := *r
-	if r.EncryptedSession != nil {
-		es := *r.EncryptedSession
-		cp.EncryptedSession = &es
-	}
-	if r.EncryptedSeedSession != nil {
-		seed := *r.EncryptedSeedSession
-		cp.EncryptedSeedSession = &seed
-	}
-	return &cp
+	return r.copy()
 }
 
 // UpdateStatus updates a request's status and notifies waiters.
@@ -146,8 +141,7 @@ func (s *Storage) UpdateStatus(rid string, status RequestStatus) *StoredRequest 
 		Type:    "status",
 		Payload: StatusPayload{Status: status, Timestamp: nowISO8601()},
 	})
-	cp := *r
-	return &cp
+	return r.copy()
 }
 
 // StoreSession stores an encrypted session, validates payload size, and notifies waiters.

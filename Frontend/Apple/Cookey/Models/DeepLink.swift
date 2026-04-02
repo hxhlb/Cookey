@@ -81,20 +81,10 @@ struct DeepLink: Equatable {
         requestSecret = values["request_secret"]
     }
 
-    static func isAllowedRelayURL(_ url: URL) -> Bool {
-        guard let scheme = url.scheme?.lowercased() else { return false }
-        switch scheme {
-        case "https":
-            return url.host?.isEmpty == false
-        case "http":
-            guard let host = url.host?.lowercased() else { return false }
-            return host == "localhost" || host == "127.0.0.1" || host == "::1"
-        default:
-            return false
-        }
-    }
+    static func isAllowedRelayURL(_ url: URL) -> Bool { isAllowedURL(url) }
+    static func isAllowedTargetURL(_ url: URL) -> Bool { isAllowedURL(url) }
 
-    static func isAllowedTargetURL(_ url: URL) -> Bool {
+    private static func isAllowedURL(_ url: URL) -> Bool {
         guard let scheme = url.scheme?.lowercased() else { return false }
         switch scheme {
         case "https":

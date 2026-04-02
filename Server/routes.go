@@ -66,23 +66,34 @@ func (rt *Routes) handleCreateRequest(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, NewRequestStatusResponse(stored))
 }
 
-// GET /v1/requests/{rid}
-func (rt *Routes) handleGetRequest(w http.ResponseWriter, r *http.Request) {
+// loadRequestOrFail extracts the rid, loads the request, and checks expiry.
+// Returns nil if a response was already written.
+func (rt *Routes) loadRequestOrFail(w http.ResponseWriter, r *http.Request) *StoredRequest {
 	rid := r.PathValue("rid")
 	if rid == "" {
 		writeText(w, http.StatusBadRequest, "Missing request ID")
-		return
+		return nil
 	}
 
 	stored := rt.storage.GetRequest(rid)
 	if stored == nil {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "Request not found"})
-		return
+		return nil
 	}
 
 	if stored.ExpiresAt.Before(time.Now()) {
 		rt.storage.UpdateStatus(rid, StatusExpired)
 		writeJSON(w, http.StatusGone, map[string]string{"error": "Request expired"})
+		return nil
+	}
+
+	return stored
+}
+
+// GET /v1/requests/{rid}
+func (rt *Routes) handleGetRequest(w http.ResponseWriter, r *http.Request) {
+	stored := rt.loadRequestOrFail(w, r)
+	if stored == nil {
 		return
 	}
 
@@ -123,25 +134,12 @@ func (rt *Routes) handleResolvePairKey(w http.ResponseWriter, r *http.Request) {
 
 // GET /v1/requests/{rid}/seed-session
 func (rt *Routes) handleGetSeedSession(w http.ResponseWriter, r *http.Request) {
-	rid := r.PathValue("rid")
-	if rid == "" {
-		writeText(w, http.StatusBadRequest, "Missing request ID")
-		return
-	}
-
-	stored := rt.storage.GetRequest(rid)
+	stored := rt.loadRequestOrFail(w, r)
 	if stored == nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": "Request not found"})
 		return
 	}
 
-	if stored.ExpiresAt.Before(time.Now()) {
-		rt.storage.UpdateStatus(rid, StatusExpired)
-		writeJSON(w, http.StatusGone, map[string]string{"error": "Request expired"})
-		return
-	}
-
-	seed := rt.storage.GetAndClearSeedSession(rid)
+	seed := rt.storage.GetAndClearSeedSession(stored.RID)
 	if seed == nil {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "Seed session not found"})
 		return
@@ -152,21 +150,8 @@ func (rt *Routes) handleGetSeedSession(w http.ResponseWriter, r *http.Request) {
 
 // POST /v1/requests/{rid}/session
 func (rt *Routes) handleUploadSession(w http.ResponseWriter, r *http.Request) {
-	rid := r.PathValue("rid")
-	if rid == "" {
-		writeText(w, http.StatusBadRequest, "Missing request ID")
-		return
-	}
-
-	stored := rt.storage.GetRequest(rid)
+	stored := rt.loadRequestOrFail(w, r)
 	if stored == nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": "Request not found"})
-		return
-	}
-
-	if stored.ExpiresAt.Before(time.Now()) {
-		rt.storage.UpdateStatus(rid, StatusExpired)
-		writeJSON(w, http.StatusGone, map[string]string{"error": "Request expired"})
 		return
 	}
 
@@ -190,35 +175,30 @@ func (rt *Routes) handleUploadSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if rt.storage.StoreSession(rid, session) == nil {
+	if rt.storage.StoreSession(stored.RID, session) == nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Failed to store session"})
 		return
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]string{"status": "uploaded", "rid": rid})
+	writeJSON(w, http.StatusCreated, map[string]string{"status": "uploaded", "rid": stored.RID})
 }
 
 // POST /v1/requests/{rid}/seed-session
 func (rt *Routes) handleUploadSeedSession(w http.ResponseWriter, r *http.Request) {
-	rid := r.PathValue("rid")
-	if rid == "" {
-		writeText(w, http.StatusBadRequest, "Missing request ID")
-		return
-	}
-
-	stored := rt.storage.GetRequest(rid)
+	stored := rt.loadRequestOrFail(w, r)
 	if stored == nil {
-		writeJSON(w, http.StatusNotFound, map[string]string{"error": "Request not found"})
 		return
 	}
 
-	if stored.ExpiresAt.Before(time.Now()) {
-		rt.storage.UpdateStatus(rid, StatusExpired)
-		writeJSON(w, http.StatusGone, map[string]string{"error": "Request expired"})
+	if stored.RequestType != RequestTypeRefresh {
+		writeJSON(w, http.StatusConflict, map[string]string{"error": "Seed session already uploaded"})
 		return
 	}
-
-	if stored.RequestType != RequestTypeRefresh || stored.Status != StatusPending || stored.EncryptedSeedSession != nil {
+	if stored.Status != StatusPending {
+		writeJSON(w, http.StatusConflict, map[string]string{"error": "Seed session already uploaded"})
+		return
+	}
+	if stored.EncryptedSeedSession != nil {
 		writeJSON(w, http.StatusConflict, map[string]string{"error": "Seed session already uploaded"})
 		return
 	}
@@ -234,7 +214,7 @@ func (rt *Routes) handleUploadSeedSession(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	if err := rt.storage.StoreSeedSession(rid, &seed); err != nil {
+	if err := rt.storage.StoreSeedSession(stored.RID, &seed); err != nil {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Failed to store session"})
 		return
 	}
@@ -245,7 +225,7 @@ func (rt *Routes) handleUploadSeedSession(w http.ResponseWriter, r *http.Request
 		}
 	}
 
-	writeJSON(w, http.StatusCreated, map[string]string{"status": "uploaded", "rid": rid})
+	writeJSON(w, http.StatusCreated, map[string]string{"status": "uploaded", "rid": stored.RID})
 }
 
 // decodeBody reads and decodes a JSON body with a size limit.

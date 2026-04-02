@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"cookey/internal/crypto"
+	"cookey/internal/fileutil"
 	"cookey/internal/models"
 )
 
@@ -133,7 +134,7 @@ func WriteJSON(path string, value any, permissions os.FileMode) error {
 		return err
 	}
 
-	return writeFileAtomically(path, data, permissions)
+	return fileutil.WriteFileAtomically(path, data, permissions)
 }
 
 func LoadOrCreateDeviceID(path string) (string, error) {
@@ -151,7 +152,7 @@ func LoadOrCreateDeviceID(path string) (string, error) {
 		return "", err
 	}
 
-	if err := writeFileAtomically(path, []byte(identifier), 0o600); err != nil {
+	if err := fileutil.WriteFileAtomically(path, []byte(identifier), 0o600); err != nil {
 		return "", err
 	}
 
@@ -505,47 +506,6 @@ func ensureDirectory(path string, permissions os.FileMode) error {
 	return os.Chmod(path, permissions)
 }
 
-func writeFileAtomically(path string, data []byte, permissions os.FileMode) error {
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0o700); err != nil {
-		return err
-	}
-
-	tempFile, err := os.CreateTemp(dir, "."+filepath.Base(path)+".tmp-*")
-	if err != nil {
-		return err
-	}
-
-	tempPath := tempFile.Name()
-	cleanup := func() {
-		_ = tempFile.Close()
-		_ = os.Remove(tempPath)
-	}
-
-	if _, err := tempFile.Write(data); err != nil {
-		cleanup()
-		return err
-	}
-	if err := tempFile.Sync(); err != nil {
-		cleanup()
-		return err
-	}
-	if err := tempFile.Chmod(permissions); err != nil {
-		cleanup()
-		return err
-	}
-	if err := tempFile.Close(); err != nil {
-		_ = os.Remove(tempPath)
-		return err
-	}
-
-	if err := os.Rename(tempPath, path); err != nil {
-		_ = os.Remove(tempPath)
-		return err
-	}
-
-	return nil
-}
 
 func marshalPrettyJSON(value any) ([]byte, error) {
 	data, err := json.MarshalIndent(value, "", "  ")

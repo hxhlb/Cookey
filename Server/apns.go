@@ -211,16 +211,6 @@ func (c *APNSClient) loadSigningKey() (*ecdsa.PrivateKey, error) {
 	return ecKey, nil
 }
 
-func isPermanentTokenError(statusCode int, reason string) bool {
-	if statusCode != 400 && statusCode != 410 {
-		return false
-	}
-	switch reason {
-	case "BadDeviceToken", "DeviceTokenNotForTopic", "Unregistered":
-		return true
-	}
-	return false
-}
 
 func encodeJWTPart(v interface{}) (string, error) {
 	data, err := json.Marshal(v)
@@ -260,9 +250,6 @@ type apsAlert struct {
 	TitleLocKey string   `json:"title-loc-key"`
 }
 
-type apnsErrorResponse struct {
-	Reason string `json:"reason"`
-}
 
 type jwtHeader struct {
 	Alg string `json:"alg"`
