@@ -186,10 +186,10 @@ struct CookeyTests {
             requestSecret: requestSecret
         )
 
-        let deepLink = DeepLink(
+        let deepLink = try DeepLink(
             rid: "r_test_upload",
             serverURL: serverURL,
-            targetURL: try #require(URL(string: "https://www.qaq.wiki/wp-admin")),
+            targetURL: #require(URL(string: "https://www.qaq.wiki/wp-admin")),
             recipientPublicKeyBase64: Data(recipient.publicKey).base64EncodedString(),
             deviceID: "device-test",
             requestType: .login,
