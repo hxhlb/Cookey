@@ -817,6 +817,22 @@
         }
       }
     },
+    "Report bugs, request features, or share your thoughts about Cookey." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Report bugs, request features, or share your thoughts about Cookey."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "报告错误、请求新功能或分享您对 Cookey 的想法。"
+          }
+        }
+      }
+    },
     "When enabled, the relay server can send push notifications to this device for session refresh requests. This requires system notification permissions." : {
       "localizations" : {
         "en" : {

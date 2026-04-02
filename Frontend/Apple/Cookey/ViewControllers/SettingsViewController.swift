@@ -19,6 +19,7 @@ final class SettingsViewController: ConfigurableViewController {
     static let feedbackObject = ConfigurableObject(
         icon: "ellipsis.bubble",
         title: "Submit Feedback",
+        explain: "Report bugs, request features, or share your thoughts about Cookey.",
         ephemeralAnnotation: .action(handler: openFeedback)
     )
 
