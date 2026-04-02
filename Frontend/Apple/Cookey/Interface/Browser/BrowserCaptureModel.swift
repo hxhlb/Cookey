@@ -24,6 +24,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
     @Published var isTransferring = false
     @Published var pageTitle = ""
     @Published var passkeyAlertPresented = false
+    @Published var initialLoadComplete = false
 
     private let targetURL: URL
     private let deviceID: String
