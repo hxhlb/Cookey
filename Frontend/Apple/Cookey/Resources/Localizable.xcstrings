@@ -542,7 +542,14 @@
       }
     },
     "Getting Started" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始使用"
+          }
+        }
+      }
     },
     "Inspect recent application logs for troubleshooting." : {
       "localizations" : {
@@ -877,7 +884,14 @@
       }
     },
     "Please log in or complete the required actions on this page. When you are done, tap the send button in the top-right corner to package and deliver the session data to the requester." : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请在此页面登录或完成所需操作。完成后，点击右上角的发送按钮以打包并将会话数据发送给请求方。"
+          }
+        }
+      }
     },
     "Privacy Policy" : {
       "localizations" : {
