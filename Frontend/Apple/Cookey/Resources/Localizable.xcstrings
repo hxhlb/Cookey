@@ -864,6 +864,262 @@
           }
         }
       }
+    },
+    "Welcome to" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome to"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "欢迎使用"
+          }
+        }
+      }
+    },
+    "%@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@"
+          }
+        }
+      }
+    },
+    "Scan a QR code on your phone, log in on mobile, and your session lands encrypted in your terminal — ready for automation." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan a QR code on your phone, log in on mobile, and your session lands encrypted in your terminal — ready for automation."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在手机上扫描二维码，完成登录，加密的会话将直接传回终端——随时可用于自动化。"
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get Started"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开始使用"
+          }
+        }
+      }
+    },
+    "Scan & Login" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan & Login"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扫码登录"
+          }
+        }
+      }
+    },
+    "Scan a QR code from your terminal, log in on your phone, done." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Scan a QR code from your terminal, log in on your phone, done."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "扫描终端中的二维码，在手机上完成登录，搞定。"
+          }
+        }
+      }
+    },
+    "End-to-end Encrypted" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End-to-end Encrypted"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "端到端加密"
+          }
+        }
+      }
+    },
+    "Session data is encrypted on-device before leaving your phone. The relay never sees plaintext." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session data is encrypted on-device before leaving your phone. The relay never sees plaintext."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "会话数据在离开手机前已在设备上加密。中继服务器无法看到明文。"
+          }
+        }
+      }
+    },
+    "Zero Registration" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zero Registration"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "零注册"
+          }
+        }
+      }
+    },
+    "No accounts or enrollment. The CLI generates its own key pair on first run." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No accounts or enrollment. The CLI generates its own key pair on first run."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无需账号或注册。CLI 首次运行时自动生成密钥对。"
+          }
+        }
+      }
+    },
+    "Self-Hostable" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Self-Hostable"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "可自托管"
+          }
+        }
+      }
+    },
+    "Single Docker image, memory-only storage, auto-expiring sessions." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Single Docker image, memory-only storage, auto-expiring sessions."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "单个 Docker 镜像，纯内存存储，会话自动过期。"
+          }
+        }
+      }
+    },
+    "Built for Automation" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Built for Automation"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "为自动化而生"
+          }
+        }
+      }
+    },
+    "Outputs Playwright-compatible storageState JSON. Pipe into any browser automation tool." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Outputs Playwright-compatible storageState JSON. Pipe into any browser automation tool."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "输出兼容 Playwright 的 storageState JSON，可直接用于任何浏览器自动化工具。"
+          }
+        }
+      }
+    },
+    "Open Source" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Open Source"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开源"
+          }
+        }
+      }
+    },
+    "Every component — CLI, app, relay — is open source and auditable." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every component — CLI, app, relay — is open source and auditable."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有组件——CLI、App、中继——均为开源，可供审计。"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

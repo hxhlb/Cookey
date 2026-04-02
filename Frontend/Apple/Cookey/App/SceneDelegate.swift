@@ -37,6 +37,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             appDelegate.sessionModel.handleURL(url)
         }
 
+        if WelcomeExperience.shouldPresent {
+            let welcome = WelcomePageViewController.makePresentedController {
+                WelcomeExperience.markPresented()
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                nav.topViewController?.present(welcome, animated: true)
+            }
+        }
+
         Task { await appDelegate.pushCoordinator.attach(to: appDelegate.sessionModel) }
     }
 
