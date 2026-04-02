@@ -5,7 +5,7 @@ import Foundation
 import Sodium
 import Testing
 
-private struct RecordedRequest: Sendable {
+private struct RecordedRequest {
     let method: String?
     let url: URL?
     let body: Data?
@@ -31,7 +31,7 @@ private final class LockedBox<Value>: @unchecked Sendable {
 struct CookeyTests {
     @Test("DeepLink parses a valid login URL")
     func parsesDeepLink() throws {
-        let expiresAt = ISO8601DateFormatter().date(from: "2026-04-02T12:00:00Z")!
+        let expiresAt = try #require(ISO8601DateFormatter().date(from: "2026-04-02T12:00:00Z"))
         let requestSecret = Data(repeating: 0x42, count: 32)
             .base64EncodedString()
             .replacingOccurrences(of: "+", with: "-")
@@ -39,8 +39,8 @@ struct CookeyTests {
             .replacingOccurrences(of: "=", with: "")
         let requestProof = try RequestAuthenticator.requestProof(
             rid: "r_123",
-            serverURL: URL(string: "https://api.cookey.sh")!,
-            targetURL: URL(string: "https://www.qaq.wiki/wp-admin")!,
+            serverURL: #require(URL(string: "https://api.cookey.sh")),
+            targetURL: #require(URL(string: "https://www.qaq.wiki/wp-admin")),
             recipientPublicKeyBase64: "U/uenIM6CaBBb3VLlp94N44EPuF8vQacUuzRfo27Lxk=",
             deviceID: "device-123",
             requestType: .login,
@@ -165,11 +165,11 @@ struct CookeyTests {
             .replacingOccurrences(of: "+", with: "-")
             .replacingOccurrences(of: "/", with: "_")
             .replacingOccurrences(of: "=", with: "")
-        let expiresAt = ISO8601DateFormatter().date(from: "2026-04-02T12:00:00Z")!
+        let expiresAt = try #require(ISO8601DateFormatter().date(from: "2026-04-02T12:00:00Z"))
         let requestProof = try RequestAuthenticator.requestProof(
             rid: "r_test_upload",
             serverURL: serverURL,
-            targetURL: URL(string: "https://www.qaq.wiki/wp-admin")!,
+            targetURL: #require(URL(string: "https://www.qaq.wiki/wp-admin")),
             recipientPublicKeyBase64: Data(recipient.publicKey).base64EncodedString(),
             deviceID: "device-test",
             requestType: .login,

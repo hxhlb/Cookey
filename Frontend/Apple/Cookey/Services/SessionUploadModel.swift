@@ -53,7 +53,8 @@ final class SessionUploadModel: ObservableObject {
            components.host?.lowercased() == "login",
            let pairKey = components.queryItems?.first(where: { $0.name == "pair" })?.value,
            let requestSecret = components.queryItems?.first(where: { $0.name == "request_secret" })?.value,
-           !pairKey.isEmpty {
+           !pairKey.isEmpty
+        {
             let serverValue = components.queryItems?.first(where: { $0.name == "server" })?.value
             let serverURL = serverValue.flatMap { URL(string: $0) } ?? AppEnvironment.apiBaseURL
             guard DeepLink.isAllowedRelayURL(serverURL) else {
