@@ -3,10 +3,6 @@ import PackageDescription
 
 let package = Package(
     name: "CryptoBox",
-    platforms: [
-        .iOS(.v17),
-        .macOS(.v13),
-    ],
     products: [
         .library(name: "CryptoBox", targets: ["CryptoBox"]),
     ],
