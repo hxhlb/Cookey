@@ -40,6 +40,7 @@ final class SeedLoadingViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        Logger.ui.infoFile("SeedLoadingViewController loaded for rid \(deepLink.rid)")
         view.backgroundColor = .systemBackground
         navigationItem.hidesBackButton = true
 
@@ -106,6 +107,7 @@ final class SeedLoadingViewController: UIViewController {
         }
 
         hasPresentedPushExplanation = true
+        Logger.push.infoFile("Presenting push explanation for rid \(deepLink.rid)")
         let host = deepLink.serverURL.host(percentEncoded: false) ?? deepLink.serverURL.absoluteString
         let alert = AlertViewController(
             title: String(localized: "Enable APNs for Cookey?"),
@@ -113,11 +115,13 @@ final class SeedLoadingViewController: UIViewController {
         ) { [weak self] context in
             context.addAction(title: String(localized: "Not Now")) {
                 context.dispose {
+                    Logger.push.infoFile("User declined push explanation for rid \(self?.deepLink.rid ?? "<unknown>")")
                     self?.sessionModel.respondToPushExplanation(allow: false)
                 }
             }
             context.addAction(title: String(localized: "Continue"), attribute: .dangerous) {
                 context.dispose {
+                    Logger.push.infoFile("User accepted push explanation for rid \(self?.deepLink.rid ?? "<unknown>")")
                     self?.sessionModel.respondToPushExplanation(allow: true)
                 }
             }

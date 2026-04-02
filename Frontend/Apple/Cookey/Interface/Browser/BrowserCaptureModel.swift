@@ -32,6 +32,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
     init(targetURL: URL, deviceID: String) {
         self.targetURL = targetURL
         self.deviceID = deviceID
+        Logger.browser.infoFile("Creating browser capture model for target \(targetURL.host() ?? targetURL.absoluteString) without seed session")
 
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
@@ -49,6 +50,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
     init(targetURL: URL, deviceID: String, seedSession: CapturedSession) {
         self.targetURL = targetURL
         self.deviceID = deviceID
+        Logger.browser.infoFile("Creating browser capture model for target \(targetURL.host() ?? targetURL.absoluteString) with seed session cookies=\(seedSession.cookies.count) origins=\(seedSession.origins.count)")
 
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
@@ -84,6 +86,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
         let cookies = await capturedCookies()
         let origins = try await capturedOrigins()
         let deviceInfo = try currentDeviceInfo()
+        Logger.browser.infoFile("Captured browser state with cookies=\(cookies.count) origins=\(origins.count) deviceInfoPresent=\(deviceInfo != nil)")
 
         let session = CapturedSession(cookies: cookies, origins: origins, deviceInfo: deviceInfo)
         let data = try sanitizeCapturedSessionPayload(session)
@@ -193,6 +196,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
         let rawItems = try await webView.evaluateJavaScript(script)
         let itemsJSON = rawItems as? String ?? "[]"
         let items = try JSONDecoder().decode([CapturedStorageItem].self, from: Data(itemsJSON.utf8))
+        Logger.browser.debugFile("Captured \(items.count) localStorage items from \(webView.url?.host() ?? targetURL.host() ?? targetURL.absoluteString)")
 
         let currentURL = webView.url ?? targetURL
         return [CapturedOrigin(origin: originString(for: currentURL), localStorage: items)]
@@ -220,9 +224,11 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
             let token = PushTokenStore.currentToken,
             let environment = PushTokenStore.currentEnvironment
         else {
+            Logger.push.debugFile("No APNs device info available for captured session")
             return nil
         }
 
+        Logger.push.debugFile("Attaching APNs device info to captured session in \(environment) environment")
         return try DeviceInfo(
             deviceID: deviceID,
             apnToken: token,

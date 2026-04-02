@@ -52,6 +52,7 @@ class HomeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        Logger.ui.infoFile("HomeViewController loaded")
         view.backgroundColor = .systemBackground
         navigationItem.rightBarButtonItem = UIBarButtonItem(
             image: UIImage(systemName: "gearshape"),
@@ -76,6 +77,7 @@ class HomeViewController: UIViewController {
             guard let url = coordinator.consumePendingNotification(),
                   let deepLink = DeepLink(url: url)
             else { return }
+            Logger.push.infoFile("Prompting user to start queued \(deepLink.requestType.rawValue) request for rid \(deepLink.rid)")
 
             let targetHost = deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString
             let isRefresh = deepLink.requestType == .refresh
@@ -89,6 +91,7 @@ class HomeViewController: UIViewController {
             let alert = AlertViewController(title: title, message: message) { [weak self] context in
                 context.addAction(title: String(localized: "Start"), attribute: .dangerous) {
                     context.dispose {
+                        Logger.push.infoFile("User accepted queued push request for rid \(deepLink.rid)")
                         self?.sessionModel.handleURL(url)
                     }
                 }
@@ -121,12 +124,14 @@ class HomeViewController: UIViewController {
     }
 
     @objc private func settingsTapped() {
+        Logger.ui.infoFile("Opening settings from home screen")
         let settings = SettingsViewController()
         navigationController?.pushViewController(settings, animated: true)
     }
 
     @objc private func actionTapped() {
         #if targetEnvironment(macCatalyst)
+            Logger.ui.infoFile("Paste Link tapped on Mac Catalyst")
             guard let string = UIPasteboard.general.string?.trimmingCharacters(in: .whitespacesAndNewlines),
                   let url = URL(string: string),
                   DeepLink(url: url) != nil
@@ -144,6 +149,7 @@ class HomeViewController: UIViewController {
             }
             sessionModel.handleURL(url)
         #else
+            Logger.ui.infoFile("Scan QR Code tapped")
             sessionModel.startScan()
         #endif
     }

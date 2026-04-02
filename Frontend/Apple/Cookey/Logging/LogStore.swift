@@ -1,6 +1,6 @@
 import Foundation
 
-final class LogStore: @unchecked Sendable {
+final nonisolated class LogStore: @unchecked Sendable {
     static let shared = LogStore()
 
     let queue: DispatchQueue
@@ -10,7 +10,7 @@ final class LogStore: @unchecked Sendable {
     let logDirectory: URL
     let logFileName: String
 
-    private lazy var timestampFormatter: ISO8601DateFormatter = {
+    private let timestampFormatter: ISO8601DateFormatter = {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
         return formatter

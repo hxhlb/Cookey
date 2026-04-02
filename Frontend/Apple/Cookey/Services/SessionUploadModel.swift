@@ -43,15 +43,18 @@ final class SessionUploadModel: ObservableObject {
     }
 
     func startScan() {
+        Logger.ui.infoFile("Starting QR scan flow")
         phase = .scanning
     }
 
     func handleURL(_ url: URL) {
         guard let deepLink = DeepLink(url: url) else {
+            Logger.model.errorFile("Rejected invalid Cookey URL: \(url.absoluteString)")
             phase = .failed("Invalid Cookey login link.")
             return
         }
 
+        Logger.model.infoFile("Handling deep link rid=\(deepLink.rid) requestType=\(deepLink.requestType.rawValue) target=\(deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString)")
         phase = .validating(deepLink)
         Task { await validateAndProceed(deepLink) }
     }
@@ -61,9 +64,11 @@ final class SessionUploadModel: ObservableObject {
         deepLink: DeepLink
     ) async {
         do {
+            Logger.browser.infoFile("Capturing browser session for rid \(deepLink.rid)")
             let plaintext = try await browser.captureSessionPayloadData()
             await uploadCapturedSessionData(plaintext, deepLink: deepLink)
         } catch {
+            Logger.browser.errorFile("Browser capture failed for rid \(deepLink.rid): \(error.localizedDescription)")
             phase = .failed(error.localizedDescription)
         }
     }
@@ -80,11 +85,13 @@ final class SessionUploadModel: ObservableObject {
             }
 
             try Self.validateCapturedSessionData(plaintext)
+            Logger.crypto.infoFile("Validated captured session for rid \(deepLink.rid): \(Self.sessionSummary(from: plaintext))")
 
             let sealed = try XSalsa20Poly1305Box.seal(
                 plaintext: plaintext,
                 recipientPublicKey: recipientPublicKey
             )
+            Logger.crypto.infoFile("Encrypted session for rid \(deepLink.rid); ciphertext size \(sealed.ciphertext.count) bytes")
 
             let envelope = EncryptedSessionEnvelope(
                 version: 1,
@@ -99,19 +106,23 @@ final class SessionUploadModel: ObservableObject {
                 rid: deepLink.rid,
                 envelope: envelope
             )
+            Logger.network.infoFile("Session upload finished for rid \(deepLink.rid)")
             phase = .done
         } catch {
+            Logger.crypto.errorFile("Session upload failed for rid \(deepLink.rid): \(error.localizedDescription)")
             phase = .failed(error.localizedDescription)
         }
     }
 
     func respondToPushExplanation(allow: Bool) {
+        Logger.push.infoFile("User responded to push explanation with allow=\(allow)")
         shouldPresentPushExplanation = false
         pushExplanationContinuation?.resume(returning: allow)
         pushExplanationContinuation = nil
     }
 
     func resetToIdle() {
+        Logger.ui.infoFile("Resetting session model to idle")
         seedSession = nil
         loadingState = nil
         shouldPresentPushExplanation = false
@@ -120,19 +131,23 @@ final class SessionUploadModel: ObservableObject {
 
     private func validateAndProceed(_ deepLink: DeepLink) async {
         let host = deepLink.serverURL.host() ?? deepLink.serverURL.absoluteString
+        Logger.model.infoFile("Validating request rid=\(deepLink.rid) requestType=\(deepLink.requestType.rawValue) host=\(host)")
 
         do {
             loadingState = .checkingRequest(host: host)
             let status = try await relayClientFactory(deepLink.serverURL)
                 .fetchRequestStatus(rid: deepLink.rid)
+            Logger.model.infoFile("Fetched request status for rid \(deepLink.rid): expired=\(status.isExpired)")
 
             if status.isExpired {
+                Logger.model.errorFile("Request rid \(deepLink.rid) is expired")
                 phase = .failed(String(localized: "This login request has expired."))
                 return
             }
 
             if deepLink.requestType == .refresh {
                 loadingState = .loadingSeed(host: host)
+                Logger.model.infoFile("Loading seed session for refresh rid \(deepLink.rid)")
                 await loadSeed(for: deepLink)
                 guard phase == .validating(deepLink) else { return }
             }
@@ -141,13 +156,16 @@ final class SessionUploadModel: ObservableObject {
 
             try? await Task.sleep(for: .seconds(1))
             loadingState = nil
+            Logger.ui.infoFile("Opening browser for rid \(deepLink.rid)")
             phase = .browsing(deepLink)
         } catch {
             loadingState = nil
             let nsError = error as NSError
             if nsError.domain == "Cookey.RelayClient", nsError.code == 404 || nsError.code == 410 {
+                Logger.network.errorFile("Request rid \(deepLink.rid) is missing or expired on relay")
                 phase = .failed(String(localized: "This login request has expired or does not exist."))
             } else {
+                Logger.model.errorFile("Validation failed for rid \(deepLink.rid): \(error.localizedDescription)")
                 phase = .failed(error.localizedDescription)
             }
         }
@@ -158,8 +176,10 @@ final class SessionUploadModel: ObservableObject {
             guard let encrypted = try await relayClientFactory(deepLink.serverURL)
                 .fetchSeedSession(rid: deepLink.rid)
             else {
+                Logger.model.infoFile("No seed session available for rid \(deepLink.rid)")
                 return
             }
+            Logger.crypto.infoFile("Fetched encrypted seed session for rid \(deepLink.rid); envelope ciphertext chars \(encrypted.ciphertext.count)")
 
             let deviceSecretKey = try DeviceKeyManager.secretKey()
             guard
@@ -167,8 +187,10 @@ final class SessionUploadModel: ObservableObject {
                 let nonce = Data(base64Encoded: encrypted.nonce),
                 let ciphertext = Data(base64Encoded: encrypted.ciphertext)
             else {
+                Logger.crypto.errorFile("Seed session envelope for rid \(deepLink.rid) contains invalid base64 fields")
                 throw UploadError.invalidSessionPayload
             }
+            Logger.crypto.debugFile("Decoded seed envelope for rid \(deepLink.rid); ephemeral=\(ephemeralPublicKey.count) nonce=\(nonce.count) ciphertext=\(ciphertext.count)")
 
             let plaintext = try XSalsa20Poly1305Box.open(
                 ciphertext: ciphertext,
@@ -176,15 +198,19 @@ final class SessionUploadModel: ObservableObject {
                 ephemeralPublicKey: ephemeralPublicKey,
                 recipientSecretKey: deviceSecretKey
             )
+            Logger.crypto.infoFile("Decrypted seed session for rid \(deepLink.rid): \(Self.sessionSummary(from: plaintext))")
 
             seedSession = try JSONDecoder().decode(CapturedSession.self, from: plaintext)
+            Logger.model.infoFile("Loaded seed session for rid \(deepLink.rid) with \(seedSession?.cookies.count ?? 0) cookies and \(seedSession?.origins.count ?? 0) origins")
         } catch {
+            Logger.crypto.errorFile("Failed to load seed session for rid \(deepLink.rid): \(error.localizedDescription)")
             phase = .failed("Failed to load seed session: \(error.localizedDescription)")
         }
     }
 
     private func preparePushSupport(for deepLink: DeepLink) async throws {
         guard PushRegistrationCoordinator.isSupported, let pushCoordinator else {
+            Logger.push.debugFile("Push support unavailable; continuing without APNs registration")
             return
         }
 
@@ -192,6 +218,7 @@ final class SessionUploadModel: ObservableObject {
             forKey: SettingsViewController.allowRefreshKey,
             defaultValue: false
         )
+        Logger.push.infoFile("Preparing push support for rid \(deepLink.rid); allowRefresh=\(allowRefresh)")
 
         if allowRefresh {
             try await pushCoordinator.ensurePushToken(
@@ -203,6 +230,7 @@ final class SessionUploadModel: ObservableObject {
         }
 
         let wantsPush = await requestPushExplanation()
+        Logger.push.infoFile("Push explanation result for rid \(deepLink.rid): wantsPush=\(wantsPush)")
         guard wantsPush else { return }
 
         try await pushCoordinator.ensurePushToken(
@@ -216,6 +244,7 @@ final class SessionUploadModel: ObservableObject {
 
     private func requestPushExplanation() async -> Bool {
         await withCheckedContinuation { continuation in
+            Logger.push.debugFile("Requesting push explanation dialog")
             pushExplanationContinuation = continuation
             shouldPresentPushExplanation = true
         }
@@ -239,5 +268,57 @@ final class SessionUploadModel: ObservableObject {
         let data = try JSONEncoder().encode(session)
         try validateCapturedSessionData(data)
         return data
+    }
+
+    private static func sessionSummary(from data: Data) -> String {
+        guard let object = try? JSONSerialization.jsonObject(with: data) else {
+            return "bytes=\(data.count), topLevel=non-json"
+        }
+        return sessionSummary(for: object, bytes: data.count)
+    }
+
+    private static func sessionSummary(for object: Any, bytes: Int) -> String {
+        if let dictionary = object as? [String: Any] {
+            let keys = dictionary.keys.sorted().joined(separator: ",")
+            var parts = ["bytes=\(bytes)", "keys=[\(keys)]"]
+            if let cookies = dictionary["cookies"] as? [Any] {
+                parts.append("cookies=\(cookies.count)")
+            }
+            if let origins = dictionary["origins"] as? [Any] {
+                parts.append("origins=\(origins.count)")
+            }
+            if let payload = dictionary["payload"] {
+                parts.append("payload=\(nestedSummary(for: payload))")
+            }
+            if let session = dictionary["session"] {
+                parts.append("session=\(nestedSummary(for: session))")
+            }
+            if let storageState = dictionary["storageState"] {
+                parts.append("storageState=\(nestedSummary(for: storageState))")
+            }
+            if let storageState = dictionary["storage_state"] {
+                parts.append("storage_state=\(nestedSummary(for: storageState))")
+            }
+            return parts.joined(separator: ", ")
+        }
+
+        if let array = object as? [Any] {
+            return "bytes=\(bytes), topLevel=array(count=\(array.count))"
+        }
+
+        return "bytes=\(bytes), topLevel=\(String(describing: type(of: object)))"
+    }
+
+    private static func nestedSummary(for object: Any) -> String {
+        if let dictionary = object as? [String: Any] {
+            return "dict(keys=[\(dictionary.keys.sorted().joined(separator: ","))])"
+        }
+        if let array = object as? [Any] {
+            return "array(count=\(array.count))"
+        }
+        if let string = object as? String {
+            return "string(chars=\(string.count))"
+        }
+        return String(describing: type(of: object))
     }
 }

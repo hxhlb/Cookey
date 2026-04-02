@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private enum LogCategoryResolver {
+private nonisolated enum LogCategoryResolver {
     static func resolve(category: String?, fileID: String) -> String {
         if let category, !category.isEmpty { return category }
 
@@ -25,7 +25,7 @@ private enum LogCategoryResolver {
     }
 }
 
-extension Logger {
+nonisolated extension Logger {
     func debugFile(_ message: String, category: String? = nil, fileID: String = #fileID) {
         logToFile(.debug, message, category: category, fileID: fileID)
     }
@@ -38,14 +38,14 @@ extension Logger {
         logToFile(.error, message, category: category, fileID: fileID)
     }
 
-    private func logToFile(_ level: LogLevel, _ message: String, category: String?, fileID: String) {
+    private nonisolated func logToFile(_ level: LogLevel, _ message: String, category: String?, fileID: String) {
         log(level: level.osLogType, "\(message, privacy: .public)")
         let resolvedCategory = LogCategoryResolver.resolve(category: category, fileID: fileID)
         LogStore.shared.append(level: level, category: resolvedCategory, message: message)
     }
 }
 
-private extension LogLevel {
+private nonisolated extension LogLevel {
     var osLogType: OSLogType {
         switch self {
         case .debug:

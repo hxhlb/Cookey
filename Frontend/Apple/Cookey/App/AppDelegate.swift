@@ -93,7 +93,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 }
 
 private extension AppDelegate {
-    // DONT REMOVE
+    /// DONT REMOVE
     static let localizationExtension: [String] = [
         String(localized: "apn_refresh_title"),
         String(localized: "apn_refresh_body"),

@@ -53,7 +53,6 @@ final class PushRegistrationCoordinator: ObservableObject {
         switch settings.authorizationStatus {
         case .authorized, .provisional, .ephemeral:
             Logger.push.debugFile("Notification authorization already available with status \(settings.authorizationStatus.rawValue)")
-            break
         case .notDetermined:
             guard requestAuthorizationIfNeeded else {
                 Logger.push.errorFile("Notification authorization required but prompting is disabled")

@@ -49,6 +49,16 @@
         }
       }
     },
+    "All Categories" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "所有分类"
+          }
+        }
+      }
+    },
     "Allow Refresh Requests" : {
       "localizations" : {
         "en" : {
@@ -221,6 +231,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在检查请求…"
+          }
+        }
+      }
+    },
+    "Clear" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "清除"
           }
         }
       }
@@ -465,6 +485,26 @@
         }
       }
     },
+    "Filter by Category" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按分类筛选"
+          }
+        }
+      }
+    },
+    "Filter by Level" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按级别筛选"
+          }
+        }
+      }
+    },
     "Get Started" : {
       "localizations" : {
         "en" : {
@@ -477,6 +517,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "开始使用"
+          }
+        }
+      }
+    },
+    "Inspect recent application logs for troubleshooting." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看近期应用日志以排查问题。"
           }
         }
       }
@@ -509,6 +559,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在加载会话…"
+          }
+        }
+      }
+    },
+    "Logs" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日志"
           }
         }
       }
@@ -589,6 +649,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "此设备没有可用的相机。"
+          }
+        }
+      }
+    },
+    "No categories" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无分类"
+          }
+        }
+      }
+    },
+    "No logs yet." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "暂无日志。"
+          }
+        }
+      }
+    },
+    "No matching logs." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有匹配的日志。"
           }
         }
       }
@@ -706,7 +796,14 @@
       }
     },
     "Open Source Licenses" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "开源许可"
+          }
+        }
+      }
     },
     "Outputs Playwright-compatible storageState JSON. Pipe into any browser automation tool." : {
       "localizations" : {
@@ -757,7 +854,24 @@
       }
     },
     "Privacy Policy" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "隐私政策"
+          }
+        }
+      }
+    },
+    "Refresh" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "刷新"
+          }
+        }
+      }
     },
     "Report bugs, request features, or share your thoughts about Cookey." : {
       "localizations" : {
@@ -776,7 +890,14 @@
       }
     },
     "Resource not found, please check your installation." : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未找到资源，请检查安装。"
+          }
+        }
+      }
     },
     "Scan" : {
       "localizations" : {
@@ -874,6 +995,16 @@
         }
       }
     },
+    "Search logs..." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索日志…"
+          }
+        }
+      }
+    },
     "Self-Hostable" : {
       "localizations" : {
         "en" : {
@@ -950,6 +1081,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "设置"
+          }
+        }
+      }
+    },
+    "Share" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
           }
         }
       }
@@ -1226,6 +1367,16 @@
         }
       }
     },
+    "View Logs" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看日志"
+          }
+        }
+      }
+    },
     "Welcome to" : {
       "localizations" : {
         "en" : {
@@ -1243,7 +1394,14 @@
       }
     },
     "What's New" : {
-
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新功能"
+          }
+        }
+      }
     },
     "When enabled, the relay server can send push notifications to this device for session refresh requests. This requires system notification permissions." : {
       "localizations" : {
