@@ -15,6 +15,10 @@ import (
 	"cookey/internal/relay"
 )
 
+func warnDeprecatedCommand(oldCommand string, newCommand string) {
+	fmt.Fprintf(os.Stderr, "warning: `%s` is deprecated; use `%s`\n", oldCommand, newCommand)
+}
+
 type requestMode string
 
 const (
@@ -115,28 +119,23 @@ func runRequestCapture(args []string, mode requestMode) error {
 		}
 	}
 
-	deepLink := qrcode.DeepLink(manifest)
-	qrLink := deepLink
-	if pairKey != "" {
-		qrLink = qrcode.PairKeyDeepLink(pairKey, serverURL, manifest.RequestSecret)
-	}
+	deepLink := qrcode.PairKeyDeepLink(pairKey, serverURL, manifest.RequestSecret)
 
 	qrText := ""
 	if *qr {
-		qrText = qrcode.Render(qrLink)
+		qrText = qrcode.Render(deepLink)
 	}
 
 	output := models.LoginOutput{
-		RID:             rid,
-		ServerURL:       serverURL,
-		TargetURL:       targetURL,
-		TimeoutSeconds:  timeoutSeconds,
-		PairKey:         pairKey,
-		PairKeyDeepLink: qrLink,
-		DeepLink:        deepLink,
-		QRText:          qrText,
-		ShowQR:          *qr,
-		Detached:        !*attach,
+		RID:            rid,
+		ServerURL:      serverURL,
+		TargetURL:      targetURL,
+		TimeoutSeconds: timeoutSeconds,
+		PairKey:        pairKey,
+		DeepLink:       deepLink,
+		QRText:         qrText,
+		ShowQR:         *qr,
+		Detached:       !*attach,
 	}
 
 	if *attach {

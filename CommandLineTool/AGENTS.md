@@ -26,7 +26,7 @@ Go executable module targeting macOS 13+ and Linux. The `cookey` binary is the u
 ## Key Concepts
 
 - **Bootstrap**: every entry point runs the same sequence — create `~/.cookey/`, ensure keypair, generate device fingerprint, clean stale daemons
-- **Commands**: grouped `request`, `session`, and `config` commands; legacy flat aliases remain for compatibility; internal `__daemon`
+- **Commands**: grouped `request`, `session`, and `config` commands; internal `__daemon`
 - **Process model**: `login` launches a detached child daemon that waits for the session, then writes to `~/.cookey/sessions/{rid}.json`
 - **Crypto flow**: Ed25519 identity key stored long-term; converted to X25519 at runtime for ECDH session decryption
 
