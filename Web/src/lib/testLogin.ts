@@ -130,29 +130,13 @@ async function computeRequestProof(params: {
   return bytesToBase64Url(new Uint8Array(signature));
 }
 
-function buildDeepLink(params: {
-  deviceId: string;
-  expiresAt: string;
-  pubkey: string;
-  rid: string;
-  requestProof: string;
-  requestSecret: string;
-  serverUrl: string;
-  targetUrl: string;
-}): string {
-  const query = new URLSearchParams({
-    device_id: params.deviceId,
-    expires_at: params.expiresAt,
-    pubkey: params.pubkey,
-    request_proof: params.requestProof,
-    request_secret: params.requestSecret,
-    request_type: "login",
-    rid: params.rid,
-    server: params.serverUrl,
-    target: params.targetUrl,
-  });
-
-  return `cookey://login?${query.toString()}`;
+function pairKeyDeepLink(pairKey: string, serverUrl: string): string {
+  const defaultHost = "api.cookey.sh";
+  const host = new URL(serverUrl).host;
+  if (host === defaultHost) {
+    return `cookey://${pairKey}`;
+  }
+  return `cookey://${pairKey}?host=${encodeURIComponent(host)}`;
 }
 
 async function readJson(response: Response): Promise<unknown> {
@@ -237,7 +221,7 @@ export async function createLoginRequest(
     );
   }
 
-  if (!isRequestStatusResponse(payload)) {
+  if (!isRegisterResponse(payload)) {
     throw new Error("API returned an unexpected response shape.");
   }
 
@@ -245,17 +229,20 @@ export async function createLoginRequest(
     rid: payload.rid,
     serverUrl: relayServerUrl,
     targetUrl,
-    deepLink: buildDeepLink({
-      deviceId,
-      expiresAt,
-      pubkey,
-      rid: payload.rid,
-      requestProof,
-      requestSecret,
-      serverUrl: relayServerUrl,
-      targetUrl,
-    }),
+    deepLink: pairKeyDeepLink(payload.pair_key, relayServerUrl),
   };
+}
+
+interface RegisterResponse extends RequestStatusResponse {
+  pair_key: string;
+}
+
+function isRegisterResponse(value: unknown): value is RegisterResponse {
+  return (
+    isRequestStatusResponse(value) &&
+    typeof (value as Partial<RegisterResponse>).pair_key === "string" &&
+    (value as Partial<RegisterResponse>).pair_key!.length > 0
+  );
 }
 
 export function isRequestStatus(value: unknown): value is RequestStatus {
