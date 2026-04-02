@@ -15,12 +15,12 @@ struct PairKeyDeepLink: Equatable {
             return nil
         }
 
-        let serverURL: URL = if let serverHost = components.queryItems?.first(where: { $0.name == "host" })?.value,
-                                let resolved = Self.httpsRelayURL(from: serverHost)
-        {
-            resolved
+        let serverURL: URL
+        if let serverHost = components.queryItems?.first(where: { $0.name == "host" })?.value {
+            guard let resolved = Self.httpsRelayURL(from: serverHost) else { return nil }
+            serverURL = resolved
         } else {
-            AppEnvironment.effectiveAPIBaseURL
+            serverURL = AppEnvironment.effectiveAPIBaseURL
         }
 
         self.pairKey = pairKey

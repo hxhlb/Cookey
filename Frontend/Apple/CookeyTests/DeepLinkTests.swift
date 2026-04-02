@@ -24,14 +24,12 @@ struct DeepLinkTests {
     @Test("PairKeyDeepLink rejects custom server paths")
     func rejectsPairKeyDeepLinkWithPath() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N?host=api.cookey.sh/path"))
-
         #expect(PairKeyDeepLink(url: url) == nil)
     }
 
     @Test("PairKeyDeepLink rejects server values with scheme")
     func rejectsPairKeyDeepLinkWithScheme() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N?host=https://api.cookey.sh"))
-
         #expect(PairKeyDeepLink(url: url) == nil)
     }
 }

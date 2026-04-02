@@ -82,23 +82,17 @@ class HomeViewController: UIViewController {
         Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(500))
             guard let url = coordinator.consumePendingNotification(),
-                  let deepLink = DeepLink(url: url)
+                  let pairKeyLink = PairKeyDeepLink(url: url)
             else { return }
-            Logger.push.infoFile("Prompting user to start queued \(deepLink.requestType.rawValue) request for rid \(deepLink.rid)")
+            Logger.push.infoFile("Prompting user to start queued request for pair key \(pairKeyLink.pairKey)")
 
-            let targetHost = deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString
-            let isRefresh = deepLink.requestType == .refresh
-            let title = isRefresh
-                ? String(localized: "New Session Refresh")
-                : String(localized: "New Login Request")
-            let message = isRefresh
-                ? String(format: String(localized: "A session refresh was received for %@. Would you like to start?"), targetHost)
-                : String(format: String(localized: "A login request was received for %@. Would you like to start?"), targetHost)
+            let title = String(localized: "New Login Request")
+            let message = String(localized: "A login request was received. Would you like to start?")
 
             let alert = AlertViewController(title: title, message: message) { [weak self] context in
                 context.addAction(title: String(localized: "Start"), attribute: .dangerous) {
                     context.dispose {
-                        Logger.push.infoFile("User accepted queued push request for rid \(deepLink.rid)")
+                        Logger.push.infoFile("User accepted queued push request for pair key \(pairKeyLink.pairKey)")
                         self?.sessionModel.handleURL(url)
                     }
                 }
