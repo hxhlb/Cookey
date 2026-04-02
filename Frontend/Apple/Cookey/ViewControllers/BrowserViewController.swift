@@ -44,8 +44,15 @@ class BrowserViewController: UIViewController {
         edgesForExtendedLayout = .all
         extendedLayoutIncludesOpaqueBars = true
 
+        browser.webView.alpha = 0
         view.addSubview(browser.webView)
         browser.webView.snp.makeConstraints { $0.edges.equalTo(view) }
+
+        let loadingSpinner = UIActivityIndicatorView(style: .large)
+        loadingSpinner.startAnimating()
+        loadingSpinner.tag = 999
+        view.addSubview(loadingSpinner)
+        loadingSpinner.snp.makeConstraints { $0.center.equalTo(view) }
 
         browser.webView.scrollView.refreshControl = UIRefreshControl().then {
             $0.addTarget(self, action: #selector(refresh), for: .valueChanged)
@@ -66,6 +73,21 @@ class BrowserViewController: UIViewController {
     // MARK: - Bindings
 
     private func bindModel() {
+        browser.$initialLoadComplete
+            .receive(on: DispatchQueue.main)
+            .filter(\.self)
+            .prefix(1)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                if let spinner = view.viewWithTag(999) {
+                    spinner.removeFromSuperview()
+                }
+                UIView.animate(withDuration: 0.5) {
+                    self.browser.webView.alpha = 1
+                }
+            }
+            .store(in: &cancellables)
+
         browser.$pageTitle
             .receive(on: DispatchQueue.main)
             .sink { [weak self] pageTitle in

@@ -3,6 +3,9 @@ import WebKit
 extension BrowserCaptureModel: WKNavigationDelegate {
     func webView(_ webView: WKWebView, didFinish _: WKNavigation!) {
         pageTitle = webView.title ?? "Cookey"
+        if !initialLoadComplete {
+            initialLoadComplete = true
+        }
     }
 
     func webView(
