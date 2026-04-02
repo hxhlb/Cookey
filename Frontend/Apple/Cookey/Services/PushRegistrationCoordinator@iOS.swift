@@ -106,14 +106,13 @@ final class PushRegistrationCoordinator: ObservableObject {
     }
 
     func handleNotificationUserInfo(_ userInfo: [AnyHashable: Any]) {
-        guard let url = deepLinkURL(from: userInfo) else {
-            Logger.push.errorFile("Failed to build deep link from push userInfo keys: \(userInfo.keys.map(String.init(describing:)).sorted())")
+        guard let url = pairKeyURL(from: userInfo) else {
+            Logger.push.errorFile("Failed to build pair key URL from push userInfo keys: \(userInfo.keys.map(String.init(describing:)).sorted())")
             return
         }
 
-        let requestType = (userInfo["request_type"] as? String) ?? "login"
-        let rid = (userInfo["rid"] as? String) ?? "<missing>"
-        Logger.push.infoFile("Received push payload for rid \(rid) with request type \(requestType)")
+        let pairKey = (userInfo["pair_key"] as? String) ?? "<missing>"
+        Logger.push.infoFile("Received push payload for pair key \(pairKey)")
 
         if model?.phase == .idle {
             Logger.push.infoFile("App is idle; opening push deep link immediately")
@@ -166,30 +165,19 @@ final class PushRegistrationCoordinator: ObservableObject {
         #endif
     }
 
-    private func deepLinkURL(from userInfo: [AnyHashable: Any]) -> URL? {
-        guard
-            let rid = userInfo["rid"] as? String,
-            let targetURL = userInfo["target_url"] as? String,
-            let publicKey = userInfo["pubkey"] as? String,
-            let deviceID = userInfo["device_id"] as? String
-        else {
+    private func pairKeyURL(from userInfo: [AnyHashable: Any]) -> URL? {
+        guard let pairKey = userInfo["pair_key"] as? String, !pairKey.isEmpty else {
             return nil
         }
 
         var components = URLComponents()
         components.scheme = "cookey"
-        components.host = "login"
-        components.queryItems = [
-            URLQueryItem(name: "rid", value: rid),
-            URLQueryItem(name: "target", value: targetURL),
-            URLQueryItem(name: "pubkey", value: publicKey),
-            URLQueryItem(name: "device_id", value: deviceID),
-        ]
-        if let serverURL = userInfo["server_url"] as? String {
-            components.queryItems?.append(URLQueryItem(name: "server", value: serverURL))
-        }
-        if let requestType = userInfo["request_type"] as? String {
-            components.queryItems?.append(URLQueryItem(name: "request_type", value: requestType))
+        components.host = pairKey
+        if let serverURL = userInfo["server_url"] as? String,
+           let parsed = URL(string: serverURL),
+           let host = parsed.host()
+        {
+            components.queryItems = [URLQueryItem(name: "host", value: host)]
         }
         return components.url
     }
