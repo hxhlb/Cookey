@@ -24,4 +24,17 @@ struct CapturedSession: Codable, Equatable {
         case origins
         case deviceInfo = "device_info"
     }
+
+    init(cookies: [CapturedCookie], origins: [CapturedOrigin], deviceInfo: DeviceInfo?) {
+        self.cookies = cookies
+        self.origins = origins
+        self.deviceInfo = deviceInfo
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        cookies = try container.decodeIfPresent([CapturedCookie].self, forKey: .cookies) ?? []
+        origins = try container.decodeIfPresent([CapturedOrigin].self, forKey: .origins) ?? []
+        deviceInfo = try? container.decodeIfPresent(DeviceInfo.self, forKey: .deviceInfo)
+    }
 }

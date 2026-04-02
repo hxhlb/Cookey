@@ -201,6 +201,28 @@ type OriginState struct {
 	LocalStorage []OriginStorageItem `json:"localStorage"`
 }
 
+func (o OriginState) MarshalJSON() ([]byte, error) {
+	type alias OriginState
+	normalized := alias(o)
+	if normalized.LocalStorage == nil {
+		normalized.LocalStorage = []OriginStorageItem{}
+	}
+	return json.Marshal(normalized)
+}
+
+func (o *OriginState) UnmarshalJSON(data []byte) error {
+	type alias OriginState
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	if decoded.LocalStorage == nil {
+		decoded.LocalStorage = []OriginStorageItem{}
+	}
+	*o = OriginState(decoded)
+	return nil
+}
+
 type OriginStorageItem struct {
 	Name  string `json:"name"`
 	Value string `json:"value"`
