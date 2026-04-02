@@ -62,7 +62,8 @@ CookeyTests/
 
 - **ViewControllers**: UIKit-based screens managed by `FlowCoordinator`, which drives navigation between home, scanner, seed loading, browser, upload progress, and notification consent
 - **State machine**: `SessionUploadModel` drives the upload flow; `FlowCoordinator` drives overall app navigation
-- **Deep link**: `cookey://login?rid=...&server=...&target=...&pubkey=...&device_id=...&request_type=login|refresh`
+- **Pair-key deep link**: `cookey://SM8ND67N?host=api.cookey.sh` (host only, HTTPS implied, no custom path)
+- **Authenticated request deep link**: `cookey://login?rid=...&server=...&target=...&pubkey=...&device_id=...&request_type=login|refresh`
 - **Session refresh**: for `request_type=refresh`, the app downloads a seed session from the relay via `SeedLoadingViewController`, pre-populates the browser, then captures the refreshed session
 - **DeviceKeyManager**: manages Ed25519/X25519 device keypair persistence in the Keychain for session decryption
 - **PushTokenStore**: persists the APNs device token across launches for re-registration

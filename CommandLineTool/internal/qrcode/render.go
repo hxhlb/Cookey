@@ -7,19 +7,23 @@ import (
 	qrterminal "github.com/mdp/qrterminal/v3"
 )
 
-func PairKeyDeepLink(pairKey string, serverURL string, requestSecret string) string {
+func PairKeyDeepLink(pairKey string, serverURL string) string {
 	components := url.URL{
 		Scheme: "cookey",
-		Host:   "p",
-		Path:   "/" + pairKey,
+		Host:   pairKey,
 	}
 	query := url.Values{}
-	query.Set("s", requestSecret)
-	if serverURL != "" && serverURL != DefaultServerURL {
-		query.Set("h", serverURL)
-	}
+	query.Set("host", RelayHost(serverURL))
 	components.RawQuery = query.Encode()
 	return components.String()
+}
+
+func RelayHost(serverURL string) string {
+	parsed, err := url.Parse(serverURL)
+	if err != nil || parsed.Host == "" {
+		return serverURL
+	}
+	return parsed.Host
 }
 
 var DefaultServerURL = "https://api.cookey.sh"

@@ -48,21 +48,8 @@ final class SessionUploadModel: ObservableObject {
     }
 
     func handleURL(_ url: URL) {
-        // Compact pair key format: cookey://p/{pairKey}?s={secret}&h={server}
-        if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-           components.scheme?.lowercased() == "cookey",
-           components.host?.lowercased() == "p",
-           let pairKey = components.path.split(separator: "/").first.map(String.init),
-           let requestSecret = components.queryItems?.first(where: { $0.name == "s" })?.value,
-           !pairKey.isEmpty
-        {
-            let serverValue = components.queryItems?.first(where: { $0.name == "h" })?.value
-            let serverURL = serverValue.flatMap { URL(string: $0) } ?? AppEnvironment.apiBaseURL
-            guard DeepLink.isAllowedRelayURL(serverURL) else {
-                phase = .failed("Invalid Cookey login link.")
-                return
-            }
-            handlePairKey(pairKey, requestSecret: requestSecret, serverURL: serverURL)
+        if let pairKeyDeepLink = PairKeyDeepLink(url: url) {
+            handlePairKey(pairKeyDeepLink.pairKey, serverURL: pairKeyDeepLink.serverURL)
             return
         }
 
@@ -85,10 +72,10 @@ final class SessionUploadModel: ObservableObject {
             phase = .failed(String(localized: "Invalid or expired pair key."))
             return
         }
-        handlePairKey(normalized, requestSecret: nil, serverURL: AppEnvironment.apiBaseURL)
+        handlePairKey(normalized, serverURL: AppEnvironment.apiBaseURL)
     }
 
-    func handlePairKey(_ pairKey: String, requestSecret: String?, serverURL: URL) {
+    func handlePairKey(_ pairKey: String, serverURL: URL) {
         let normalized = pairKey
             .uppercased()
             .filter { $0.isLetter || $0.isNumber }
@@ -104,16 +91,10 @@ final class SessionUploadModel: ObservableObject {
                       resolvedServerURL == serverURL,
                       !response.rid.isEmpty,
                       !response.cliPublicKey.isEmpty,
-                      !response.deviceID.isEmpty
+                      !response.deviceID.isEmpty,
+                      !response.requestSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                 else {
                     phase = .failed(String(localized: "Invalid server response for pair key."))
-                    return
-                }
-                let effectiveSecret = [requestSecret, response.requestSecret]
-                    .compactMap(\.self)
-                    .first { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-                guard let effectiveSecret else {
-                    phase = .failed(String(localized: "Invalid or expired pair key."))
                     return
                 }
                 let deepLink = DeepLink(
@@ -125,7 +106,7 @@ final class SessionUploadModel: ObservableObject {
                     requestType: DeepLink.RequestType(rawValue: response.requestType) ?? .login,
                     expiresAt: response.expiresAt,
                     requestProof: response.requestProof,
-                    requestSecret: effectiveSecret
+                    requestSecret: response.requestSecret
                 )
                 try RequestAuthenticator.verify(deepLink)
                 Logger.model.infoFile("Resolved pair key to rid=\(deepLink.rid) target=\(deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString)")

@@ -29,7 +29,7 @@ Legacy aliases still work for now:
 
 ## Usage
 
-1. `cookey request start <target_url>` → pair key / QR appears
+1. `cookey request start <target_url>` → pair key / QR appears (`SM8N-D67N (api.cookey.sh)`, `cookey://SM8ND67N?host=api.cookey.sh`)
 2. User scans QR with Cookey iPhone app and logs in
 3. `cookey session export <rid> > storageState.json`
 4. Pass storageState to Playwright or browser automation

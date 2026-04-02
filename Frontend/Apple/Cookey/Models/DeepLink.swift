@@ -1,5 +1,52 @@
 import Foundation
 
+struct PairKeyDeepLink: Equatable {
+    let pairKey: String
+    let serverURL: URL
+
+    init?(url: URL) {
+        guard
+            let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+            components.scheme?.lowercased() == "cookey",
+            let pairKey = components.host,
+            !pairKey.isEmpty,
+            components.path.isEmpty || components.path == "/",
+            let serverHost = components.queryItems?.first(where: { $0.name == "host" })?.value,
+            let serverURL = Self.httpsRelayURL(from: serverHost)
+        else {
+            return nil
+        }
+
+        self.pairKey = pairKey
+        self.serverURL = serverURL
+    }
+
+    static func httpsRelayURL(from hostValue: String) -> URL? {
+        let trimmed = hostValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard
+            !trimmed.isEmpty,
+            !trimmed.contains("://"),
+            !trimmed.contains("/"),
+            !trimmed.contains("?"),
+            !trimmed.contains("#"),
+            !trimmed.contains("@"),
+            var components = URLComponents(string: "https://\(trimmed)"),
+            components.scheme?.lowercased() == "https",
+            components.user == nil,
+            components.password == nil,
+            components.host?.isEmpty == false,
+            components.query == nil,
+            components.fragment == nil,
+            components.path.isEmpty || components.path == "/"
+        else {
+            return nil
+        }
+
+        components.path = ""
+        return components.url
+    }
+}
+
 struct DeepLink: Equatable {
     enum RequestType: String, Equatable {
         case login

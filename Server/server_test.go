@@ -367,6 +367,27 @@ func TestResolvePairKeyIncludesRequestProof(t *testing.T) {
 	}
 }
 
+func TestCreateRequestReturnsConflictOnPairKeyCollision(t *testing.T) {
+	storage := NewStorage(1024 * 1024)
+	storage.pairKeys["SM8ND67N"] = "rid-existing"
+	storage.pairKeyGenerator = func() string { return "SM8ND67N" }
+
+	routes := &Routes{
+		storage:     storage,
+		config:      ServerConfig{MaxPayloadSize: 1024 * 1024, PublicURL: "https://relay.test"},
+		apnsClient:  newStubNotificationSender(),
+		apnBlocker:  NewAPNTokenBlocker(),
+		pushLimiter: NewAPNPushRateLimiter(),
+	}
+	mux := http.NewServeMux()
+	routes.Register(mux)
+
+	rec := performJSONRequest(t, mux, http.MethodPost, "/v1/requests", newLoginRequest("rid-collision"))
+	if rec.Code != http.StatusConflict {
+		t.Fatalf("create request status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestDeviceRegistrationEndpointRemoved(t *testing.T) {
 	mux, _, _ := newTestServer()
 

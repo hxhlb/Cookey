@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cookey/internal/models"
+	"cookey/internal/qrcode"
 )
 
 func emitLoginOutput(output models.LoginOutput, mode requestMode, asJSON bool) error {
@@ -30,7 +31,7 @@ func emitLoginOutput(output models.LoginOutput, mode requestMode, asJSON bool) e
 		}
 	}
 	if output.PairKey != "" {
-		fmt.Printf("  Pair Key         %s-%s (%s)\n", output.PairKey[:4], output.PairKey[4:], output.ServerURL)
+		fmt.Printf("  Pair Key         %s-%s (%s)\n", output.PairKey[:4], output.PairKey[4:], qrcode.RelayHost(output.ServerURL))
 		fmt.Printf("  Deep Link        %s\n", output.DeepLink)
 	}
 	if output.ShowQR {
