@@ -11,7 +11,7 @@ export default function FaqItem({
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border-b border-border">
+    <div className="border-b border-border last:border-b-0">
       <button
         type="button"
         onClick={() => setOpen(!open)}
