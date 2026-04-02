@@ -48,6 +48,22 @@ final class SessionUploadModel: ObservableObject {
     }
 
     func handleURL(_ url: URL) {
+        if let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+           components.scheme?.lowercased() == "cookey",
+           components.host?.lowercased() == "login",
+           let pairKey = components.queryItems?.first(where: { $0.name == "pair" })?.value,
+           let requestSecret = components.queryItems?.first(where: { $0.name == "request_secret" })?.value,
+           !pairKey.isEmpty {
+            let serverValue = components.queryItems?.first(where: { $0.name == "server" })?.value
+            let serverURL = serverValue.flatMap { URL(string: $0) } ?? AppEnvironment.apiBaseURL
+            guard DeepLink.isAllowedRelayURL(serverURL) else {
+                phase = .failed("Invalid Cookey login link.")
+                return
+            }
+            handlePairKey(pairKey, requestSecret: requestSecret, serverURL: serverURL)
+            return
+        }
+
         guard let deepLink = DeepLink(url: url) else {
             Logger.model.errorFile("Rejected invalid Cookey URL: \(url.absoluteString)")
             phase = .failed("Invalid Cookey login link.")
@@ -57,6 +73,55 @@ final class SessionUploadModel: ObservableObject {
         Logger.model.infoFile("Handling deep link rid=\(deepLink.rid) requestType=\(deepLink.requestType.rawValue) target=\(deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString)")
         phase = .validating(deepLink)
         Task { await validateAndProceed(deepLink) }
+    }
+
+    func handlePairKey(_ pairKey: String, requestSecret: String, serverURL: URL) {
+        let normalized = pairKey
+            .uppercased()
+            .filter { $0.isLetter || $0.isNumber }
+        Logger.model.infoFile("Resolving pair key \(normalized) via \(serverURL.host() ?? serverURL.absoluteString)")
+        Task {
+            do {
+                let response = try await relayClientFactory(serverURL)
+                    .resolvePairKey(normalized)
+                guard let resolvedServerURL = URL(string: response.serverURL),
+                      let targetURL = URL(string: response.targetURL),
+                      DeepLink.isAllowedRelayURL(resolvedServerURL),
+                      DeepLink.isAllowedTargetURL(targetURL),
+                      resolvedServerURL == serverURL,
+                      !response.rid.isEmpty,
+                      !response.cliPublicKey.isEmpty,
+                      !response.deviceID.isEmpty
+                else {
+                    phase = .failed(String(localized: "Invalid server response for pair code."))
+                    return
+                }
+                let deepLink = DeepLink(
+                    rid: response.rid,
+                    serverURL: resolvedServerURL,
+                    targetURL: targetURL,
+                    recipientPublicKeyBase64: response.cliPublicKey,
+                    deviceID: response.deviceID,
+                    requestType: DeepLink.RequestType(rawValue: response.requestType) ?? .login,
+                    expiresAt: response.expiresAt,
+                    requestProof: response.requestProof,
+                    requestSecret: requestSecret
+                )
+                try RequestAuthenticator.verify(deepLink)
+                Logger.model.infoFile("Resolved pair key to rid=\(deepLink.rid) target=\(deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString)")
+                phase = .validating(deepLink)
+                await validateAndProceed(deepLink)
+            } catch {
+                let nsError = error as NSError
+                if nsError.domain == "Cookey.RelayClient", nsError.code == 404 || nsError.code == 410 {
+                    Logger.model.errorFile("Pair key \(normalized) not found or expired")
+                    phase = .failed(String(localized: "Invalid or expired pair code."))
+                } else {
+                    Logger.model.errorFile("Pair key resolve failed: \(error.localizedDescription)")
+                    phase = .failed(error.localizedDescription)
+                }
+            }
+        }
     }
 
     func captureAndUpload(
@@ -83,6 +148,9 @@ final class SessionUploadModel: ObservableObject {
             guard let recipientPublicKey = Data(base64Encoded: deepLink.recipientPublicKeyBase64) else {
                 throw UploadError.invalidRecipientPublicKey
             }
+            guard let requestSecret = deepLink.requestSecret else {
+                throw RequestAuthenticator.Error.missingAuthenticatedFields
+            }
 
             try Self.validateCapturedSessionData(plaintext)
             Logger.crypto.infoFile("Validated captured session for rid \(deepLink.rid): \(Self.sessionSummary(from: plaintext))")
@@ -99,12 +167,27 @@ final class SessionUploadModel: ObservableObject {
                 ephemeralPublicKey: sealed.ephemeralPublicKey.base64EncodedString(),
                 nonce: sealed.nonce.base64EncodedString(),
                 ciphertext: sealed.ciphertext.base64EncodedString(),
-                capturedAt: Date()
+                capturedAt: Date(),
+                requestSignature: nil
+            )
+            let requestSignature = try RequestAuthenticator.envelopeProof(
+                rid: deepLink.rid,
+                envelope: envelope,
+                requestSecret: requestSecret
+            )
+            let signedEnvelope = EncryptedSessionEnvelope(
+                version: envelope.version,
+                algorithm: envelope.algorithm,
+                ephemeralPublicKey: envelope.ephemeralPublicKey,
+                nonce: envelope.nonce,
+                ciphertext: envelope.ciphertext,
+                capturedAt: envelope.capturedAt,
+                requestSignature: requestSignature
             )
 
             try await relayClientFactory(deepLink.serverURL).uploadSession(
                 rid: deepLink.rid,
-                envelope: envelope
+                envelope: signedEnvelope
             )
             Logger.network.infoFile("Session upload finished for rid \(deepLink.rid)")
             phase = .done
@@ -130,10 +213,15 @@ final class SessionUploadModel: ObservableObject {
     }
 
     private func validateAndProceed(_ deepLink: DeepLink) async {
+        var resolvedDeepLink = deepLink
         let host = deepLink.serverURL.host() ?? deepLink.serverURL.absoluteString
         Logger.model.infoFile("Validating request rid=\(deepLink.rid) requestType=\(deepLink.requestType.rawValue) host=\(host)")
 
         do {
+            if deepLink.requestType == .login || deepLink.requestSecret != nil {
+                try RequestAuthenticator.verify(deepLink)
+            }
+
             loadingState = .checkingRequest(host: host)
             let status = try await relayClientFactory(deepLink.serverURL)
                 .fetchRequestStatus(rid: deepLink.rid)
@@ -148,16 +236,17 @@ final class SessionUploadModel: ObservableObject {
             if deepLink.requestType == .refresh {
                 loadingState = .loadingSeed(host: host)
                 Logger.model.infoFile("Loading seed session for refresh rid \(deepLink.rid)")
-                await loadSeed(for: deepLink)
+                guard let trustedDeepLink = await loadSeed(for: deepLink) else { return }
+                resolvedDeepLink = trustedDeepLink
                 guard phase == .validating(deepLink) else { return }
             }
 
-            try await preparePushSupport(for: deepLink)
+            try await preparePushSupport(for: resolvedDeepLink)
 
             try? await Task.sleep(for: .seconds(1))
             loadingState = nil
-            Logger.ui.infoFile("Opening browser for rid \(deepLink.rid)")
-            phase = .browsing(deepLink)
+            Logger.ui.infoFile("Opening browser for rid \(resolvedDeepLink.rid)")
+            phase = .browsing(resolvedDeepLink)
         } catch {
             loadingState = nil
             let nsError = error as NSError
@@ -171,13 +260,14 @@ final class SessionUploadModel: ObservableObject {
         }
     }
 
-    private func loadSeed(for deepLink: DeepLink) async {
+    private func loadSeed(for deepLink: DeepLink) async -> DeepLink? {
         do {
             guard let encrypted = try await relayClientFactory(deepLink.serverURL)
                 .fetchSeedSession(rid: deepLink.rid)
             else {
                 Logger.model.infoFile("No seed session available for rid \(deepLink.rid)")
-                return
+                phase = .failed("Failed to load seed session: missing authenticated request payload.")
+                return nil
             }
             Logger.crypto.infoFile("Fetched encrypted seed session for rid \(deepLink.rid); envelope ciphertext chars \(encrypted.ciphertext.count)")
 
@@ -200,11 +290,39 @@ final class SessionUploadModel: ObservableObject {
             )
             Logger.crypto.infoFile("Decrypted seed session for rid \(deepLink.rid): \(Self.sessionSummary(from: plaintext))")
 
-            seedSession = try JSONDecoder().decode(CapturedSession.self, from: plaintext)
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let payload = try decoder.decode(SeedSessionPayload.self, from: plaintext)
+            guard let request = payload.request,
+                  request.rid == deepLink.rid,
+                  let serverURL = URL(string: request.serverURL),
+                  let targetURL = URL(string: request.targetURL),
+                  DeepLink.isAllowedRelayURL(serverURL),
+                  DeepLink.isAllowedTargetURL(targetURL)
+            else {
+                throw RequestAuthenticator.Error.invalidRequestProof
+            }
+
+            let trustedDeepLink = DeepLink(
+                rid: request.rid,
+                serverURL: serverURL,
+                targetURL: targetURL,
+                recipientPublicKeyBase64: request.cliPublicKey,
+                deviceID: request.deviceID,
+                requestType: DeepLink.RequestType(rawValue: request.requestType) ?? .refresh,
+                expiresAt: request.expiresAt,
+                requestProof: request.requestProof,
+                requestSecret: request.requestSecret
+            )
+            try RequestAuthenticator.verify(trustedDeepLink)
+
+            seedSession = payload.capturedSession
             Logger.model.infoFile("Loaded seed session for rid \(deepLink.rid) with \(seedSession?.cookies.count ?? 0) cookies and \(seedSession?.origins.count ?? 0) origins")
+            return trustedDeepLink
         } catch {
             Logger.crypto.errorFile("Failed to load seed session for rid \(deepLink.rid): \(error.localizedDescription)")
             phase = .failed("Failed to load seed session: \(error.localizedDescription)")
+            return nil
         }
     }
 

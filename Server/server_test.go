@@ -106,6 +106,7 @@ func newLoginRequest(rid string) LoginRequest {
 		DeviceFingerprint: "device-fingerprint",
 		DeviceID:          "device-1",
 		ExpiresAt:         ISO8601Time{Time: time.Now().Add(5 * time.Minute).UTC()},
+		RequestProof:      "proof-1",
 		RID:               rid,
 		TargetURL:         "https://example.com/login",
 	}
@@ -315,6 +316,13 @@ func TestRequestValidation(t *testing.T) {
 		t.Fatalf("invalid environment status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 
+	missingProof := newLoginRequest("rid-missing-proof")
+	missingProof.RequestProof = ""
+	rec = performJSONRequest(t, mux, http.MethodPost, "/v1/requests", missingProof)
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("missing proof status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
 	validRefresh := newLoginRequest("rid-seed-validation")
 	validRefresh.APNToken = "token"
 	validRefresh.APNEnvironment = "sandbox"
@@ -329,6 +337,33 @@ func TestRequestValidation(t *testing.T) {
 	rec = performJSONRequest(t, mux, http.MethodPost, "/v1/requests/rid-seed-validation/seed-session", invalidSeed)
 	if rec.Code != http.StatusBadRequest {
 		t.Fatalf("invalid seed algorithm status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestResolvePairKeyIncludesRequestProof(t *testing.T) {
+	mux, _, _ := newTestServer()
+
+	create := newLoginRequest("rid-pair")
+	create.RequestProof = "request-proof"
+
+	rec := performJSONRequest(t, mux, http.MethodPost, "/v1/requests", create)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create request status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	response := mustDecodeJSON[RequestStatusResponse](t, rec)
+	if response.PairKey == "" {
+		t.Fatal("expected pair key in create response")
+	}
+
+	rec = performJSONRequest(t, mux, http.MethodGet, "/v1/pair/"+response.PairKey, nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("pair resolve status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	pair := mustDecodeJSON[PairKeyResponse](t, rec)
+	if pair.RequestProof != "request-proof" {
+		t.Fatalf("request proof mismatch: %q", pair.RequestProof)
 	}
 }
 

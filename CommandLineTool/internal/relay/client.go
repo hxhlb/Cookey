@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -44,6 +45,9 @@ func NewClient(rawBaseURL string) (*Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("invalid relay server URL: %w", err)
 	}
+	if !isAllowedRelayURL(parsed) {
+		return nil, fmt.Errorf("relay server URL must use https or loopback http")
+	}
 
 	return &Client{
 		baseURL: parsed,
@@ -53,7 +57,7 @@ func NewClient(rawBaseURL string) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Register(manifest models.LoginManifest) error {
+func (c *Client) Register(manifest models.LoginManifest) (string, error) {
 	body, err := json.Marshal(models.RelayRegisterRequest{
 		APNEnvironment:    manifest.APNEnvironment,
 		APNToken:          manifest.APNToken,
@@ -64,27 +68,38 @@ func (c *Client) Register(manifest models.LoginManifest) error {
 		DeviceFingerprint: manifest.DeviceFingerprint,
 		ExpiresAt:         manifest.ExpiresAt,
 		RequestType:       manifest.RequestType,
+		RequestProof:      manifest.RequestProof,
 	})
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	request, err := http.NewRequestWithContext(context.Background(), http.MethodPost, c.url("v1/requests").String(), bytes.NewReader(body))
 	if err != nil {
-		return err
+		return "", err
 	}
 	request.Header.Set("Content-Type", "application/json")
 
 	responseBody, statusCode, err := c.do(request, 15*time.Second)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	if statusCode < 200 || statusCode >= 300 {
-		return HTTPStatusError{Code: statusCode, Body: responseBody}
+		return "", HTTPStatusError{Code: statusCode, Body: responseBody}
 	}
 
-	return nil
+	var response models.RelayStatusResponse
+	if err := json.Unmarshal([]byte(responseBody), &response); err != nil {
+		// Server registered successfully but response couldn't be parsed;
+		// fall back to full deeplink (old server or unexpected format).
+		return "", nil
+	}
+
+	if response.PairKey != nil {
+		return *response.PairKey, nil
+	}
+	return "", nil
 }
 
 func (c *Client) UploadSeedSession(rid string, envelope models.EncryptedSessionEnvelope) error {
@@ -259,6 +274,26 @@ func (c *Client) wsURL(path string) *url.URL {
 	}
 
 	return &joined
+}
+
+func isAllowedRelayURL(parsed *url.URL) bool {
+	if parsed == nil {
+		return false
+	}
+
+	switch strings.ToLower(parsed.Scheme) {
+	case "https":
+		return parsed.Host != ""
+	case "http":
+		host := parsed.Hostname()
+		if strings.EqualFold(host, "localhost") {
+			return true
+		}
+		ip := net.ParseIP(host)
+		return ip != nil && ip.IsLoopback()
+	default:
+		return false
+	}
 }
 
 func (c *Client) url(path string) *url.URL {

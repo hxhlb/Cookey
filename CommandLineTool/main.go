@@ -1,8 +1,8 @@
 package main
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -99,6 +99,10 @@ func handleLogin(arguments []string) error {
 	if err != nil {
 		return err
 	}
+	requestSecret, err := crypto.GenerateRequestSecret()
+	if err != nil {
+		return err
+	}
 
 	manifest := models.LoginManifest{
 		RequestType:       "login",
@@ -110,6 +114,11 @@ func handleLogin(arguments []string) error {
 		DeviceFingerprint: context.DeviceFingerprint,
 		CreatedAt:         createdAt,
 		ExpiresAt:         models.NewISO8601Time(createdAt.Time.Add(time.Duration(timeoutSeconds) * time.Second)),
+		RequestSecret:     requestSecret,
+	}
+	manifest.RequestProof, err = crypto.ComputeRequestProof(manifest, manifest.RequestSecret)
+	if err != nil {
+		return err
 	}
 
 	var seedEnvelope *models.EncryptedSessionEnvelope
@@ -126,14 +135,6 @@ func handleLogin(arguments []string) error {
 		if err != nil {
 			return err
 		}
-		seedPayload, err := encodeJSON(models.PlaywrightStorageState{
-			Cookies: previousSession.Cookies,
-			Origins: previousSession.Origins,
-		}, false)
-		if err != nil {
-			return err
-		}
-
 		deviceInfo := previousSession.DeviceInfo
 		if deviceInfo == nil {
 			fallbackDeviceInfo, _, err := config.LatestDeviceInfoForTarget(context.Paths, targetURL)
@@ -144,12 +145,36 @@ func handleLogin(arguments []string) error {
 		}
 
 		if deviceInfo != nil {
+			manifest.RequestType = "refresh"
+			manifest.RequestProof, err = crypto.ComputeRequestProof(manifest, manifest.RequestSecret)
+			if err != nil {
+				return err
+			}
+
+			seedPayload, err := encodeJSON(models.SeedSessionPayload{
+				Cookies: previousSession.Cookies,
+				Origins: previousSession.Origins,
+				Request: &models.SeedRequestPayload{
+					RID:           manifest.RID,
+					ServerURL:     manifest.ServerURL,
+					TargetURL:     manifest.TargetURL,
+					CLIPublicKey:  manifest.CLIPublicKey,
+					DeviceID:      manifest.DeviceID,
+					RequestType:   manifest.RequestType,
+					ExpiresAt:     manifest.ExpiresAt,
+					RequestProof:  manifest.RequestProof,
+					RequestSecret: manifest.RequestSecret,
+				},
+			}, false)
+			if err != nil {
+				return err
+			}
+
 			envelope, err := crypto.EncryptSessionEnvelope(seedPayload, deviceInfo.PublicKey)
 			if err != nil {
 				return err
 			}
 
-			manifest.RequestType = "refresh"
 			manifest.APNToken = deviceInfo.APNToken
 			manifest.APNEnvironment = deviceInfo.APNEnvironment
 			seedEnvelope = &envelope
@@ -164,7 +189,8 @@ func handleLogin(arguments []string) error {
 	if err != nil {
 		return cliError{message: "Invalid --server value: " + serverURL}
 	}
-	if err := client.Register(manifest); err != nil {
+	pairKey, err := client.Register(manifest)
+	if err != nil {
 		return err
 	}
 	if seedEnvelope != nil {
@@ -174,7 +200,11 @@ func handleLogin(arguments []string) error {
 	}
 
 	deepLink := qrcode.DeepLink(manifest)
-	qrText := qrcode.Render(deepLink)
+	qrLink := deepLink
+	if pairKey != "" {
+		qrLink = qrcode.PairKeyDeepLink(pairKey, serverURL, manifest.RequestSecret)
+	}
+	qrText := qrcode.Render(qrLink)
 	jsonOutput := flags["json"] != ""
 	noDetach := flags["no-detach"] != ""
 
@@ -186,6 +216,7 @@ func handleLogin(arguments []string) error {
 			TimeoutSeconds: timeoutSeconds,
 			DaemonPID:      int32(os.Getpid()),
 			DeepLink:       deepLink,
+			PairKey:        pairKey,
 			QRText:         qrText,
 			Detached:       false,
 		}
@@ -215,6 +246,7 @@ func handleLogin(arguments []string) error {
 		TimeoutSeconds: timeoutSeconds,
 		DaemonPID:      daemonPID,
 		DeepLink:       deepLink,
+		PairKey:        pairKey,
 		QRText:         qrText,
 		Detached:       true,
 	}
@@ -580,8 +612,10 @@ func emitLoginOutput(output models.LoginOutput, asJSON bool) error {
 	if !strings.HasSuffix(output.QRText, "\n") {
 		fmt.Println()
 	}
-	fmt.Printf("  Link: %s\n\n", output.DeepLink)
-	fmt.Println("  Scan with the Cookey app. Waiting for session...")
+	if output.PairKey != "" {
+		fmt.Printf("  Pair Key  %s-%s\n", output.PairKey[:4], output.PairKey[4:])
+	}
+	fmt.Println("  Scan the QR code above with the Cookey app.")
 	return nil
 }
 

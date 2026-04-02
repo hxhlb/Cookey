@@ -137,6 +137,10 @@ func DecodeSession(
 	keypair models.KeypairFile,
 	deviceFingerprint string,
 ) (models.SessionFile, error) {
+	if err := crypto.VerifyEnvelopeProof(rid, envelope, manifest.RequestSecret); err != nil {
+		return models.SessionFile{}, err
+	}
+
 	plaintext, err := crypto.DecryptSessionEnvelope(envelope, keypair)
 	if err != nil {
 		return models.SessionFile{}, err

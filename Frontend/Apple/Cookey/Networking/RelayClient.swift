@@ -65,6 +65,32 @@ struct RelayClient {
         _ = try await sendRequest(to: endpoint, method: "POST", body: envelope)
     }
 
+    func resolvePairKey(_ pairKey: String) async throws -> PairKeyResolveResponse {
+        let endpoint = baseURL.appending(path: "v1/pair/\(pairKey)")
+        var request = URLRequest(url: endpoint)
+        request.httpMethod = "GET"
+        Logger.network.infoFile("Resolving pair key \(pairKey)")
+
+        let (data, response) = try await perform(request)
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        Logger.network.infoFile("Pair key resolve returned HTTP \(httpResponse.statusCode)")
+
+        guard (200 ..< 300).contains(httpResponse.statusCode) else {
+            let body = String(decoding: data, as: UTF8.self)
+            throw NSError(
+                domain: "Cookey.RelayClient",
+                code: httpResponse.statusCode,
+                userInfo: [
+                    NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode): \(body)",
+                ]
+            )
+        }
+
+        return try decoder.decode(PairKeyResolveResponse.self, from: data)
+    }
+
     func fetchRequestStatus(rid: String) async throws -> RequestStatusResponse {
         let endpoint = baseURL.appending(path: "v1/requests/\(rid)")
         var request = URLRequest(url: endpoint)

@@ -27,6 +27,7 @@ type Routes struct {
 func (rt *Routes) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /health", rt.handleHealth)
 	mux.HandleFunc("POST /v1/requests", rt.handleCreateRequest)
+	mux.HandleFunc("GET /v1/pair/{pair_key}", rt.handleResolvePairKey)
 	mux.HandleFunc("GET /v1/requests/{rid}", rt.handleGetRequest)
 	mux.HandleFunc("GET /v1/requests/{rid}/seed-session", rt.handleGetSeedSession)
 	mux.HandleFunc("POST /v1/requests/{rid}/session", rt.handleUploadSession)
@@ -86,6 +87,38 @@ func (rt *Routes) handleGetRequest(w http.ResponseWriter, r *http.Request) {
 	}
 
 	writeJSON(w, http.StatusOK, NewRequestStatusResponse(stored))
+}
+
+// GET /v1/pair/{pair_key}
+func (rt *Routes) handleResolvePairKey(w http.ResponseWriter, r *http.Request) {
+	pairKey := r.PathValue("pair_key")
+	if pairKey == "" {
+		writeText(w, http.StatusBadRequest, "Missing pair key")
+		return
+	}
+
+	stored := rt.storage.GetRequestByPairKey(pairKey)
+	if stored == nil {
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "Pair key not found"})
+		return
+	}
+
+	if stored.ExpiresAt.Before(time.Now()) {
+		rt.storage.UpdateStatus(stored.RID, StatusExpired)
+		writeJSON(w, http.StatusGone, map[string]string{"error": "Request expired"})
+		return
+	}
+
+	writeJSON(w, http.StatusOK, PairKeyResponse{
+		CLIPublicKey: stored.CLIPublicKey,
+		DeviceID:     stored.DeviceID,
+		ExpiresAt:    ISO8601Time{stored.ExpiresAt},
+		RID:          stored.RID,
+		RequestProof: stored.RequestProof,
+		RequestType:  stored.RequestType,
+		ServerURL:    rt.config.PublicURL,
+		TargetURL:    stored.TargetURL,
+	})
 }
 
 // GET /v1/requests/{rid}/seed-session
@@ -149,6 +182,10 @@ func (rt *Routes) handleUploadSession(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !IsValidAlgorithm(session.Algorithm) {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid session payload"})
+		return
+	}
+	if strings.TrimSpace(session.RequestSignature) == "" {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "Invalid session payload"})
 		return
 	}
@@ -242,6 +279,9 @@ func writeText(w http.ResponseWriter, status int, body string) {
 
 func (rt *Routes) isValidCreateRequest(req LoginRequest) bool {
 	if req.RequestType == "" {
+		return false
+	}
+	if strings.TrimSpace(req.RequestProof) == "" {
 		return false
 	}
 	if (req.APNToken == "") != (req.APNEnvironment == "") {

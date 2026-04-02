@@ -118,7 +118,7 @@ class HomeViewController: UIViewController {
 
         actionButton.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(32)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(32)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
             $0.height.equalTo(50)
         }
     }
@@ -134,7 +134,7 @@ class HomeViewController: UIViewController {
             Logger.ui.infoFile("Paste Link tapped on Mac Catalyst")
             guard let string = UIPasteboard.general.string?.trimmingCharacters(in: .whitespacesAndNewlines),
                   let url = URL(string: string),
-                  DeepLink(url: url) != nil
+                  url.scheme?.lowercased() == "cookey"
             else {
                 let alert = AlertViewController(
                     title: String(localized: "Invalid Link"),

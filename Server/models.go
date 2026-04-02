@@ -62,6 +62,7 @@ type LoginRequest struct {
 	DeviceID          string      `json:"device_id"`
 	ExpiresAt         ISO8601Time `json:"expires_at"`
 	RequestType       string      `json:"request_type,omitempty"`
+	RequestProof      string      `json:"request_proof"`
 	RID               string      `json:"rid"`
 	TargetURL         string      `json:"target_url"`
 }
@@ -78,6 +79,8 @@ type StoredRequest struct {
 	CreatedAt            time.Time         `json:"-"`
 	ExpiresAt            time.Time         `json:"-"`
 	RequestType          string            `json:"-"`
+	RequestProof         string            `json:"-"`
+	PairKey              string            `json:"-"`
 	Status               RequestStatus     `json:"-"`
 	EncryptedSession     *EncryptedSession `json:"-"`
 	EncryptedSeedSession *EncryptedSession `json:"-"`
@@ -88,6 +91,7 @@ type StoredRequest struct {
 type RequestStatusResponse struct {
 	CreatedAt   ISO8601Time   `json:"created_at"`
 	ExpiresAt   ISO8601Time   `json:"expires_at"`
+	PairKey     string        `json:"pair_key,omitempty"`
 	RequestType string        `json:"request_type,omitempty"`
 	RID         string        `json:"rid"`
 	Status      RequestStatus `json:"status"`
@@ -98,11 +102,25 @@ func NewRequestStatusResponse(r *StoredRequest) RequestStatusResponse {
 	return RequestStatusResponse{
 		CreatedAt:   ISO8601Time{r.CreatedAt},
 		ExpiresAt:   ISO8601Time{r.ExpiresAt},
+		PairKey:     r.PairKey,
 		RequestType: r.RequestType,
 		RID:         r.RID,
 		Status:      r.Status,
 		TargetURL:   r.TargetURL,
 	}
+}
+
+// PairKeyResponse is the JSON response for pair key resolution.
+// Fields ordered alphabetically by JSON tag.
+type PairKeyResponse struct {
+	CLIPublicKey string      `json:"cli_public_key"`
+	DeviceID     string      `json:"device_id"`
+	ExpiresAt    ISO8601Time `json:"expires_at"`
+	RID          string      `json:"rid"`
+	RequestProof string      `json:"request_proof"`
+	RequestType  string      `json:"request_type"`
+	ServerURL    string      `json:"server_url"`
+	TargetURL    string      `json:"target_url"`
 }
 
 const (
@@ -137,6 +155,7 @@ type EncryptedSession struct {
 	Ciphertext         string      `json:"ciphertext"`
 	EphemeralPublicKey string      `json:"ephemeral_public_key"`
 	Nonce              string      `json:"nonce"`
+	RequestSignature   string      `json:"request_signature,omitempty"`
 	Version            int         `json:"version"`
 }
 

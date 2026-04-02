@@ -180,8 +180,8 @@ struct BrowserCaptureModelTests {
         // JSONSerialization escapes tabs and backslashes
         #expect(script.contains("\\t"))
         #expect(script.contains("\\\\"))
-        // Angle brackets should be present (JSON doesn't escape them)
+        // Angle brackets are preserved, while the closing tag slash is JSON-escaped.
         #expect(script.contains("<script>"))
-        #expect(script.contains("</script>"))
+        #expect(script.contains("<\\/script>"))
     }
 }

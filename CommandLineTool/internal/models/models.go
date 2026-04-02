@@ -122,6 +122,8 @@ type LoginManifest struct {
 	CreatedAt         ISO8601Time `json:"created_at"`
 	ExpiresAt         ISO8601Time `json:"expires_at"`
 	RequestType       string      `json:"request_type,omitempty"`
+	RequestProof      string      `json:"request_proof,omitempty"`
+	RequestSecret     string      `json:"request_secret,omitempty"`
 }
 
 type DaemonDescriptor struct {
@@ -159,6 +161,7 @@ type RelayRegisterRequest struct {
 	DeviceFingerprint string      `json:"device_fingerprint"`
 	ExpiresAt         ISO8601Time `json:"expires_at"`
 	RequestType       string      `json:"request_type,omitempty"`
+	RequestProof      string      `json:"request_proof"`
 }
 
 type RelayStatusResponse struct {
@@ -167,6 +170,7 @@ type RelayStatusResponse struct {
 	TargetURL *string      `json:"target_url,omitempty"`
 	ExpiresAt *ISO8601Time `json:"expires_at,omitempty"`
 	CreatedAt *ISO8601Time `json:"created_at,omitempty"`
+	PairKey   *string      `json:"pair_key,omitempty"`
 }
 
 type EncryptedSessionEnvelope struct {
@@ -176,6 +180,25 @@ type EncryptedSessionEnvelope struct {
 	Nonce              string                     `json:"nonce"`
 	Ciphertext         string                     `json:"ciphertext"`
 	CapturedAt         ISO8601Time                `json:"captured_at"`
+	RequestSignature   string                     `json:"request_signature,omitempty"`
+}
+
+type SeedRequestPayload struct {
+	RID           string      `json:"rid"`
+	ServerURL     string      `json:"server_url"`
+	TargetURL     string      `json:"target_url"`
+	CLIPublicKey  string      `json:"cli_public_key"`
+	DeviceID      string      `json:"device_id"`
+	RequestType   string      `json:"request_type"`
+	ExpiresAt     ISO8601Time `json:"expires_at"`
+	RequestProof  string      `json:"request_proof"`
+	RequestSecret string      `json:"request_secret"`
+}
+
+type SeedSessionPayload struct {
+	Cookies []BrowserCookie     `json:"cookies"`
+	Origins []OriginState       `json:"origins"`
+	Request *SeedRequestPayload `json:"_cookey_request,omitempty"`
 }
 
 type SessionFile struct {
@@ -258,6 +281,7 @@ type LoginOutput struct {
 	TargetURL      string `json:"target_url"`
 	TimeoutSeconds int    `json:"timeout_seconds"`
 	DaemonPID      int32  `json:"daemon_pid"`
+	PairKey        string `json:"pair_key"`
 	DeepLink       string `json:"deep_link"`
 	QRText         string `json:"qr_text"`
 	Detached       bool   `json:"detached"`

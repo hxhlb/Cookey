@@ -1,15 +1,21 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
+
+const pairKeyAlphabet = "23456789ABCDEFGHJKMNPQRSTUVWXYZ"
+const pairKeyLength = 8
 
 // Storage is the in-memory store for requests, APN registrations, and WebSocket waiters.
 type Storage struct {
 	mu             sync.RWMutex
 	requests       map[string]*StoredRequest
+	pairKeys       map[string]string                           // pair_key -> rid
 	waiters        map[string]map[string]chan WebSocketMessage // rid -> waiterID -> ch
 	maxPayloadSize int
 }
@@ -18,6 +24,7 @@ type Storage struct {
 func NewStorage(maxPayloadSize int) *Storage {
 	return &Storage{
 		requests:       make(map[string]*StoredRequest),
+		pairKeys:       make(map[string]string),
 		waiters:        make(map[string]map[string]chan WebSocketMessage),
 		maxPayloadSize: maxPayloadSize,
 	}
@@ -27,6 +34,8 @@ func NewStorage(maxPayloadSize int) *Storage {
 func (s *Storage) Store(req LoginRequest) *StoredRequest {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	pairKey := s.generatePairKeyLocked()
 
 	stored := &StoredRequest{
 		RID:               req.RID,
@@ -39,10 +48,67 @@ func (s *Storage) Store(req LoginRequest) *StoredRequest {
 		CreatedAt:         time.Now().UTC(),
 		ExpiresAt:         req.ExpiresAt.Time,
 		RequestType:       NormalizeRequestType(req.RequestType),
+		RequestProof:      req.RequestProof,
+		PairKey:           pairKey,
 		Status:            StatusPending,
 	}
 	s.requests[req.RID] = stored
+	if pairKey != "" {
+		s.pairKeys[pairKey] = req.RID
+	}
 	return stored
+}
+
+// generatePairKeyLocked generates a unique 8-char pair key. Must be called with s.mu held.
+func (s *Storage) generatePairKeyLocked() string {
+	for attempt := 0; attempt < 10; attempt++ {
+		key := randomPairKey()
+		if key == "" {
+			continue
+		}
+		if _, exists := s.pairKeys[key]; !exists {
+			return key
+		}
+	}
+	return ""
+}
+
+func randomPairKey() string {
+	b := make([]byte, pairKeyLength)
+	if _, err := rand.Read(b); err != nil {
+		return ""
+	}
+	result := make([]byte, pairKeyLength)
+	for i := range b {
+		result[i] = pairKeyAlphabet[int(b[i])%len(pairKeyAlphabet)]
+	}
+	return string(result)
+}
+
+// GetRequestByPairKey looks up a request by its short pair key.
+func (s *Storage) GetRequestByPairKey(pairKey string) *StoredRequest {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	normalized := strings.ToUpper(strings.TrimSpace(pairKey))
+	rid, ok := s.pairKeys[normalized]
+	if !ok {
+		return nil
+	}
+	r := s.requests[rid]
+	if r == nil {
+		return nil
+	}
+	cp := *r
+	if r.EncryptedSession != nil {
+		es := *r.EncryptedSession
+		cp.EncryptedSession = &es
+	}
+	if r.EncryptedSeedSession != nil {
+		seed := *r.EncryptedSeedSession
+		cp.EncryptedSeedSession = &seed
+	}
+	return &cp
 }
 
 // GetRequest retrieves a stored request by ID.
@@ -96,7 +162,7 @@ func (s *Storage) StoreSession(rid string, session EncryptedSession) *StoredRequ
 	}
 
 	// Two-stage validation: field-length check
-	payloadSize := len(session.Ciphertext) + len(session.EphemeralPublicKey) + len(session.Nonce)
+	payloadSize := len(session.Ciphertext) + len(session.EphemeralPublicKey) + len(session.Nonce) + len(session.RequestSignature)
 	if payloadSize > s.maxPayloadSize {
 		return nil
 	}
@@ -166,6 +232,9 @@ func (s *Storage) MarkDelivered(rid string) *StoredRequest {
 	}
 	r.Status = StatusDelivered
 	r.EncryptedSession = nil
+	if r.PairKey != "" {
+		delete(s.pairKeys, r.PairKey)
+	}
 	cp := *r
 	return &cp
 }
@@ -186,6 +255,10 @@ func (s *Storage) CleanupExpired() []string {
 	}
 
 	for _, rid := range expired {
+		// Remove pair key mapping before deleting request
+		if r := s.requests[rid]; r != nil && r.PairKey != "" {
+			delete(s.pairKeys, r.PairKey)
+		}
 		// Remove first, then notify (matching Storage.swift:87-88)
 		delete(s.requests, rid)
 		s.notifyWaiters(rid, WebSocketMessage{

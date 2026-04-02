@@ -7,6 +7,7 @@ struct EncryptedSessionEnvelope: Codable {
     let nonce: String
     let ciphertext: String
     let capturedAt: Date
+    let requestSignature: String?
 
     enum CodingKeys: String, CodingKey {
         case version
@@ -15,5 +16,6 @@ struct EncryptedSessionEnvelope: Codable {
         case ciphertext
         case ephemeralPublicKey = "ephemeral_public_key"
         case capturedAt = "captured_at"
+        case requestSignature = "request_signature"
     }
 }

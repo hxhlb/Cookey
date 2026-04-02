@@ -127,7 +127,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
               object.type == .qr,
               let value = object.stringValue,
               let url = URL(string: value),
-              DeepLink(url: url) != nil
+              url.scheme?.lowercased() == "cookey"
         else { return }
 
         didScan = true
