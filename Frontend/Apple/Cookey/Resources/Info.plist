@@ -47,7 +47,7 @@
 		<true/>
 	</dict>
 	<key>NSCameraUsageDescription</key>
-	<string>Cookey needs camera access to scan QR codes from your terminal.</string>
+	<string>Cookey uses your camera to scan a QR code displayed in your terminal. This lets the app securely pair with your computer so you can log in to websites on your phone and send the session back to your CLI tool.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -13,7 +13,7 @@ final class HealthCheckModel: ObservableObject {
     private let client: RelayClient
 
     init() {
-        client = RelayClient(baseURL: AppEnvironment.apiBaseURL)
+        client = RelayClient(baseURL: AppEnvironment.effectiveAPIBaseURL)
     }
 
     init(client: RelayClient) {

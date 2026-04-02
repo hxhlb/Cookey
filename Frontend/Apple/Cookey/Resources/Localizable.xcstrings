@@ -102,7 +102,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "批准登录 %@"
+            "value" : "批准 %@ 的登录请求"
           }
         }
       }
@@ -314,23 +314,23 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cookey 可以在未来接收来自 %@ 的登录请求并将它们直接发送到此设备。您的推送令牌仅发送至您选择的 Cookey 中继服务器，绝不会与任何第三方分享。"
+            "value" : "未来，Cookey 可以将来自 %@ 的登录请求直接推送到此设备。您的推送令牌仅会发送至您所选的 Cookey 中继服务器，绝不会与第三方分享。"
           }
         }
       }
     },
-    "Cookey can use push notifications to refresh future login requests on this device for %@. If you continue, iOS will show the system notification permission prompt and Cookey will wait for the APNs token callback before opening the website." : {
+    "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cookey can use push notifications to refresh future login requests on this device for %@. If you continue, iOS will show the system notification permission prompt and Cookey will wait for the APNs token callback before opening the website."
+            "value" : "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cookey 可以利用推送通知在此设备上为 %@ 刷新未来的登录请求。如果您继续，iOS 将显示系统通知权限提示，Cookey 将等待 APNs 令牌回调后再打开网站。"
+            "value" : "开启推送通知后，未来 %@ 的登录或会话刷新请求可直接发送到此设备，无需再次扫描二维码或手动输入配对码。继续操作将弹出系统通知权限提示。"
           }
         }
       }
@@ -347,6 +347,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cookey 无法启动相机扫描器。"
+          }
+        }
+      }
+    },
+    "Default Server" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default Server"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "默认服务器"
           }
         }
       }
@@ -383,18 +399,18 @@
         }
       }
     },
-    "Enable APNs for Cookey?" : {
+    "Enable Push Notifications for Cookey?" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Enable APNs for Cookey?"
+            "value" : "Enable Push Notifications for Cookey?"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "为 Cookey 启用 APNs 吗？"
+            "value" : "要为 Cookey 启用推送通知吗？"
           }
         }
       }
@@ -506,7 +522,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "输入终端中显示的配对码。"
+            "value" : "输入终端上显示的配对码。"
           }
         }
       }
@@ -538,7 +554,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "所有组件——CLI、App、中继——均为开源，可供审计。"
+            "value" : "所有组件 —— 包括 CLI、App 和中继 —— 均完全开源且可审计。"
           }
         }
       }
@@ -652,7 +668,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "服务器对配对码的响应无效。"
+            "value" : "服务器返回了无效的配对码响应。"
           }
         }
       }
@@ -669,6 +685,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在加载会话…"
+          }
+        }
+      }
+    },
+    "Logs may contain sensitive information such as session tokens and request details. Sharing or taking screenshots could expose your credentials." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Logs may contain sensitive information such as session tokens and request details. Sharing or taking screenshots could expose your credentials."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "日志中可能包含会话令牌、请求详情等敏感数据。截图或分享可能导致您的凭据隐私泄露。"
           }
         }
       }
@@ -742,7 +774,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无需账号或注册。CLI 首次运行时自动生成密钥对。"
+            "value" : "无需账号或注册登录。CLI 会在首次运行时自动生成密钥对。"
           }
         }
       }
@@ -836,7 +868,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "获取通知权限被拒绝。"
+            "value" : "未获得推送通知权限。"
           }
         }
       }
@@ -926,7 +958,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "输出兼容 Playwright 的 storageState JSON，可直接用于任何浏览器自动化工具。"
+            "value" : "输出兼容 Playwright 的 storageState JSON，可无缝接入任何浏览器自动化工具。"
           }
         }
       }
@@ -968,7 +1000,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请在此页面登录或完成所需操作。完成后，点击右上角的发送按钮以打包并将会话数据发送给请求方。"
+            "value" : "请在此页面完成登录或相关操作。完成后，点击右上角的发送按钮，将会话数据打包并发送给请求方。"
           }
         }
       }
@@ -1004,7 +1036,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "报告错误、请求新功能或分享您对 Cookey 的想法。"
+            "value" : "提交 Bug、请求新功能，或是分享您对 Cookey 的建议。"
           }
         }
       }
@@ -1078,7 +1110,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "扫描终端中的二维码，在手机上完成登录，搞定。"
+            "value" : "扫描终端上的二维码，在手机端完成登录，一切就绪。"
           }
         }
       }
@@ -1094,7 +1126,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在手机上扫描二维码，完成登录，加密的会话将直接传回终端——随时可用于自动化。"
+            "value" : "使用手机扫码并完成登录，加密后的会话数据即可直达终端 —— 自动化流程随时待命。"
           }
         }
       }
@@ -1110,7 +1142,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "扫描或输入终端中的配对码\n以传输登录会话。"
+            "value" : "扫描或输入终端上的配对码\n即可传输登录会话。"
           }
         }
       }
@@ -1173,6 +1205,22 @@
         }
       }
     },
+    "Sensitive Data Warning" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sensitive Data Warning"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "敏感数据警告"
+          }
+        }
+      }
+    },
     "Session data is encrypted on-device before leaving your phone. The relay never sees plaintext." : {
       "localizations" : {
         "en" : {
@@ -1184,7 +1232,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "会话数据在离开手机前已在设备上加密。中继服务器无法看到明文。"
+            "value" : "会话数据在离开手机前即完成本地加密，中继服务器全程无法接触明文。"
           }
         }
       }
@@ -1226,7 +1274,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "单个 Docker 镜像，纯内存存储，会话自动过期。"
+            "value" : "单 Docker 镜像，纯内存存储，且会话会自动过期。"
           }
         }
       }
@@ -1290,7 +1338,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获的浏览器会话无法编码。"
+            "value" : "无法对捕获到的浏览器会话进行编码。"
           }
         }
       }
@@ -1306,7 +1354,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获的浏览器会话为空。"
+            "value" : "捕获到的浏览器会话为空。"
           }
         }
       }
@@ -1322,7 +1370,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获的浏览器会话为空。请刷新页面，完成登录后再尝试发送。"
+            "value" : "捕获到的浏览器会话为空。请刷新页面，确保完成登录后再试一次。"
           }
         }
       }
@@ -1338,7 +1386,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获的浏览器会话无效。请刷新页面后重新发送。"
+            "value" : "捕获到的浏览器会话无效。请刷新页面后再试一次。"
           }
         }
       }
@@ -1355,6 +1403,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "登录请求包含无效的接收方密钥。"
+          }
+        }
+      }
+    },
+    "The server used when no relay is specified. Enter a domain name — HTTPS is enforced automatically." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The server used when no relay is specified. Enter a domain name — HTTPS is enforced automatically."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未指定中继服务器时的默认选项。只需输入域名，HTTPS 连接将自动启用。"
           }
         }
       }
@@ -1402,7 +1466,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "该网站正在请求 Passkey 认证，应用内浏览器不支持此功能。请使用密码或短信验证等其他登录方式。"
+            "value" : "当前网站请求使用 Passkey 登录，但应用内浏览器暂不支持。请改用密码或短信验证码等方式登录。"
           }
         }
       }
@@ -1418,23 +1482,23 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这将打包并发送当前会话状态给请求方。请确认您已完成登录或所需的操作。"
+            "value" : "这将会把当前的会话状态打包发送给请求方。请确认您已完成登录或相关操作。"
           }
         }
       }
     },
-    "Timed out waiting for the APNs token callback." : {
+    "Timed out waiting for push notification registration." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Timed out waiting for the APNs token callback."
+            "value" : "Timed out waiting for push notification registration."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "等待 APNs 令牌回调超时。"
+            "value" : "等待注册推送通知超时。"
           }
         }
       }
@@ -1550,7 +1614,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "启用后，中继服务器可以向此设备发送推送通知来刷新会话请求。这需要系统通知权限。"
+            "value" : "开启后，中继服务器可通过推送通知向此设备发送会话刷新请求。这需要您授予相应的系统通知权限。"
           }
         }
       }

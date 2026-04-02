@@ -1,3 +1,4 @@
+import AlertController
 import SnapKit
 import UIKit
 
@@ -5,6 +6,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
     private let tableView = UITableView(frame: .zero, style: .plain)
     private let searchController = UISearchController(searchResultsController: nil)
 
+    private var hasShownWarning = false
     private var allLines: [LogLine] = []
     private var filteredLines: [LogLine] = []
 
@@ -64,6 +66,21 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         setupMenuButton()
         setupTableView()
         reload()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        guard !hasShownWarning else { return }
+        hasShownWarning = true
+        let alert = AlertViewController(
+            title: String(localized: "Sensitive Data Warning"),
+            message: String(localized: "Logs may contain sensitive information such as session tokens and request details. Sharing or taking screenshots could expose your credentials.")
+        ) { context in
+            context.addAction(title: String(localized: "OK"), attribute: .dangerous) {
+                context.dispose()
+            }
+        }
+        present(alert, animated: true)
     }
 
     private func setupSearchController() {

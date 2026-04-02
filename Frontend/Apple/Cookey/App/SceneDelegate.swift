@@ -34,6 +34,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let fixedSize = CGSize(width: 666, height: 666)
             windowScene.sizeRestrictions?.minimumSize = fixedSize
             windowScene.sizeRestrictions?.maximumSize = fixedSize
+            if let titlebar = windowScene.titlebar {
+                titlebar.titleVisibility = .hidden
+                titlebar.toolbar = nil
+            }
         #endif
 
         if let url = connectionOptions.urlContexts.first?.url {

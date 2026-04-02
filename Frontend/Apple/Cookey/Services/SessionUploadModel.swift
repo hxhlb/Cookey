@@ -73,7 +73,7 @@ final class SessionUploadModel: ObservableObject {
             phase = .failed(String(localized: "Invalid or expired pair key."))
             return
         }
-        handlePairKey(normalized, serverURL: AppEnvironment.apiBaseURL)
+        handlePairKey(normalized, serverURL: AppEnvironment.effectiveAPIBaseURL)
     }
 
     func handlePairKey(_ pairKey: String, serverURL: URL) {

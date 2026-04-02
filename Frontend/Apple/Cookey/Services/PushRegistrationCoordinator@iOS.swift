@@ -19,7 +19,7 @@ final class PushRegistrationCoordinator: ObservableObject {
             case .notificationsUnavailable:
                 String(localized: "Notifications are disabled for Cookey on this device.")
             case .timedOut:
-                String(localized: "Timed out waiting for the APNs token callback.")
+                String(localized: "Timed out waiting for push notification registration.")
             }
         }
     }

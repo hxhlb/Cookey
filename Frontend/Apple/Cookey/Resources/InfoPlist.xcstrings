@@ -44,13 +44,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "new",
-            "value" : "Cookey needs camera access to scan QR codes from your terminal."
+            "value" : "Cookey uses your camera to scan a QR code displayed in your terminal. This lets the app securely pair with your computer so you can log in to websites on your phone and send the session back to your CLI tool."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cookey 需要相机权限来扫描终端中的二维码。"
+            "value" : "Cookey 使用相机扫描终端上显示的二维码，以便与电脑安全配对。配对后，您可以在手机上登录网站，并将会话安全地传回命令行工具。"
           }
         }
       }
