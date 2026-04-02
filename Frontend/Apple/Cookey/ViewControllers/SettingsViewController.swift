@@ -6,7 +6,17 @@ import UserNotifications
 
 final class SettingsViewController: StackScrollController {
     static let allowRefreshKey = "wiki.qaq.cookey.settings.allow-refresh"
+    static let defaultServerKey = "wiki.qaq.cookey.settings.default-server"
     static let feedbackURL = URL(string: "https://feedback.qaq.wiki/")!
+
+    static let defaultServerObject = ConfigurableObject(
+        icon: "server.rack",
+        title: "Default Server",
+        explain: "The server used when no relay is specified. Enter a domain name — HTTPS is enforced automatically.",
+        key: defaultServerKey,
+        defaultValue: "",
+        annotation: .textInput(placeholder: "api.cookey.sh")
+    )
 
     static let object = ConfigurableObject(
         icon: "arrow.trianglehead.2.clockwise",
@@ -87,6 +97,8 @@ final class SettingsViewController: StackScrollController {
         stackView.addArrangedSubviewWithMargin(
             ConfigurableSectionHeaderView().with(header: String(localized: "General"))
         ) { $0.bottom /= 2 }
+        stackView.addArrangedSubview(SeparatorView())
+        stackView.addArrangedSubviewWithMargin(Self.defaultServerObject.createView())
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(Self.object.createView())
         stackView.addArrangedSubview(SeparatorView())

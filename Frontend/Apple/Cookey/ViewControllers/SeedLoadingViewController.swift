@@ -110,8 +110,8 @@ final class SeedLoadingViewController: UIViewController {
         Logger.push.infoFile("Presenting push explanation for rid \(deepLink.rid)")
         let host = deepLink.serverURL.host(percentEncoded: false) ?? deepLink.serverURL.absoluteString
         let alert = AlertViewController(
-            title: String(localized: "Enable APNs for Cookey?"),
-            message: String(localized: "Cookey can use push notifications to refresh future login requests on this device for \(host). If you continue, iOS will show the system notification permission prompt and Cookey will wait for the APNs token callback before opening the website.")
+            title: String(localized: "Enable Push Notifications for Cookey?"),
+            message: String(localized: "If you enable push notifications, future login or session refresh requests for \(host) can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt.")
         ) { [weak self] context in
             context.addAction(title: String(localized: "Not Now")) {
                 context.dispose {
