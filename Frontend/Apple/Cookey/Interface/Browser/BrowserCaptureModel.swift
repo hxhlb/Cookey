@@ -36,14 +36,20 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
+        #if os(iOS) || os(visionOS)
+        configuration.allowsInlineMediaPlayback = true
+        configuration.ignoresViewportScaleLimits = true
+        #endif
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
 
         Self.installPasskeyIntercept(on: configuration.userContentController)
 
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.underPageBackgroundColor = .systemBackground
         super.init()
-        configuration.userContentController.add(self, name: Self.passkeyMessageHandler)
+        configuration.userContentController.add(self, contentWorld: .defaultClient, name: Self.passkeyMessageHandler)
         webView.navigationDelegate = self
+        webView.uiDelegate = self
         webView.load(URLRequest(url: targetURL))
     }
 
@@ -54,6 +60,11 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
         let configuration = WKWebViewConfiguration()
         configuration.websiteDataStore = .nonPersistent()
+        #if os(iOS) || os(visionOS)
+        configuration.allowsInlineMediaPlayback = true
+        configuration.ignoresViewportScaleLimits = true
+        #endif
+        configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
 
         if let localStorageScript = Self.localStorageInjectionScript(from: seedSession.origins) {
             let userScript = WKUserScript(
@@ -69,8 +80,9 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.underPageBackgroundColor = .systemBackground
         super.init()
-        configuration.userContentController.add(self, name: Self.passkeyMessageHandler)
+        configuration.userContentController.add(self, contentWorld: .defaultClient, name: Self.passkeyMessageHandler)
         webView.navigationDelegate = self
+        webView.uiDelegate = self
 
         Task { @MainActor [weak webView] in
             let cookieStore = configuration.websiteDataStore.httpCookieStore
@@ -257,7 +269,10 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
     private static let passkeyMessageHandler = "passkeyInterceptHandler"
 
-    private static let passkeyInterceptScript = """
+    /// Script A: Runs in the **page** content world so it can override `navigator.credentials`.
+    /// Signals the native side by setting a DOM attribute on `<html>`, which is visible
+    /// across all content worlds.
+    private static let passkeyPageScript = """
     (function() {
         if (navigator.credentials) {
             var origCreate = navigator.credentials.create.bind(navigator.credentials);
@@ -265,7 +280,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
             navigator.credentials.create = function(options) {
                 if (options && options.publicKey) {
-                    window.webkit.messageHandlers.passkeyInterceptHandler.postMessage("create");
+                    document.documentElement.setAttribute('data-ck-pk', Date.now().toString());
                     return Promise.reject(new DOMException("Passkey is not supported in this browser.", "NotAllowedError"));
                 }
                 return origCreate.apply(navigator.credentials, arguments);
@@ -273,7 +288,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
             navigator.credentials.get = function(options) {
                 if (options && options.publicKey) {
-                    window.webkit.messageHandlers.passkeyInterceptHandler.postMessage("get");
+                    document.documentElement.setAttribute('data-ck-pk', Date.now().toString());
                     return Promise.reject(new DOMException("Passkey is not supported in this browser.", "NotAllowedError"));
                 }
                 return origGet.apply(navigator.credentials, arguments);
@@ -282,13 +297,40 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
     })();
     """
 
+    /// Script B: Runs in the **defaultClient** content world where `messageHandlers` is registered.
+    /// Watches the DOM attribute set by Script A and relays the signal to native code.
+    private static let passkeyRelayScript = """
+    (function() {
+        function relay() {
+            if (document.documentElement.hasAttribute('data-ck-pk')) {
+                window.webkit.messageHandlers.passkeyInterceptHandler.postMessage('detected');
+                document.documentElement.removeAttribute('data-ck-pk');
+            }
+        }
+        var observer = new MutationObserver(function() { relay(); });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-ck-pk'] });
+        relay();
+    })();
+    """
+
     private static func installPasskeyIntercept(on controller: WKUserContentController) {
-        let script = WKUserScript(
-            source: passkeyInterceptScript,
+        // Script A: page world — overrides navigator.credentials
+        let pageScript = WKUserScript(
+            source: passkeyPageScript,
             injectionTime: .atDocumentStart,
-            forMainFrameOnly: false
+            forMainFrameOnly: false,
+            in: .page
         )
-        controller.addUserScript(script)
+        controller.addUserScript(pageScript)
+
+        // Script B: defaultClient world — relays DOM signal to native via messageHandler
+        let relayScript = WKUserScript(
+            source: passkeyRelayScript,
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: false,
+            in: .defaultClient
+        )
+        controller.addUserScript(relayScript)
     }
 
     nonisolated func userContentController(
