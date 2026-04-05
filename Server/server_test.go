@@ -388,6 +388,131 @@ func TestCreateRequestReturnsConflictOnPairKeyCollision(t *testing.T) {
 	}
 }
 
+func createAndGetPairKey(t *testing.T, mux *http.ServeMux, rid string) string {
+	t.Helper()
+	rec := performJSONRequest(t, mux, http.MethodPost, "/v1/requests", newLoginRequest(rid))
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create request status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	resp := mustDecodeJSON[RequestStatusResponse](t, rec)
+	if resp.PairKey == "" {
+		t.Fatal("expected pair key in create response")
+	}
+	return resp.PairKey
+}
+
+func TestJumpRedirectsToDeepLink(t *testing.T) {
+	mux, _, _ := newTestServer()
+	pairKey := createAndGetPairKey(t, mux, "rid-jump")
+
+	code := pairKey[:4] + "-" + pairKey[4:]
+	req := httptest.NewRequest(http.MethodGet, "/jump?code="+code, nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusFound {
+		t.Fatalf("jump status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	location := rec.Header().Get("Location")
+	// Test server PublicURL is "https://relay.test" which is not api.cookey.sh,
+	// so the redirect should include ?host=relay.test
+	expected := "cookey://" + pairKey + "?host=relay.test"
+	if location != expected {
+		t.Fatalf("location = %q, want %q", location, expected)
+	}
+}
+
+func TestJumpDefaultServerOmitsHost(t *testing.T) {
+	storage := NewStorage(1024 * 1024)
+	routes := &Routes{
+		storage:     storage,
+		config:      ServerConfig{MaxPayloadSize: 1024 * 1024, PublicURL: "https://api.cookey.sh"},
+		apnsClient:  newStubNotificationSender(),
+		apnBlocker:  NewAPNTokenBlocker(),
+		pushLimiter: NewAPNPushRateLimiter(),
+	}
+	mux := http.NewServeMux()
+	routes.Register(mux)
+
+	pairKey := createAndGetPairKey(t, mux, "rid-jump-default")
+	code := pairKey[:4] + "-" + pairKey[4:]
+	req := httptest.NewRequest(http.MethodGet, "/jump?code="+code, nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusFound {
+		t.Fatalf("jump status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	expected := "cookey://" + pairKey
+	if location := rec.Header().Get("Location"); location != expected {
+		t.Fatalf("location = %q, want %q", location, expected)
+	}
+}
+
+func TestJumpMissingCode(t *testing.T) {
+	mux, _, _ := newTestServer()
+	req := httptest.NewRequest(http.MethodGet, "/jump", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusBadRequest {
+		t.Fatalf("jump missing code status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestJumpInvalidCode(t *testing.T) {
+	mux, _, _ := newTestServer()
+	req := httptest.NewRequest(http.MethodGet, "/jump?code=ZZZZ-ZZZZ", nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("jump invalid code status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
+func TestJumpExpiredRequest(t *testing.T) {
+	mux, storage, _ := newTestServer()
+
+	create := newLoginRequest("rid-jump-expired")
+	create.ExpiresAt = ISO8601Time{Time: time.Now().Add(1 * time.Second).UTC()}
+	rec := performJSONRequest(t, mux, http.MethodPost, "/v1/requests", create)
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("create status = %d", rec.Code)
+	}
+	resp := mustDecodeJSON[RequestStatusResponse](t, rec)
+	pairKey := resp.PairKey
+
+	// Force expiry by directly mutating the stored request
+	storage.mu.Lock()
+	storage.requests["rid-jump-expired"].ExpiresAt = time.Now().Add(-1 * time.Second)
+	storage.mu.Unlock()
+
+	code := pairKey[:4] + "-" + pairKey[4:]
+	req := httptest.NewRequest(http.MethodGet, "/jump?code="+code, nil)
+	rec2 := httptest.NewRecorder()
+	mux.ServeHTTP(rec2, req)
+
+	if rec2.Code != http.StatusGone {
+		t.Fatalf("jump expired status = %d, body = %s", rec2.Code, rec2.Body.String())
+	}
+}
+
+func TestJumpStripsMultipleDashes(t *testing.T) {
+	mux, _, _ := newTestServer()
+	pairKey := createAndGetPairKey(t, mux, "rid-jump-dashes")
+
+	// Send code with dashes in unusual positions
+	code := string(pairKey[0]) + "-" + string(pairKey[1]) + "-" + pairKey[2:]
+	req := httptest.NewRequest(http.MethodGet, "/jump?code="+code, nil)
+	rec := httptest.NewRecorder()
+	mux.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusFound {
+		t.Fatalf("jump multi-dash status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestDeviceRegistrationEndpointRemoved(t *testing.T) {
 	mux, _, _ := newTestServer()
 

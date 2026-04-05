@@ -31,12 +31,16 @@ func emitLoginOutput(output models.LoginOutput, mode requestMode, asJSON bool) e
 		}
 	}
 	if output.PairKey != "" {
-		if qrcode.IsDefaultServer(output.ServerURL) {
-			fmt.Printf("  Pair Key         %s-%s\n", output.PairKey[:4], output.PairKey[4:])
-		} else {
-			fmt.Printf("  Pair Key         %s-%s (%s)\n", output.PairKey[:4], output.PairKey[4:], qrcode.RelayHost(output.ServerURL))
+		displayKey := output.PairKey
+		if len(displayKey) >= 5 {
+			displayKey = displayKey[:4] + "-" + displayKey[4:]
 		}
-		fmt.Printf("  Deep Link        %s\n", output.DeepLink)
+		if qrcode.IsDefaultServer(output.ServerURL) {
+			fmt.Printf("  Pair Key         %s\n", displayKey)
+		} else {
+			fmt.Printf("  Pair Key         %s (%s)\n", displayKey, qrcode.RelayHost(output.ServerURL))
+		}
+		fmt.Printf("  Deep Link        %s\n", output.JumpLink)
 	}
 	if output.ShowQR {
 		fmt.Println("  Scan or type the pair key in the Cookey app to continue.")

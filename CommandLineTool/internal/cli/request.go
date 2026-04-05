@@ -131,11 +131,12 @@ func runRequestCapture(args []string, mode requestMode) error {
 		}
 	}
 
-	deepLink := qrcode.PairKeyDeepLink(pairKey, serverURL)
+	cookeyLink := qrcode.CookeyLink(pairKey, serverURL)
+	jumpLink := qrcode.JumpLink(pairKey, serverURL)
 
 	qrText := ""
 	if *qr {
-		qrText = qrcode.Render(deepLink)
+		qrText = qrcode.Render(cookeyLink)
 	}
 
 	output := models.LoginOutput{
@@ -144,7 +145,8 @@ func runRequestCapture(args []string, mode requestMode) error {
 		TargetURL:      targetURL,
 		TimeoutSeconds: timeoutSeconds,
 		PairKey:        pairKey,
-		DeepLink:       deepLink,
+		DeepLink:       cookeyLink,
+		JumpLink:       jumpLink,
 		QRText:         qrText,
 		ShowQR:         *qr,
 		Detached:       !*attach,

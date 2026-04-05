@@ -7,7 +7,7 @@ import (
 	qrterminal "github.com/mdp/qrterminal/v3"
 )
 
-func PairKeyDeepLink(pairKey string, serverURL string) string {
+func CookeyLink(pairKey string, serverURL string) string {
 	components := url.URL{
 		Scheme: "cookey",
 		Host:   pairKey,
@@ -18,6 +18,15 @@ func PairKeyDeepLink(pairKey string, serverURL string) string {
 		components.RawQuery = query.Encode()
 	}
 	return components.String()
+}
+
+func JumpLink(pairKey string, serverURL string) string {
+	host := RelayHost(serverURL)
+	code := pairKey
+	if len(pairKey) >= 5 {
+		code = pairKey[:4] + "-" + pairKey[4:]
+	}
+	return "https://" + host + "/jump?code=" + code
 }
 
 func IsDefaultServer(serverURL string) bool {

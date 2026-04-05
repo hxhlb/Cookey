@@ -128,7 +128,9 @@ export default function HomePage() {
                     &nbsp; Expires in &nbsp;5m 00s
                   </div>
                   <div className="text-muted">&nbsp;</div>
-                  <QrCode />
+                  <div className="pl-2">
+                    <QrCode />
+                  </div>
                   <div className="text-muted">
                     &nbsp; Scan with the Cookey app. Waiting for session&hellip;
                   </div>
