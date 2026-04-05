@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"time"
@@ -27,6 +28,7 @@ type Routes struct {
 
 // Register sets up all HTTP routes on the given mux.
 func (rt *Routes) Register(mux *http.ServeMux) {
+	mux.HandleFunc("GET /jump", rt.handleJump)
 	mux.HandleFunc("GET /health", rt.handleHealth)
 	mux.HandleFunc("POST /v1/requests", rt.handleCreateRequest)
 	mux.HandleFunc("GET /v1/pair/{pair_key}", rt.handleResolvePairKey)
@@ -42,6 +44,51 @@ func (rt *Routes) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
+}
+
+// GET /jump — redirect to cookey:// deep link for the given pair key code.
+func (rt *Routes) handleJump(w http.ResponseWriter, r *http.Request) {
+	code := strings.TrimSpace(r.URL.Query().Get("code"))
+	if code == "" {
+		writeText(w, http.StatusBadRequest, "Missing code parameter")
+		return
+	}
+
+	pairKey := strings.ToUpper(strings.ReplaceAll(code, "-", ""))
+	if pairKey == "" {
+		writeText(w, http.StatusBadRequest, "Invalid code parameter")
+		return
+	}
+
+	stored := rt.storage.GetRequestByPairKey(pairKey)
+	if stored == nil {
+		writeText(w, http.StatusNotFound, "Pair key not found")
+		return
+	}
+
+	if stored.ExpiresAt.Before(time.Now()) {
+		rt.storage.UpdateStatus(stored.RID, StatusExpired)
+		writeText(w, http.StatusGone, "Request expired")
+		return
+	}
+
+	target := url.URL{Scheme: "cookey", Host: pairKey}
+	const defaultHost = "api.cookey.sh"
+	if publicHost := extractHost(rt.config.PublicURL); publicHost != "" && publicHost != defaultHost {
+		query := url.Values{}
+		query.Set("host", publicHost)
+		target.RawQuery = query.Encode()
+	}
+
+	http.Redirect(w, r, target.String(), http.StatusFound)
+}
+
+func extractHost(publicURL string) string {
+	parsed, err := url.Parse(publicURL)
+	if err != nil || parsed.Host == "" {
+		return ""
+	}
+	return parsed.Host
 }
 
 // POST /v1/requests

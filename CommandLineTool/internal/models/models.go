@@ -284,6 +284,7 @@ type LoginOutput struct {
 	DaemonPID      int32  `json:"daemon_pid"`
 	PairKey        string `json:"pair_key"`
 	DeepLink       string `json:"deep_link"`
+	JumpLink       string `json:"jump_link"`
 	QRText         string `json:"qr_text"`
 	ShowQR         bool   `json:"show_qr,omitempty"`
 	Detached       bool   `json:"detached"`
