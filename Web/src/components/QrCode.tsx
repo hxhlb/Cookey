@@ -75,6 +75,7 @@ function DecorativeQrCode({ size }: { size: number }) {
 
 export default function QrCode({ value, size = 120 }: QrCodeProps) {
   const [svgMarkup, setSvgMarkup] = useState<string | null>(null);
+  const containerClassName = "inline-block leading-none [&_svg]:block";
 
   useEffect(() => {
     let cancelled = false;
@@ -106,13 +107,21 @@ export default function QrCode({ value, size = 120 }: QrCodeProps) {
   }, [size, value]);
 
   if (!value || !svgMarkup) {
-    return <DecorativeQrCode size={size} />;
+    return (
+      <div
+        aria-label="Cookey login QR code"
+        className={containerClassName}
+        role="img"
+      >
+        <DecorativeQrCode size={size} />
+      </div>
+    );
   }
 
   return (
     <div
       aria-label="Cookey login QR code"
-      className="flex justify-center"
+      className={containerClassName}
       dangerouslySetInnerHTML={{ __html: svgMarkup }}
       role="img"
     />

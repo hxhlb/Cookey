@@ -46,7 +46,7 @@ func (rt *Routes) handleHealth(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-// GET /jump — redirect to cookey:// deep link for the given pair key code.
+// GET /jump — serve a small HTML page that opens the cookey:// deep link.
 func (rt *Routes) handleJump(w http.ResponseWriter, r *http.Request) {
 	code := strings.TrimSpace(r.URL.Query().Get("code"))
 	if code == "" {
@@ -72,15 +72,49 @@ func (rt *Routes) handleJump(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	writeJumpHTML(w, buildJumpDeepLink(pairKey, rt.config.PublicURL))
+}
+
+func buildJumpDeepLink(pairKey string, publicURL string) string {
 	target := url.URL{Scheme: "cookey", Host: pairKey}
 	const defaultHost = "api.cookey.sh"
-	if publicHost := extractHost(rt.config.PublicURL); publicHost != "" && publicHost != defaultHost {
+	if publicHost := extractHost(publicURL); publicHost != "" && publicHost != defaultHost {
 		query := url.Values{}
 		query.Set("host", publicHost)
 		target.RawQuery = query.Encode()
 	}
 
-	http.Redirect(w, r, target.String(), http.StatusFound)
+	return target.String()
+}
+
+func writeJumpHTML(w http.ResponseWriter, deepLink string) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+
+	escapedLink := strings.NewReplacer(
+		"&", "&amp;",
+		`"`, "&quot;",
+		"<", "&lt;",
+		">", "&gt;",
+	).Replace(deepLink)
+	quotedScriptLinkBytes, _ := json.Marshal(deepLink)
+	quotedScriptLink := string(quotedScriptLinkBytes)
+
+	io.WriteString(w, "<!doctype html>\n")
+	io.WriteString(w, `<html lang="en"><head><meta charset="utf-8">`)
+	io.WriteString(w, `<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">`)
+	io.WriteString(w, `<title>Opening Cookey…</title>`)
+	io.WriteString(w, `<style>`)
+	io.WriteString(w, `:root{color-scheme:dark}body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0a0a0a;color:#f0f0f0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",sans-serif}main{width:100%;max-width:420px;padding:28px;border:1px solid #222;border-radius:20px;background:#111;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,.28)}h1{margin:0 0 12px;font-size:28px;line-height:1.1}p{margin:0;color:#a1a1aa}a{display:inline-flex;align-items:center;justify-content:center;margin-top:20px;padding:12px 18px;border-radius:12px;background:#f0f0f0;color:#0a0a0a;text-decoration:none;font-weight:600}.muted{margin-top:14px;font-size:14px}.dot{width:10px;height:10px;margin:0 auto 18px;border-radius:999px;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.45);animation:pulse 1.6s infinite}@keyframes pulse{0%{transform:scale(.96);box-shadow:0 0 0 0 rgba(74,222,128,.45)}70%{transform:scale(1);box-shadow:0 0 0 18px rgba(74,222,128,0)}100%{transform:scale(.96);box-shadow:0 0 0 0 rgba(74,222,128,0)}}</style>`)
+	io.WriteString(w, `</head><body><main><div class="dot"></div><h1>Opening Cookey…</h1><p id="status">If Cookey does not open automatically, tap the button below.</p>`)
+	io.WriteString(w, `<a id="open-link" href="`)
+	io.WriteString(w, escapedLink)
+	io.WriteString(w, `">Open Cookey</a><p class="muted">You can return to this tab after opening the app.</p>`)
+	io.WriteString(w, `<script>const target=`)
+	io.WriteString(w, quotedScriptLink)
+	io.WriteString(w, `;const status=document.getElementById("status");const open=()=>{window.location.href=target;};window.setTimeout(open,120);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){status.textContent="Cookey opened. You can come back here after finishing in the app.";}});</script>`)
+	io.WriteString(w, `</main></body></html>`)
 }
 
 func extractHost(publicURL string) string {

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -401,7 +402,7 @@ func createAndGetPairKey(t *testing.T, mux *http.ServeMux, rid string) string {
 	return resp.PairKey
 }
 
-func TestJumpRedirectsToDeepLink(t *testing.T) {
+func TestJumpServesHTMLWithDeepLink(t *testing.T) {
 	mux, _, _ := newTestServer()
 	pairKey := createAndGetPairKey(t, mux, "rid-jump")
 
@@ -410,19 +411,19 @@ func TestJumpRedirectsToDeepLink(t *testing.T) {
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusFound {
+	if rec.Code != http.StatusOK {
 		t.Fatalf("jump status = %d, body = %s", rec.Code, rec.Body.String())
 	}
-	location := rec.Header().Get("Location")
-	// Test server PublicURL is "https://relay.test" which is not api.cookey.sh,
-	// so the redirect should include ?host=relay.test
+	if contentType := rec.Header().Get("Content-Type"); !strings.Contains(contentType, "text/html") {
+		t.Fatalf("content-type = %q", contentType)
+	}
 	expected := "cookey://" + pairKey + "?host=relay.test"
-	if location != expected {
-		t.Fatalf("location = %q, want %q", location, expected)
+	if body := rec.Body.String(); !strings.Contains(body, `href="`+expected+`"`) {
+		t.Fatalf("jump body missing deep link %q: %s", expected, body)
 	}
 }
 
-func TestJumpDefaultServerOmitsHost(t *testing.T) {
+func TestJumpHTMLDefaultServerOmitsHost(t *testing.T) {
 	storage := NewStorage(1024 * 1024)
 	routes := &Routes{
 		storage:     storage,
@@ -440,12 +441,12 @@ func TestJumpDefaultServerOmitsHost(t *testing.T) {
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusFound {
+	if rec.Code != http.StatusOK {
 		t.Fatalf("jump status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 	expected := "cookey://" + pairKey
-	if location := rec.Header().Get("Location"); location != expected {
-		t.Fatalf("location = %q, want %q", location, expected)
+	if body := rec.Body.String(); !strings.Contains(body, `href="`+expected+`"`) {
+		t.Fatalf("jump body missing deep link %q: %s", expected, body)
 	}
 }
 
@@ -508,7 +509,7 @@ func TestJumpStripsMultipleDashes(t *testing.T) {
 	rec := httptest.NewRecorder()
 	mux.ServeHTTP(rec, req)
 
-	if rec.Code != http.StatusFound {
+	if rec.Code != http.StatusOK {
 		t.Fatalf("jump multi-dash status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 }
