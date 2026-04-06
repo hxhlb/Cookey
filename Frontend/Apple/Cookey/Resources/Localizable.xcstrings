@@ -22,7 +22,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "收到登录请求，要开始吗？"
+            "value" : "收到登录请求，要开始登录吗？"
           }
         }
       }
@@ -64,7 +64,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "发生了未知错误。"
+            "value" : "发生未知错误。"
           }
         }
       }
@@ -112,7 +112,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "刷新 %@ 的会话"
+            "value" : "刷新 %@ 的会话状态"
           }
         }
       }
@@ -176,7 +176,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "需要相机权限才能扫描 Cookey 二维码。"
+            "value" : "扫描 Cookey 二维码需要相机权限。"
           }
         }
       }
@@ -239,6 +239,16 @@
         }
       }
     },
+    "Connection rejected." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已拒绝连接。"
+          }
+        }
+      }
+    },
     "Contact Us" : {
       "localizations" : {
         "zh-Hans" : {
@@ -292,7 +302,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未来，Cookey 可以将来自 %@ 的登录请求直接推送到此设备。您的推送令牌仅会发送至您所选的 Cookey 中继服务器，绝不会与第三方分享。"
+            "value" : "Cookey 可以将未来来自 %@ 的登录请求直接推送到此设备。你的推送令牌只会发送至你选择的中继服务器，绝不会与第三方共享。"
           }
         }
       }
@@ -308,7 +318,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cookey 无法启动相机扫描器。"
+            "value" : "Cookey 无法启动相机。"
           }
         }
       }
@@ -335,6 +345,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "默认服务器"
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除"
+          }
+        }
+      }
+    },
+    "Delete (%lld)" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete (%lld)"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除（%lld）"
+          }
+        }
+      }
+    },
+    "Delete %lld Item(s)?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %lld Item(s)?"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "删除 %lld 项？"
+          }
+        }
+      }
+    },
+    "Device ID: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Device ID: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设备 ID：%@"
           }
         }
       }
@@ -402,7 +477,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "启用登录通知？"
+            "value" : "要启用登录通知吗？"
           }
         }
       }
@@ -450,7 +525,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "正在加密并发送浏览器会话。"
+            "value" : "正在加密并发送会话。"
           }
         }
       }
@@ -492,7 +567,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请输入域名，HTTPS 连接将自动启用。"
+            "value" : "请输入域名（将自动使用 HTTPS）。"
           }
         }
       }
@@ -524,7 +599,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "输入终端上显示的配对码。"
+            "value" : "请输入终端显示的配对码。"
           }
         }
       }
@@ -556,7 +631,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "所有组件 —— 包括 CLI、App 和中继 —— 均完全开源且可审计。"
+            "value" : "CLI、App 和中继等所有组件均完全开源且可审计。"
           }
         }
       }
@@ -577,6 +652,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "按级别筛选"
+          }
+        }
+      }
+    },
+    "First connection from this computer. Verify the fingerprint below matches what your terminal shows. If they don't match, reject the connection — it may be intercepted by a third party." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这是首次连接该电脑。请核对下方指纹与终端显示的是否一致。如果不一致，请拒绝连接，因为通信可能已被第三方截获。"
           }
         }
       }
@@ -628,7 +713,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启推送通知后，未来 %@ 的登录或会话刷新请求可直接发送到此设备，无需再次扫描二维码或手动输入配对码。\n\n此功能完全可选——不启用通知也可正常使用 Cookey。你可以稍后在设置中更改。"
+            "value" : "启用推送通知后，未来来自 %@ 的登录或会话刷新请求将直接发送到此设备，无需再次扫码或输入配对码。\n\n此功能为可选项，不开启通知也能正常使用 Cookey。你可以随时在设置中更改。"
           }
         }
       }
@@ -686,7 +771,37 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "服务器返回了无效的配对码响应。"
+            "value" : "服务器返回的配对码响应无效。"
+          }
+        }
+      }
+    },
+    "Key mismatch: the server response differs from the encrypted seed payload." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "密钥不匹配：服务器响应与加密种子荷载不一致。"
+          }
+        }
+      }
+    },
+    "Known Key, New Device" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已知密钥，新设备"
+          }
+        }
+      }
+    },
+    "Last seen: %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上次连接：%@"
           }
         }
       }
@@ -728,7 +843,34 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "日志中可能包含会话令牌、请求详情等敏感数据。截图或分享可能导致您的凭据隐私泄露。"
+            "value" : "日志可能包含会话令牌和请求详情等敏感信息。分享或截图可能会导致凭据泄露。"
+          }
+        }
+      }
+    },
+    "Manage command-line devices you have verified. Removing a device will require re-verification on the next connection." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理已验证的命令行设备。移除后，下次连接该设备需重新验证。"
+          }
+        }
+      }
+    },
+    "Manage command-line public keys you have verified. Removing a key will require re-verification on the next connection." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manage command-line public keys you have verified. Removing a key will require re-verification on the next connection."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "管理你已验证过的命令行公钥。移除某个公钥后，下次连接时需要重新验证。"
           }
         }
       }
@@ -749,6 +891,26 @@
         }
       }
     },
+    "New fingerprint" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新指纹"
+          }
+        }
+      }
+    },
+    "New Key" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新密钥"
+          }
+        }
+      }
+    },
     "New Login Request" : {
       "localizations" : {
         "en" : {
@@ -760,7 +922,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "新的登录请求"
+            "value" : "新登录请求"
           }
         }
       }
@@ -776,7 +938,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无需账号或注册登录。CLI 会在首次运行时自动生成密钥对。"
+            "value" : "无需注册账号。CLI 会在首次运行时自动生成密钥对。"
           }
         }
       }
@@ -792,7 +954,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此设备没有可用的相机。"
+            "value" : "此设备无可用相机。"
           }
         }
       }
@@ -822,7 +984,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "没有匹配的日志。"
+            "value" : "无匹配日志。"
           }
         }
       }
@@ -838,7 +1000,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "剪贴板中未找到有效的 Cookey 登录链接。"
+            "value" : "剪贴板未发现有效的 Cookey 链接。"
           }
         }
       }
@@ -870,7 +1032,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未获得推送通知权限。"
+            "value" : "推送通知权限已被拒绝。"
           }
         }
       }
@@ -886,7 +1048,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "此设备上已禁用 Cookey 的通知。"
+            "value" : "此设备已禁用 Cookey 通知。"
           }
         }
       }
@@ -960,7 +1122,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "输出兼容 Playwright 的 storageState JSON，可无缝接入任何浏览器自动化工具。"
+            "value" : "直接输出兼容 Playwright 的 storageState JSON，可直达任何浏览器自动化工具。"
           }
         }
       }
@@ -976,7 +1138,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "不支持 Passkey"
+            "value" : "暂不支持通行密钥 (Passkey)"
           }
         }
       }
@@ -1002,7 +1164,17 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "请在此页面完成登录或相关操作。完成后，点击右上角的发送按钮，将会话数据打包并发送给请求方。"
+            "value" : "请在此页面完成登录或所需操作。完成后，点击右上角的发送按钮，打包并发送会话数据。"
+          }
+        }
+      }
+    },
+    "Previous fingerprint" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "旧指纹"
           }
         }
       }
@@ -1017,12 +1189,33 @@
         }
       }
     },
+    "Public keys you have verified and trusted. Remove a key to require re-verification on the next connection." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已验证并信任的公钥。移除后，下次连接该密钥需重新验证。"
+          }
+        }
+      }
+    },
     "Refresh" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "刷新"
+          }
+        }
+      }
+    },
+    "Reject" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拒绝"
           }
         }
       }
@@ -1038,7 +1231,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "提交 Bug、请求新功能，或是分享您对 Cookey 的建议。"
+            "value" : "提交 Bug、请求新功能，或分享你对 Cookey 的建议。"
           }
         }
       }
@@ -1112,7 +1305,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "扫描终端上的二维码，在手机端完成登录，一切就绪。"
+            "value" : "扫描终端二维码，在手机上完成登录，就是这么简单。"
           }
         }
       }
@@ -1128,7 +1321,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "使用手机扫码并完成登录，加密后的会话数据即可直达终端 —— 自动化流程随时待命。"
+            "value" : "手机扫码并完成登录，加密后的会话即可直达终端，随时准备用于自动化。"
           }
         }
       }
@@ -1144,7 +1337,23 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "扫描或输入终端上的配对码\n即可传输登录会话。"
+            "value" : "扫描或输入终端显示的配对码\n以传输登录会话。"
+          }
+        }
+      }
+    },
+    "Search" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "搜索"
           }
         }
       }
@@ -1155,6 +1364,32 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "搜索日志…"
+          }
+        }
+      }
+    },
+    "Security Warning" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "安全警告"
+          }
+        }
+      }
+    },
+    "Select" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Select"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择"
           }
         }
       }
@@ -1234,7 +1469,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "会话数据在离开手机前即完成本地加密，中继服务器全程无法接触明文。"
+            "value" : "会话数据在离开手机前已完成端侧加密，中继服务器无法触及明文。"
           }
         }
       }
@@ -1276,7 +1511,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "单 Docker 镜像，纯内存存储，且会话会自动过期。"
+            "value" : "单个 Docker 镜像，纯内存存储，且会话会自动过期。"
           }
         }
       }
@@ -1340,7 +1575,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "无法对捕获到的浏览器会话进行编码。"
+            "value" : "无法编码捕获到的浏览器会话。"
           }
         }
       }
@@ -1356,7 +1591,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获到的浏览器会话为空。"
+            "value" : "捕获的浏览器会话为空。"
           }
         }
       }
@@ -1372,7 +1607,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获到的浏览器会话为空。请刷新页面，确保完成登录后再试一次。"
+            "value" : "捕获的浏览器会话为空。请刷新页面，完成登录后再试。"
           }
         }
       }
@@ -1388,7 +1623,17 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "捕获到的浏览器会话无效。请刷新页面后再试一次。"
+            "value" : "捕获的浏览器会话无效。请刷新页面后再试。"
+          }
+        }
+      }
+    },
+    "The identity of this computer has changed since you last connected. This could indicate a security issue, or the command-line tool may have been reinstalled." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这台电脑的身份信息自上次连接以来发生了变化。这可能说明存在安全问题，或者命令行工具被重新安装过。"
           }
         }
       }
@@ -1414,7 +1659,33 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "未指定中继服务器时的默认选项。HTTPS 连接将自动启用。"
+            "value" : "未指定中继时的默认服务器（自动使用 HTTPS）。"
+          }
+        }
+      }
+    },
+    "This action cannot be undone." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This action cannot be undone."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "此操作无法撤销。"
+          }
+        }
+      }
+    },
+    "This key was previously trusted under a different device identifier. This may indicate the command-line tool was migrated or reinstalled." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "该密钥此前曾以其他设备标识被信任。这可能说明命令行工具已被迁移或重新安装。"
           }
         }
       }
@@ -1462,7 +1733,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "当前网站请求使用 Passkey 登录，但应用内浏览器暂不支持。请改用密码或短信验证码等方式登录。"
+            "value" : "该网站要求使用通行密钥 (Passkey) 验证，但应用内浏览器暂不支持。请使用密码或短信等其他方式登录。"
           }
         }
       }
@@ -1478,7 +1749,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "这将会把当前的会话状态打包发送给请求方。请确认您已完成登录或相关操作。"
+            "value" : "这将打包当前会话状态并发送给请求方。请确认你已完成登录或所需操作。"
           }
         }
       }
@@ -1494,7 +1765,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "等待注册推送通知超时。"
+            "value" : "注册推送通知超时。"
           }
         }
       }
@@ -1527,6 +1798,75 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "传输失败"
+          }
+        }
+      }
+    },
+    "Trust" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信任"
+          }
+        }
+      }
+    },
+    "Trust New Key" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信任新密钥"
+          }
+        }
+      }
+    },
+    "Trusted Devices" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受信任设备"
+          }
+        }
+      }
+    },
+    "Trusted Keys" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受信任密钥"
+          }
+        }
+      }
+    },
+    "Trusted Public Keys" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trusted Public Keys"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "受信任的公钥"
+          }
+        }
+      }
+    },
+    "Trusted since: %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "信任于：%@"
           }
         }
       }
@@ -1568,7 +1908,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "使用默认 (%@)"
+            "value" : "使用默认服务器 (%@)"
           }
         }
       }
@@ -1620,7 +1960,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启后，中继服务器可通过推送通知向此设备发送会话刷新请求。这需要您授予相应的系统通知权限。"
+            "value" : "开启后，中继服务器可以通过推送通知向该设备发送会话刷新请求（需要系统通知权限）。"
           }
         }
       }
@@ -1636,7 +1976,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "终端现在可以导出会话了。"
+            "value" : "你的终端现在可以导出会话了。"
           }
         }
       }
@@ -1652,7 +1992,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "零注册"
+            "value" : "无需注册"
           }
         }
       }

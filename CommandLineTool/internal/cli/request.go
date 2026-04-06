@@ -55,7 +55,7 @@ func runRequestCapture(args []string, mode requestMode) error {
 	}
 
 	targetURL := positionals[0]
-	context, err := config.Bootstrap()
+	context, err := config.BootstrapWithIdentity()
 	if err != nil {
 		return err
 	}
@@ -255,7 +255,7 @@ func handleDaemon(args []string) error {
 		return err
 	}
 
-	context, err := config.Bootstrap()
+	context, err := config.BootstrapWithIdentity()
 	if err != nil {
 		return err
 	}

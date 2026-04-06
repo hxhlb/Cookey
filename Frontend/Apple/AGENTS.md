@@ -77,6 +77,12 @@ CookeyTests/
 - **Entitlements**: App Sandbox, Hardened Runtime, camera access
 - **API**: `https://api.cookey.sh` (override with `COOKEY_API_URL` env var)
 
+## Copy & Terminology
+
+- Never use the abbreviation "CLI" in user-facing strings — always spell out "command-line" or "command line" instead
+- Internal code comments, variable names, and documentation may use "CLI" freely
+- iOS app localization (zh-Hans): Keep tone friendly, natural, and Apple-like ("果味"). Avoid overly formal/stiff phrases like "是否...". Instead, use conversational expressions like "你要...吗" or "要...吗".
+
 ## Swift Conventions
 
 - 4-space indentation, opening braces on same line

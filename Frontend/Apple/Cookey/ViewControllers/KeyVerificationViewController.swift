@@ -6,13 +6,18 @@ final class KeyVerificationViewController: UIViewController {
     private let verificationState: KeyVerificationState
     private let onResponse: (Bool) -> Void
 
+    // MARK: - Icon
+
     private let iconView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
         $0.tintColor = .label
+        $0.preferredSymbolConfiguration = .init(pointSize: 56, weight: .ultraLight)
     }
 
+    // MARK: - Text
+
     private let titleLabel = UILabel().then {
-        $0.font = .systemFont(ofSize: 22, weight: .bold)
+        $0.font = .systemFont(ofSize: 24, weight: .bold)
         $0.textAlignment = .center
         $0.numberOfLines = 0
     }
@@ -24,22 +29,58 @@ final class KeyVerificationViewController: UIViewController {
         $0.numberOfLines = 0
     }
 
-    private let fingerprintContainer = UIView().then {
+    // MARK: - Fingerprint card
+
+    private let fingerprintCard = UIView().then {
         $0.backgroundColor = .secondarySystemBackground
-        $0.layer.cornerRadius = 12
+        $0.layer.cornerRadius = 16
     }
 
-    private let fingerprintLabel = UILabel().then {
-        $0.font = .monospacedSystemFont(ofSize: 16, weight: .medium)
+    private let hexLabel = UILabel().then {
+        $0.font = .monospacedSystemFont(ofSize: 17, weight: .semibold)
         $0.textAlignment = .center
-        $0.numberOfLines = 0
+        $0.textColor = .label
     }
 
-    private let oldFingerprintLabel = UILabel().then {
-        $0.font = .monospacedSystemFont(ofSize: 14, weight: .regular)
+    private let cardSeparator = UIView().then {
+        $0.backgroundColor = .separator
+    }
+
+    private let emojiRow1 = UILabel().then {
+        $0.font = .systemFont(ofSize: 32)
         $0.textAlignment = .center
-        $0.numberOfLines = 0
+    }
+
+    private let emojiRow2 = UILabel().then {
+        $0.font = .systemFont(ofSize: 32)
+        $0.textAlignment = .center
+    }
+
+    // MARK: - Key changed: old fingerprint
+
+    private let oldFingerprintCard = UIView().then {
+        $0.backgroundColor = .secondarySystemBackground
+        $0.layer.cornerRadius = 16
+    }
+
+    private let oldHexLabel = UILabel().then {
+        $0.font = .monospacedSystemFont(ofSize: 17, weight: .semibold)
+        $0.textAlignment = .center
         $0.textColor = .secondaryLabel
+    }
+
+    private let oldCardSeparator = UIView().then {
+        $0.backgroundColor = .separator
+    }
+
+    private let oldEmojiRow1 = UILabel().then {
+        $0.font = .systemFont(ofSize: 32)
+        $0.textAlignment = .center
+    }
+
+    private let oldEmojiRow2 = UILabel().then {
+        $0.font = .systemFont(ofSize: 32)
+        $0.textAlignment = .center
     }
 
     private let oldFingerprintHeader = UILabel().then {
@@ -56,15 +97,28 @@ final class KeyVerificationViewController: UIViewController {
         $0.text = String(localized: "New fingerprint")
     }
 
-    private lazy var trustButton = UIButton(configuration: .filled()).then {
-        $0.addTarget(self, action: #selector(trustTapped), for: .touchUpInside)
-    }
+    // MARK: - Buttons
 
-    private lazy var rejectButton = UIButton(configuration: .plain()).then {
-        $0.setTitle(String(localized: "Reject"), for: .normal)
-        $0.setTitleColor(.systemRed, for: .normal)
-        $0.addTarget(self, action: #selector(rejectTapped), for: .touchUpInside)
-    }
+    private lazy var trustButton: UIButton = {
+        var config = UIButton.Configuration.filled()
+        config.cornerStyle = .large
+        config.buttonSize = .large
+        let button = UIButton(configuration: config)
+        button.addTarget(self, action: #selector(trustTapped), for: .touchUpInside)
+        return button
+    }()
+
+    private lazy var rejectButton: UIButton = {
+        var config = UIButton.Configuration.plain()
+        config.baseForegroundColor = .systemRed
+        config.buttonSize = .large
+        let button = UIButton(configuration: config)
+        button.setTitle(String(localized: "Reject"), for: .normal)
+        button.addTarget(self, action: #selector(rejectTapped), for: .touchUpInside)
+        return button
+    }()
+
+    // MARK: - Init
 
     init(verificationState: KeyVerificationState, onResponse: @escaping (Bool) -> Void) {
         self.verificationState = verificationState
@@ -79,6 +133,8 @@ final class KeyVerificationViewController: UIViewController {
         fatalError()
     }
 
+    // MARK: - Lifecycle
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
@@ -86,30 +142,69 @@ final class KeyVerificationViewController: UIViewController {
         layoutUI()
     }
 
+    // MARK: - Configure
+
+    private struct FingerprintParts {
+        let hex: String
+        let emojis: [String]
+
+        var emojiLine1: String {
+            emojis.prefix(3).joined(separator: "  ")
+        }
+
+        var emojiLine2: String {
+            emojis.dropFirst(3).prefix(3).joined(separator: "  ")
+        }
+    }
+
+    private func parseFingerprintParts(_ fingerprint: String) -> FingerprintParts {
+        let components = fingerprint.components(separatedBy: "  ")
+        let hex = components.first ?? fingerprint
+        let emojis: [String] = if components.count > 1 {
+            components.dropFirst().joined(separator: "  ")
+                .components(separatedBy: " ")
+                .filter { !$0.isEmpty }
+        } else {
+            []
+        }
+        return FingerprintParts(hex: hex, emojis: emojis)
+    }
+
     private func configureForState() {
         switch verificationState {
         case let .firstTime(fingerprint):
+            let parts = parseFingerprintParts(fingerprint)
             iconView.image = UIImage(systemName: "desktopcomputer")
-            titleLabel.text = String(localized: "New Computer")
-            messageLabel.text = String(localized: "Verify this fingerprint matches what your terminal shows.")
-            fingerprintLabel.text = fingerprint
+            titleLabel.text = String(localized: "New Key")
+            messageLabel.text = String(localized: "First connection from this computer. Verify the fingerprint below matches what your terminal shows. If they don't match, reject the connection — it may be intercepted by a third party.")
+            hexLabel.text = parts.hex
+            emojiRow1.text = parts.emojiLine1
+            emojiRow2.text = parts.emojiLine2
             trustButton.setTitle(String(localized: "Trust"), for: .normal)
 
         case let .keyChanged(oldFingerprint, newFingerprint):
-            iconView.image = UIImage(systemName: "exclamationmark.shield.fill")
+            let oldParts = parseFingerprintParts(oldFingerprint)
+            let newParts = parseFingerprintParts(newFingerprint)
+            iconView.image = UIImage(systemName: "exclamationmark.shield")
             iconView.tintColor = .systemOrange
             titleLabel.text = String(localized: "Security Warning")
-            titleLabel.textColor = .systemOrange
             messageLabel.text = String(localized: "The identity of this computer has changed since you last connected. This could indicate a security issue, or the command-line tool may have been reinstalled.")
-            fingerprintLabel.text = newFingerprint
-            oldFingerprintLabel.text = oldFingerprint
+            hexLabel.text = newParts.hex
+            emojiRow1.text = newParts.emojiLine1
+            emojiRow2.text = newParts.emojiLine2
+            oldHexLabel.text = oldParts.hex
+            oldEmojiRow1.text = oldParts.emojiLine1
+            oldEmojiRow2.text = oldParts.emojiLine2
             trustButton.setTitle(String(localized: "Trust New Key"), for: .normal)
 
         case let .knownKeyNewDevice(fingerprint):
+            let parts = parseFingerprintParts(fingerprint)
             iconView.image = UIImage(systemName: "arrow.triangle.2.circlepath")
             titleLabel.text = String(localized: "Known Key, New Device")
             messageLabel.text = String(localized: "This key was previously trusted under a different device identifier. This may indicate the command-line tool was migrated or reinstalled.")
-            fingerprintLabel.text = fingerprint
+            hexLabel.text = parts.hex
+            emojiRow1.text = parts.emojiLine1
+            emojiRow2.text = parts.emojiLine2
             trustButton.setTitle(String(localized: "Trust"), for: .normal)
 
         case .trusted:
@@ -117,76 +212,94 @@ final class KeyVerificationViewController: UIViewController {
         }
     }
 
+    // MARK: - Layout
+
+    private func buildFingerprintCardContent(in card: UIView, hex: UILabel, separator: UIView, emoji1: UILabel, emoji2: UILabel) {
+        let stack = UIStackView(arrangedSubviews: [hex, separator, emoji1, emoji2]).then {
+            $0.axis = .vertical
+            $0.spacing = 16
+            $0.alignment = .center
+        }
+        card.addSubview(stack)
+        stack.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(UIEdgeInsets(top: 16, left: 20, bottom: 16, right: 20))
+        }
+        separator.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(1.0 / UIScreen.main.scale)
+        }
+    }
+
     private func layoutUI() {
-        let isKeyChanged = {
+        let isKeyChanged: Bool = {
             if case .keyChanged = verificationState { return true }
             return false
         }()
 
-        var arrangedSubviews: [UIView] = [iconView, titleLabel, messageLabel]
+        // Content area
+        var contentViews: [UIView] = [iconView, titleLabel, messageLabel]
+
+        // Fingerprint card(s)
+        buildFingerprintCardContent(in: fingerprintCard, hex: hexLabel, separator: cardSeparator, emoji1: emojiRow1, emoji2: emojiRow2)
 
         if isKeyChanged {
-            let oldStack = UIStackView(arrangedSubviews: [oldFingerprintHeader, oldFingerprintLabel]).then {
-                $0.axis = .vertical
-                $0.spacing = 4
-                $0.alignment = .center
-            }
+            buildFingerprintCardContent(in: oldFingerprintCard, hex: oldHexLabel, separator: oldCardSeparator, emoji1: oldEmojiRow1, emoji2: oldEmojiRow2)
 
-            let newStack = UIStackView(arrangedSubviews: [newFingerprintHeader, fingerprintLabel]).then {
+            let oldSection = UIStackView(arrangedSubviews: [oldFingerprintHeader, oldFingerprintCard]).then {
                 $0.axis = .vertical
-                $0.spacing = 4
-                $0.alignment = .center
-            }
-
-            let separator = UIView().then {
-                $0.backgroundColor = .separator
-            }
-            separator.snp.makeConstraints { $0.height.equalTo(1) }
-
-            let comparisonStack = UIStackView(arrangedSubviews: [oldStack, separator, newStack]).then {
-                $0.axis = .vertical
-                $0.spacing = 12
+                $0.spacing = 6
                 $0.alignment = .fill
             }
-
-            fingerprintContainer.addSubview(comparisonStack)
-            comparisonStack.snp.makeConstraints {
-                $0.edges.equalToSuperview().inset(16)
+            let newSection = UIStackView(arrangedSubviews: [newFingerprintHeader, fingerprintCard]).then {
+                $0.axis = .vertical
+                $0.spacing = 6
+                $0.alignment = .fill
             }
-            arrangedSubviews.append(fingerprintContainer)
+            contentViews.append(oldSection)
+            contentViews.append(newSection)
         } else {
-            fingerprintContainer.addSubview(fingerprintLabel)
-            fingerprintLabel.snp.makeConstraints {
-                $0.edges.equalToSuperview().inset(16)
-            }
-            arrangedSubviews.append(fingerprintContainer)
+            contentViews.append(fingerprintCard)
         }
 
-        let buttonStack = UIStackView(arrangedSubviews: [trustButton, rejectButton]).then {
-            $0.axis = .vertical
-            $0.spacing = 8
-            $0.alignment = .fill
-        }
-        arrangedSubviews.append(buttonStack)
-
-        let mainStack = UIStackView(arrangedSubviews: arrangedSubviews).then {
+        let contentStack = UIStackView(arrangedSubviews: contentViews).then {
             $0.axis = .vertical
             $0.alignment = .center
-            $0.spacing = 20
+            $0.spacing = 16
+        }
+        contentStack.setCustomSpacing(24, after: iconView)
+        contentStack.setCustomSpacing(8, after: titleLabel)
+
+        // Button area pinned to bottom
+        let buttonStack = UIStackView(arrangedSubviews: [trustButton, rejectButton]).then {
+            $0.axis = .vertical
+            $0.spacing = 4
+            $0.alignment = .fill
         }
 
-        view.addSubview(mainStack)
-        mainStack.snp.makeConstraints {
-            $0.center.equalToSuperview()
+        view.addSubview(contentStack)
+        view.addSubview(buttonStack)
+
+        contentStack.snp.makeConstraints {
+            $0.top.greaterThanOrEqualTo(view.safeAreaLayoutGuide).offset(32)
+            $0.centerY.equalToSuperview().offset(-40).priority(.medium)
             $0.leading.trailing.equalToSuperview().inset(32)
         }
 
-        iconView.snp.makeConstraints { $0.width.height.equalTo(48) }
-        fingerprintContainer.snp.makeConstraints { $0.leading.trailing.equalToSuperview() }
-        buttonStack.snp.makeConstraints { $0.leading.trailing.equalToSuperview() }
-        trustButton.snp.makeConstraints { $0.height.equalTo(50) }
-        rejectButton.snp.makeConstraints { $0.height.equalTo(44) }
+        buttonStack.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(32)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.top.greaterThanOrEqualTo(contentStack.snp.bottom).offset(24)
+        }
+
+        iconView.snp.makeConstraints { $0.height.equalTo(56) }
+        fingerprintCard.snp.makeConstraints { $0.leading.trailing.equalToSuperview() }
+
+        if isKeyChanged {
+            oldFingerprintCard.snp.makeConstraints { $0.leading.trailing.equalToSuperview() }
+        }
     }
+
+    // MARK: - Actions
 
     @objc private func trustTapped() {
         Logger.ui.infoFile("User tapped Trust on CLI verification")
