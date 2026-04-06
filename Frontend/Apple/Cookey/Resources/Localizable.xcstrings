@@ -617,18 +617,18 @@
         }
       }
     },
-    "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt." : {
+    "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again.\n\nThis is optional — Cookey works perfectly without notifications. You can change this later in Settings." : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again. Continuing will show the system notification permission prompt."
+            "value" : "If you enable push notifications, future login or session refresh requests for %@ can be sent directly to this device — no need to scan a QR code or enter a pairing code again.\n\nThis is optional — Cookey works perfectly without notifications. You can change this later in Settings."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "开启推送通知后，未来 %@ 的登录或会话刷新请求可直接发送到此设备，无需再次扫描二维码或手动输入配对码。继续操作将弹出系统通知权限提示。"
+            "value" : "开启推送通知后，未来 %@ 的登录或会话刷新请求可直接发送到此设备，无需再次扫描二维码或手动输入配对码。\n\n此功能完全可选——不启用通知也可正常使用 Cookey。你可以稍后在设置中更改。"
           }
         }
       }

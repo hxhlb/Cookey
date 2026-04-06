@@ -238,7 +238,7 @@ final class SessionUploadModel: ObservableObject {
                 guard phase == .validating(deepLink) else { return }
             }
 
-            try await preparePushSupport(for: resolvedDeepLink)
+            await preparePushSupport(for: resolvedDeepLink)
 
             try? await Task.sleep(for: .seconds(1))
             loadingState = nil
@@ -323,7 +323,7 @@ final class SessionUploadModel: ObservableObject {
         }
     }
 
-    private func preparePushSupport(for deepLink: DeepLink) async throws {
+    private func preparePushSupport(for deepLink: DeepLink) async {
         guard PushRegistrationCoordinator.isSupported, let pushCoordinator else {
             Logger.push.debugFile("Push support unavailable; continuing without APNs registration")
             return
@@ -336,11 +336,16 @@ final class SessionUploadModel: ObservableObject {
         Logger.push.infoFile("Preparing push support for rid \(deepLink.rid); allowRefresh=\(allowRefresh)")
 
         if allowRefresh {
-            try await pushCoordinator.ensurePushToken(
-                serverURL: deepLink.serverURL,
-                deviceID: deepLink.deviceID,
-                requestAuthorizationIfNeeded: false
-            )
+            do {
+                try await pushCoordinator.ensurePushToken(
+                    serverURL: deepLink.serverURL,
+                    deviceID: deepLink.deviceID,
+                    requestAuthorizationIfNeeded: false
+                )
+            } catch {
+                Logger.push.errorFile("Push registration failed (allowRefresh path) for rid \(deepLink.rid): \(error.localizedDescription); reverting setting and continuing without push")
+                ConfigurableKit.set(value: false, forKey: SettingsViewController.allowRefreshKey)
+            }
             return
         }
 
@@ -348,13 +353,16 @@ final class SessionUploadModel: ObservableObject {
         Logger.push.infoFile("Push explanation result for rid \(deepLink.rid): wantsPush=\(wantsPush)")
         guard wantsPush else { return }
 
-        try await pushCoordinator.ensurePushToken(
-            serverURL: deepLink.serverURL,
-            deviceID: deepLink.deviceID,
-            requestAuthorizationIfNeeded: true
-        )
-
-        ConfigurableKit.set(value: true, forKey: SettingsViewController.allowRefreshKey)
+        do {
+            try await pushCoordinator.ensurePushToken(
+                serverURL: deepLink.serverURL,
+                deviceID: deepLink.deviceID,
+                requestAuthorizationIfNeeded: true
+            )
+            ConfigurableKit.set(value: true, forKey: SettingsViewController.allowRefreshKey)
+        } catch {
+            Logger.push.errorFile("Push registration failed for rid \(deepLink.rid): \(error.localizedDescription); continuing without push")
+        }
     }
 
     private func requestPushExplanation() async -> Bool {
