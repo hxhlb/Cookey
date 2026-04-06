@@ -2,11 +2,88 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
 	"cookey/internal/models"
 )
+
+func TestBootstrapDoesNotCreateIdentityByDefault(t *testing.T) {
+	homeDir := t.TempDir()
+	t.Setenv("HOME", homeDir)
+
+	context, err := Bootstrap()
+	if err != nil {
+		t.Fatalf("Bootstrap() error = %v", err)
+	}
+
+	if fileExists(context.Paths.Keypair) {
+		t.Fatalf("Bootstrap() created keypair at %q", context.Paths.Keypair)
+	}
+	if fileExists(context.Paths.DeviceIdentifier) {
+		t.Fatalf("Bootstrap() created device identifier at %q", context.Paths.DeviceIdentifier)
+	}
+	if context.Keypair != (models.KeypairFile{}) {
+		t.Fatalf("Bootstrap() keypair = %+v, want zero value", context.Keypair)
+	}
+	if context.DeviceIdentifier != "" {
+		t.Fatalf("Bootstrap() device identifier = %q, want empty", context.DeviceIdentifier)
+	}
+	if context.DeviceFingerprint != "" {
+		t.Fatalf("Bootstrap() device fingerprint = %q, want empty", context.DeviceFingerprint)
+	}
+
+	for _, dir := range []string{
+		filepath.Join(homeDir, ".cookey"),
+		filepath.Join(homeDir, ".cookey", "sessions"),
+		filepath.Join(homeDir, ".cookey", "daemons"),
+	} {
+		if !fileExists(dir) {
+			t.Fatalf("Bootstrap() missing directory %q", dir)
+		}
+	}
+}
+
+func TestBootstrapWithIdentityCreatesAndReusesIdentity(t *testing.T) {
+	homeDir := t.TempDir()
+	t.Setenv("HOME", homeDir)
+
+	first, err := BootstrapWithIdentity()
+	if err != nil {
+		t.Fatalf("BootstrapWithIdentity() first call error = %v", err)
+	}
+	if !fileExists(first.Paths.Keypair) {
+		t.Fatalf("BootstrapWithIdentity() did not create keypair at %q", first.Paths.Keypair)
+	}
+	if !fileExists(first.Paths.DeviceIdentifier) {
+		t.Fatalf("BootstrapWithIdentity() did not create device identifier at %q", first.Paths.DeviceIdentifier)
+	}
+	if first.Keypair.PublicKey == "" || first.Keypair.PrivateKey == "" {
+		t.Fatalf("BootstrapWithIdentity() returned incomplete keypair: %+v", first.Keypair)
+	}
+	if first.DeviceIdentifier == "" {
+		t.Fatal("BootstrapWithIdentity() returned empty device identifier")
+	}
+	if first.DeviceFingerprint == "" {
+		t.Fatal("BootstrapWithIdentity() returned empty device fingerprint")
+	}
+
+	second, err := BootstrapWithIdentity()
+	if err != nil {
+		t.Fatalf("BootstrapWithIdentity() second call error = %v", err)
+	}
+
+	if first.Keypair.PublicKey != second.Keypair.PublicKey || first.Keypair.PrivateKey != second.Keypair.PrivateKey {
+		t.Fatalf("BootstrapWithIdentity() regenerated key material: first=%+v second=%+v", first.Keypair, second.Keypair)
+	}
+	if first.DeviceIdentifier != second.DeviceIdentifier {
+		t.Fatalf("BootstrapWithIdentity() regenerated device identifier: first=%q second=%q", first.DeviceIdentifier, second.DeviceIdentifier)
+	}
+	if first.DeviceFingerprint != second.DeviceFingerprint {
+		t.Fatalf("BootstrapWithIdentity() changed device fingerprint: first=%q second=%q", first.DeviceFingerprint, second.DeviceFingerprint)
+	}
+}
 
 func TestListLocalRIDsReturnsUnionNewestFirst(t *testing.T) {
 	root := t.TempDir()
@@ -255,8 +332,8 @@ func TestLatestDeviceInfoForTargetReturnsNewestMatchingDeviceInfo(t *testing.T) 
 	}
 
 	if err := WriteSession(models.SessionFile{
-		Cookies: []models.BrowserCookie{},
-		Origins: []models.OriginState{},
+		Cookies:  []models.BrowserCookie{},
+		Origins:  []models.OriginState{},
 		Metadata: &models.SessionMetadata{TargetURL: "https://example.com"},
 	}, "rid-no-device-info", paths); err != nil {
 		t.Fatalf("WriteSession(no-device-info) error = %v", err)

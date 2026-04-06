@@ -29,13 +29,13 @@ final class SettingsViewController: StackScrollController {
         ephemeralAnnotation: .action(handler: openFeedback)
     )
 
-    private static let trustedKeysDataSource = TrustedKeyListDataSource()
-
     static let trustedKeysObject = ConfigurableObject(
-        icon: "key.fill",
-        title: "Trusted Keys",
-        explain: "Public keys you have verified and trusted. Remove a key to require re-verification on the next connection.",
-        ephemeralAnnotation: ObjectListAnnotation(dataSource: trustedKeysDataSource)
+        icon: "person.badge.key.fill",
+        title: "Trusted Public Keys",
+        explain: "Manage command-line public keys you have verified. Removing a key will require re-verification on the next connection.",
+        ephemeralAnnotation: .action { controller in
+            controller.navigationController?.pushViewController(TrustedPublicKeysViewController(), animated: true)
+        }
     )
 
     static let logsObject = ConfigurableObject(
@@ -103,9 +103,9 @@ final class SettingsViewController: StackScrollController {
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(makeDefaultServerView())
         stackView.addArrangedSubview(SeparatorView())
-        stackView.addArrangedSubviewWithMargin(Self.trustedKeysObject.createView())
-        stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(Self.object.createView())
+        stackView.addArrangedSubview(SeparatorView())
+        stackView.addArrangedSubviewWithMargin(Self.trustedKeysObject.createView())
         stackView.addArrangedSubview(SeparatorView())
 
         // MARK: - Contact Us

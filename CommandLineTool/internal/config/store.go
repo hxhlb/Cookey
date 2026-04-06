@@ -71,22 +71,7 @@ func Bootstrap() (BootstrapContext, error) {
 		}
 	}
 
-	keypair, err := crypto.LoadOrCreate(paths.Keypair)
-	if err != nil {
-		return BootstrapContext{}, err
-	}
-
 	config, err := LoadConfig(paths.Config)
-	if err != nil {
-		return BootstrapContext{}, err
-	}
-
-	deviceID, err := LoadOrCreateDeviceID(paths.DeviceIdentifier)
-	if err != nil {
-		return BootstrapContext{}, err
-	}
-
-	fingerprint, err := DeviceFingerprint(keypair)
 	if err != nil {
 		return BootstrapContext{}, err
 	}
@@ -96,12 +81,36 @@ func Bootstrap() (BootstrapContext, error) {
 	}
 
 	return BootstrapContext{
-		Paths:             paths,
-		Keypair:           keypair,
-		Config:            config,
-		DeviceIdentifier:  deviceID,
-		DeviceFingerprint: fingerprint,
+		Paths:  paths,
+		Config: config,
 	}, nil
+}
+
+func BootstrapWithIdentity() (BootstrapContext, error) {
+	context, err := Bootstrap()
+	if err != nil {
+		return BootstrapContext{}, err
+	}
+
+	keypair, err := crypto.LoadOrCreate(context.Paths.Keypair)
+	if err != nil {
+		return BootstrapContext{}, err
+	}
+
+	deviceID, err := LoadOrCreateDeviceID(context.Paths.DeviceIdentifier)
+	if err != nil {
+		return BootstrapContext{}, err
+	}
+
+	fingerprint, err := DeviceFingerprint(keypair)
+	if err != nil {
+		return BootstrapContext{}, err
+	}
+
+	context.Keypair = keypair
+	context.DeviceIdentifier = deviceID
+	context.DeviceFingerprint = fingerprint
+	return context, nil
 }
 
 func LoadConfig(path string) (models.AppConfig, error) {
@@ -505,7 +514,6 @@ func ensureDirectory(path string, permissions os.FileMode) error {
 
 	return os.Chmod(path, permissions)
 }
-
 
 func marshalPrettyJSON(value any) ([]byte, error) {
 	data, err := json.MarshalIndent(value, "", "  ")

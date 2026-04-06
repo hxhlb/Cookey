@@ -83,6 +83,16 @@ enum TrustedKeyStore {
         load()
     }
 
+    static func moveItem(from sourceIndex: Int, to destinationIndex: Int) {
+        var entries = load()
+        guard sourceIndex >= 0, sourceIndex < entries.count,
+              destinationIndex >= 0, destinationIndex < entries.count
+        else { return }
+        let item = entries.remove(at: sourceIndex)
+        entries.insert(item, at: destinationIndex)
+        save(entries)
+    }
+
     private static func touchLastSeen(deviceID: String) {
         var entries = load()
         guard let index = entries.firstIndex(where: { $0.deviceID == deviceID }) else { return }
