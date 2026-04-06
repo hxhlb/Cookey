@@ -50,6 +50,21 @@ You can also pipe directly to a file:
 
 `cookey session export r_xxxxxxxxxxxxxxxxxxxxxx > storageState.json`
 
+## Agent Presentation Requirement
+
+When an agent starts or refreshes a Cookey request on behalf of a user, it must
+present the human-readable verification strings from the CLI output directly in
+the reply, not just a deep link or jump link.
+
+- Always include the pair key as plain text.
+- Always include the CLI fingerprint / verification string as plain text when it
+  is available.
+- You may also include the deep link or jump link, but never as the only thing
+  the user can act on.
+
+Reason: the mobile app may ask the user to type the pair key manually and to
+verify that the fingerprint shown on the phone matches what the terminal shows.
+
 ## Important Warning About `--attach`
 
 Unless your tool call harness supports automatic process detach (e.g., `nohup`
@@ -87,7 +102,8 @@ Examples:
 Notes:
 
 - On success, the command prints a request ID (`rid`), pair key, jump link, and
-  the daemon PID.
+  daemon PID. It also prints the CLI fingerprint / verification string when
+  available.
 - Without `--attach`, the command exits as soon as the detached daemon is ready
   to wait for the encrypted session.
 

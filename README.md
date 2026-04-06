@@ -1,10 +1,43 @@
 # Cookey
 
-Cookey is a CLI-first way to move a logged-in mobile browser session back to your terminal as Playwright-compatible `storageState` JSON.
+Cookey is a minimal, self-hostable, CLI-first tool that lets you sign in on your phone and bring the resulting browser session back to your terminal as Playwright-compatible `storageState` JSON.
 
-## Pairing Flow
+## What It Does
 
-1. Run `cookey request start <target_url>`
-2. The CLI prints a pair key like `SM8N-D67N (api.cookey.sh)`
-3. The QR/deep link uses `cookey://SM8ND67N?host=api.cookey.sh`
-4. The iPhone app resolves the rest of the request metadata from the relay over HTTPS
+- Start a login request from the CLI
+- Scan the QR code on iPhone
+- Complete login in the in-app browser
+- Return the encrypted session to the CLI
+- Reuse it in Playwright or other automation flows
+
+## How It Works
+
+1. The CLI creates a short-lived login request
+2. The mobile app opens the target site and logs in
+3. Session data is encrypted on-device
+4. The relay server transports only encrypted blobs
+5. The CLI decrypts and exports `storageState` JSON locally
+
+## Components
+
+- `CommandLineTool/` — Go CLI and local daemon
+- `Frontend/Apple/` — SwiftUI iPhone app for QR scan and login
+- `Server/` — Go relay server with in-memory storage
+- `Web/` — static site and docs
+
+## Security Model
+
+- End-to-end encrypted session handoff
+- Relay server is treated as untrusted
+- No plaintext cookies or session data on the server
+- Short-lived, in-memory request/session storage
+
+## Use Cases
+
+- Log in once on mobile, then automate locally
+- Import authenticated state into Playwright tests
+- Access mobile-only or MFA-heavy login flows from the CLI
+
+## Status
+
+Cookey is organized as a multi-component repo covering the CLI, relay server, Apple app, and website.
