@@ -43,7 +43,7 @@ jobs:
             -clonedSourcePackagesDirPath .spm \
             | xcbeautify
 
-      - name: Build iOS app without code signing
+      - name: Build iOS app with ad-hoc signing
         run: |
           set -o pipefail
           xcodebuild \
@@ -53,10 +53,94 @@ jobs:
             -sdk iphonesimulator \
             -destination 'generic/platform=iOS Simulator' \
             -clonedSourcePackagesDirPath .spm \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGN_IDENTITY=- \
             build \
+            | xcbeautify
+
+  ios-tests:
+    name: iOS Tests (${{ matrix.shard.name }})
+    runs-on: macos-26
+    strategy:
+      fail-fast: false
+      matrix:
+        shard:
+          - name: Browser + Session
+            test_args: >-
+              -only-testing:CookeyTests/BrowserCaptureModelTests
+              -only-testing:CookeyTests/CapturedSessionCodingTests
+              -only-testing:CookeyTests/CryptoBoxOpenTests
+          - name: Keys + Storage
+            test_args: >-
+              -only-testing:CookeyTests/DeviceKeyManagerTests
+              -only-testing:CookeyTests/KeyFingerprintTests
+              -only-testing:CookeyTests/LogStoreTests
+          - name: App Flows
+            test_args: >-
+              -only-testing:CookeyTests/CookeyTests
+              -only-testing:CookeyTests/DeepLinkTests
+    defaults:
+      run:
+        working-directory: Frontend/Apple
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install xcbeautify
+        run: brew install xcbeautify
+
+      - name: Select Xcode 26.3
+        run: sudo xcode-select -s /Applications/Xcode_26.3.app/Contents/Developer
+
+      - name: Cache Xcode Swift packages
+        uses: actions/cache@v4
+        with:
+          path: Frontend/Apple/.spm
+          key: ${{ runner.os }}-xcode-spm-${{ hashFiles('Frontend/Apple/Cookey.xcodeproj/project.pbxproj', 'Frontend/Apple/**/Package.resolved') }}
+          restore-keys: ${{ runner.os }}-xcode-spm-
+
+      - name: Resolve iOS package dependencies
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -resolvePackageDependencies \
+            -project Cookey.xcodeproj \
+            -scheme Cookey \
+            -clonedSourcePackagesDirPath .spm \
+            | xcbeautify
+
+      - name: Detect simulator destination
+        id: simulator
+        run: |
+          set -euo pipefail
+          SIMULATOR_ID="$(
+            xcodebuild \
+              -project Cookey.xcodeproj \
+              -scheme Cookey \
+              -showdestinations \
+            | awk -F'id:' '/platform:iOS Simulator/ {split($2, parts, ","); gsub(/ /, "", parts[1]); print parts[1]; exit}'
+          )"
+
+          if [[ -z "${SIMULATOR_ID}" ]]; then
+            echo "No iOS Simulator destination found." >&2
+            exit 1
+          fi
+
+          echo "destination=platform=iOS Simulator,id=${SIMULATOR_ID}" >> "$GITHUB_OUTPUT"
+
+      - name: Run iOS tests with ad-hoc signing
+        run: |
+          set -o pipefail
+          xcodebuild \
+            -project Cookey.xcodeproj \
+            -scheme Cookey \
+            -configuration Debug \
+            -destination "${{ steps.simulator.outputs.destination }}" \
+            -clonedSourcePackagesDirPath .spm \
+            -parallel-testing-enabled YES \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES \
+            CODE_SIGN_IDENTITY=- \
+            test \
+            ${{ matrix.shard.test_args }} \
             | xcbeautify
 
   cli:
