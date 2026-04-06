@@ -1,0 +1,7 @@
+{
+  "x25519_public_key_base64": "AAECAwQFBgcICQoLDA0ODxAREhMUFRYXGBkaGxwdHh8=",
+  "expected_fingerprint": "630d:cd29:66c4  🥗 🍹 🪀 🥒 🍪 🍧",
+  "expected_hex": "630d:cd29:66c4",
+  "expected_emoji": "🥗 🍹 🪀 🥒 🍪 🍧",
+  "emoji_table_checksum": "b095fe8df1b34c713e3f25683a031536567c5a31d961a80035e9c3e973d2024e"
+}

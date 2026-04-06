@@ -23,7 +23,11 @@ func emitLoginOutput(output models.LoginOutput, mode requestMode, asJSON bool) e
 	fmt.Printf("  %s request  %s\n", action, output.RID)
 	fmt.Printf("  Target URL       %s\n", output.TargetURL)
 	expiresAt := time.Now().Add(time.Duration(output.TimeoutSeconds) * time.Second)
-	fmt.Printf("  Expires in       %s (%s)\n\n", formatLoginTimeout(output.TimeoutSeconds), expiresAt.Format("15:04:05"))
+	fmt.Printf("  Expires in       %s (%s)\n", formatLoginTimeout(output.TimeoutSeconds), expiresAt.Format("15:04:05"))
+	if output.CLIPublicKeyFingerprint != "" {
+		fmt.Printf("  Fingerprint      %s\n", output.CLIPublicKeyFingerprint)
+	}
+	fmt.Println()
 	if output.ShowQR && output.QRText != "" {
 		fmt.Print(output.QRText)
 		if !strings.HasSuffix(output.QRText, "\n") {

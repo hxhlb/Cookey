@@ -25,10 +25,13 @@ final class SessionUploadModel: ObservableObject {
     @Published var seedSession: CapturedSession?
     @Published var loadingState: LoadingState?
     @Published var shouldPresentPushExplanation = false
+    @Published var shouldPresentKeyVerification = false
+    @Published var keyVerificationState: KeyVerificationState?
 
     private let pushCoordinator: PushRegistrationCoordinator?
     private let relayClientFactory: (URL) -> RelayClient
     private var pushExplanationContinuation: CheckedContinuation<Bool, Never>?
+    private var keyVerificationContinuation: CheckedContinuation<Bool, Never>?
 
     init(pushCoordinator: PushRegistrationCoordinator?) {
         self.pushCoordinator = pushCoordinator
@@ -201,11 +204,25 @@ final class SessionUploadModel: ObservableObject {
         pushExplanationContinuation = nil
     }
 
+    func respondToKeyVerification(trust: Bool) {
+        Logger.ui.infoFile("User responded to key verification with trust=\(trust)")
+        shouldPresentKeyVerification = false
+        keyVerificationContinuation?.resume(returning: trust)
+        keyVerificationContinuation = nil
+    }
+
     func resetToIdle() {
         Logger.ui.infoFile("Resetting session model to idle")
         seedSession = nil
         loadingState = nil
         shouldPresentPushExplanation = false
+        shouldPresentKeyVerification = false
+        keyVerificationState = nil
+        // Resume pending continuations to avoid leaks
+        pushExplanationContinuation?.resume(returning: false)
+        pushExplanationContinuation = nil
+        keyVerificationContinuation?.resume(returning: false)
+        keyVerificationContinuation = nil
         phase = .idle
     }
 
@@ -230,12 +247,33 @@ final class SessionUploadModel: ObservableObject {
                 return
             }
 
+            if deepLink.requestType == .login {
+                // Login flow: verify CLI identity using relay-provided key (only source available)
+                guard await verifyKeyTrust(deviceID: deepLink.deviceID, publicKeyBase64: deepLink.recipientPublicKeyBase64) else {
+                    phase = .failed(String(localized: "Connection rejected."))
+                    return
+                }
+            }
+
             if deepLink.requestType == .refresh {
                 loadingState = .loadingSeed(host: host)
                 Logger.model.infoFile("Loading seed session for refresh rid \(deepLink.rid)")
                 guard let trustedDeepLink = await loadSeed(for: deepLink) else { return }
                 resolvedDeepLink = trustedDeepLink
                 guard phase == .validating(deepLink) else { return }
+
+                // Refresh flow: verify relay key matches the stronger seed payload key
+                guard deepLink.recipientPublicKeyBase64 == trustedDeepLink.recipientPublicKeyBase64 else {
+                    Logger.crypto.errorFile("Key mismatch: relay response differs from seed payload for rid \(deepLink.rid)")
+                    phase = .failed(String(localized: "Key mismatch: the server response differs from the encrypted seed payload."))
+                    return
+                }
+
+                // Verify using the decrypted (relay-independent) identity
+                guard await verifyKeyTrust(deviceID: trustedDeepLink.deviceID, publicKeyBase64: trustedDeepLink.recipientPublicKeyBase64) else {
+                    phase = .failed(String(localized: "Connection rejected."))
+                    return
+                }
             }
 
             await preparePushSupport(for: resolvedDeepLink)
@@ -371,6 +409,36 @@ final class SessionUploadModel: ObservableObject {
             pushExplanationContinuation = continuation
             shouldPresentPushExplanation = true
         }
+    }
+
+    private func requestKeyVerification() async -> Bool {
+        await withCheckedContinuation { continuation in
+            Logger.ui.debugFile("Requesting key verification dialog")
+            keyVerificationContinuation = continuation
+            shouldPresentKeyVerification = true
+        }
+    }
+
+    private func verifyKeyTrust(deviceID: String, publicKeyBase64: String) async -> Bool {
+        let state = TrustedKeyStore.verify(deviceID: deviceID, publicKeyBase64: publicKeyBase64)
+        if case .trusted = state {
+            Logger.ui.infoFile("Device \(deviceID) is already trusted, auto-proceeding")
+            return true
+        }
+
+        keyVerificationState = state
+        let trusted = await requestKeyVerification()
+        keyVerificationState = nil
+
+        guard trusted else {
+            Logger.ui.infoFile("User rejected key verification for device \(deviceID)")
+            return false
+        }
+
+        let fingerprint = (try? KeyFingerprint.compute(fromX25519PublicKeyBase64: publicKeyBase64)) ?? publicKeyBase64
+        TrustedKeyStore.trust(deviceID: deviceID, publicKeyBase64: publicKeyBase64, fingerprint: fingerprint)
+        Logger.ui.infoFile("User trusted device \(deviceID)")
+        return true
     }
 
     static func validateCapturedSessionData(_ sessionData: Data) throws {

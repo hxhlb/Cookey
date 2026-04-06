@@ -87,6 +87,10 @@ func runRequestCapture(args []string, mode requestMode) error {
 	if err != nil {
 		return err
 	}
+	cliFingerprint, err := crypto.Fingerprint(cliPublicKey)
+	if err != nil {
+		return err
+	}
 	requestSecret, err := crypto.GenerateRequestSecret()
 	if err != nil {
 		return err
@@ -140,16 +144,17 @@ func runRequestCapture(args []string, mode requestMode) error {
 	}
 
 	output := models.LoginOutput{
-		RID:            rid,
-		ServerURL:      serverURL,
-		TargetURL:      targetURL,
-		TimeoutSeconds: timeoutSeconds,
-		PairKey:        pairKey,
-		DeepLink:       cookeyLink,
-		JumpLink:       jumpLink,
-		QRText:         qrText,
-		ShowQR:         *qr,
-		Detached:       !*attach,
+		RID:                     rid,
+		ServerURL:               serverURL,
+		TargetURL:               targetURL,
+		TimeoutSeconds:          timeoutSeconds,
+		PairKey:                 pairKey,
+		DeepLink:                cookeyLink,
+		JumpLink:                jumpLink,
+		QRText:                  qrText,
+		ShowQR:                  *qr,
+		Detached:                !*attach,
+		CLIPublicKeyFingerprint: cliFingerprint,
 	}
 
 	if *attach {

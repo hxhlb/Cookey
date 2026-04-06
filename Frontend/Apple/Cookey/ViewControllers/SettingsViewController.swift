@@ -29,6 +29,15 @@ final class SettingsViewController: StackScrollController {
         ephemeralAnnotation: .action(handler: openFeedback)
     )
 
+    private static let trustedKeysDataSource = TrustedKeyListDataSource()
+
+    static let trustedKeysObject = ConfigurableObject(
+        icon: "key.fill",
+        title: "Trusted Keys",
+        explain: "Public keys you have verified and trusted. Remove a key to require re-verification on the next connection.",
+        ephemeralAnnotation: ObjectListAnnotation(dataSource: trustedKeysDataSource)
+    )
+
     static let logsObject = ConfigurableObject(
         icon: "doc.text.magnifyingglass",
         title: "View Logs",
@@ -93,6 +102,8 @@ final class SettingsViewController: StackScrollController {
         ) { $0.bottom /= 2 }
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(makeDefaultServerView())
+        stackView.addArrangedSubview(SeparatorView())
+        stackView.addArrangedSubviewWithMargin(Self.trustedKeysObject.createView())
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(Self.object.createView())
         stackView.addArrangedSubview(SeparatorView())

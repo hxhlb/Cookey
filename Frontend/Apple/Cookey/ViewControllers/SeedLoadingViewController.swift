@@ -9,6 +9,8 @@ final class SeedLoadingViewController: UIViewController {
     private let deepLink: DeepLink
     private var cancellables = Set<AnyCancellable>()
     private var hasPresentedPushExplanation = false
+    private var hasPresentedKeyVerification = false
+    private var isPresentingModal = false
 
     private let activityIndicator = UIActivityIndicatorView(style: .large).then {
         $0.startAnimating()
@@ -62,7 +64,7 @@ final class SeedLoadingViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        presentPushExplanationIfNeeded()
+        presentPendingModalIfNeeded()
     }
 
     private func bindModel() {
@@ -80,7 +82,18 @@ final class SeedLoadingViewController: UIViewController {
                     self?.hasPresentedPushExplanation = false
                     return
                 }
-                self?.presentPushExplanationIfNeeded()
+                self?.presentPendingModalIfNeeded()
+            }
+            .store(in: &cancellables)
+
+        sessionModel.$shouldPresentKeyVerification
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] shouldPresent in
+                guard shouldPresent else {
+                    self?.hasPresentedKeyVerification = false
+                    return
+                }
+                self?.presentPendingModalIfNeeded()
             }
             .store(in: &cancellables)
     }
@@ -101,31 +114,56 @@ final class SeedLoadingViewController: UIViewController {
         }
     }
 
-    private func presentPushExplanationIfNeeded() {
-        guard sessionModel.shouldPresentPushExplanation, !hasPresentedPushExplanation, presentedViewController == nil else {
+    /// Single entry point for modal presentation. Checks in priority order
+    /// (key verification before push explanation) and waits for each modal
+    /// to dismiss before presenting the next.
+    private func presentPendingModalIfNeeded() {
+        guard !isPresentingModal, presentedViewController == nil else { return }
+
+        if sessionModel.shouldPresentKeyVerification,
+           !hasPresentedKeyVerification,
+           let state = sessionModel.keyVerificationState
+        {
+            isPresentingModal = true
+            hasPresentedKeyVerification = true
+            Logger.ui.infoFile("Presenting key verification for rid \(deepLink.rid)")
+            let vc = KeyVerificationViewController(verificationState: state) { [weak self] trusted in
+                self?.sessionModel.respondToKeyVerification(trust: trusted)
+                self?.isPresentingModal = false
+                self?.presentPendingModalIfNeeded()
+            }
+            present(vc, animated: true)
             return
         }
 
-        hasPresentedPushExplanation = true
-        Logger.push.infoFile("Presenting push explanation for rid \(deepLink.rid)")
-        let host = deepLink.serverURL.host(percentEncoded: false) ?? deepLink.serverURL.absoluteString
-        let alert = AlertViewController(
-            title: String(localized: "Enable Push Notifications for Cookey?"),
-            message: String(localized: "If you enable push notifications, future login or session refresh requests for \(host) can be sent directly to this device — no need to scan a QR code or enter a pairing code again.\n\nThis is optional — Cookey works perfectly without notifications. You can change this later in Settings.")
-        ) { [weak self] context in
-            context.addAction(title: String(localized: "Not Now")) {
-                context.dispose {
-                    Logger.push.infoFile("User declined push explanation for rid \(self?.deepLink.rid ?? "<unknown>")")
-                    self?.sessionModel.respondToPushExplanation(allow: false)
+        if sessionModel.shouldPresentPushExplanation, !hasPresentedPushExplanation {
+            isPresentingModal = true
+            hasPresentedPushExplanation = true
+            Logger.push.infoFile("Presenting push explanation for rid \(deepLink.rid)")
+            let host = deepLink.serverURL.host(percentEncoded: false) ?? deepLink.serverURL.absoluteString
+            let alert = AlertViewController(
+                title: String(localized: "Enable Push Notifications for Cookey?"),
+                message: String(localized: "If you enable push notifications, future login or session refresh requests for \(host) can be sent directly to this device — no need to scan a QR code or enter a pairing code again.\n\nThis is optional — Cookey works perfectly without notifications. You can change this later in Settings.")
+            ) { [weak self] context in
+                context.addAction(title: String(localized: "Not Now")) {
+                    context.dispose {
+                        Logger.push.infoFile("User declined push explanation for rid \(self?.deepLink.rid ?? "<unknown>")")
+                        self?.sessionModel.respondToPushExplanation(allow: false)
+                        self?.isPresentingModal = false
+                        self?.presentPendingModalIfNeeded()
+                    }
+                }
+                context.addAction(title: String(localized: "Continue"), attribute: .dangerous) {
+                    context.dispose {
+                        Logger.push.infoFile("User accepted push explanation for rid \(self?.deepLink.rid ?? "<unknown>")")
+                        self?.sessionModel.respondToPushExplanation(allow: true)
+                        self?.isPresentingModal = false
+                        self?.presentPendingModalIfNeeded()
+                    }
                 }
             }
-            context.addAction(title: String(localized: "Continue"), attribute: .dangerous) {
-                context.dispose {
-                    Logger.push.infoFile("User accepted push explanation for rid \(self?.deepLink.rid ?? "<unknown>")")
-                    self?.sessionModel.respondToPushExplanation(allow: true)
-                }
-            }
+            present(alert, animated: true)
+            return
         }
-        present(alert, animated: true)
     }
 }
