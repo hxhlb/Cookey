@@ -137,7 +137,11 @@ enum TrustedKeyStore {
         do {
             try data.write(to: tempURL, options: [.atomic])
             try fileManager.setAttributes([.posixPermissions: 0o600], ofItemAtPath: tempURL.path)
-            _ = try fileManager.replaceItemAt(storageURL, withItemAt: tempURL)
+            if fileManager.fileExists(atPath: storageURL.path) {
+                _ = try fileManager.replaceItemAt(storageURL, withItemAt: tempURL)
+            } else {
+                try fileManager.moveItem(at: tempURL, to: storageURL)
+            }
         } catch {
             try? fileManager.removeItem(at: tempURL)
         }
