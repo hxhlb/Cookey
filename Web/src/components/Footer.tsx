@@ -1,4 +1,5 @@
 import Container from "./Container";
+import { APP_STORE_URL, GITHUB_REPO_URL } from "../constants";
 
 export default function Footer({
   rightLink,
@@ -14,13 +15,13 @@ export default function Footer({
           </p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <a
-              href="https://testflight.apple.com/join/qNDy5p2b"
+              href={APP_STORE_URL}
               className="text-[13px] text-muted no-underline transition-colors duration-150 hover:text-ink"
             >
               Get iOS App
             </a>
             <a
-              href="https://github.com/Lakr233/Cookey"
+              href={GITHUB_REPO_URL}
               className="text-[13px] text-muted no-underline transition-colors duration-150 hover:text-ink"
             >
               Source Code

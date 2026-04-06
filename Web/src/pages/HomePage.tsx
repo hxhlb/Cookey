@@ -14,6 +14,7 @@ import GridBackground from "../components/GridBackground";
 import TerminalLines from "../components/TerminalLines";
 import Sheet from "../components/Sheet";
 import { AGENT_MARKDOWN } from "../data/agentMarkdown";
+import { APP_STORE_URL, GITHUB_REPO_URL } from "../constants";
 
 const HERO_LINES = [
   { text: "Give Your Agents the", className: "text-muted font-normal" },
@@ -44,7 +45,7 @@ export default function HomePage() {
           <Container>
             <div className="pt-24 pb-20">
               <div className="mb-8">
-                <Badge href="https://github.com/Lakr233/Cookey">
+                <Badge href={GITHUB_REPO_URL}>
                   Open source &middot; Self-hostable
                 </Badge>
               </div>
@@ -59,10 +60,7 @@ export default function HomePage() {
                 <Button variant="primary" onClick={() => setSheetOpen(true)}>
                   Get started &rarr;
                 </Button>
-                <ButtonLink
-                  href="https://testflight.apple.com/join/qNDy5p2b"
-                  variant="primary"
-                >
+                <ButtonLink href={APP_STORE_URL} variant="primary">
                   <svg
                     className="h-[16px] w-[16px] fill-current"
                     viewBox="0 0 24 24"

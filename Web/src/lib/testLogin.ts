@@ -1,4 +1,5 @@
 import nacl from "tweetnacl";
+import { DEFAULT_RELAY_HOST, RELAY_SERVER_URL } from "../constants";
 
 export type RequestStatus = "pending" | "ready" | "delivered" | "expired";
 
@@ -131,9 +132,8 @@ async function computeRequestProof(params: {
 }
 
 function pairKeyDeepLink(pairKey: string, serverUrl: string): string {
-  const defaultHost = "api.cookey.sh";
   const host = new URL(serverUrl).host;
-  if (host === defaultHost) {
+  if (host === DEFAULT_RELAY_HOST) {
     return `cookey://${pairKey}`;
   }
   return `cookey://${pairKey}?host=${encodeURIComponent(host)}`;
@@ -173,7 +173,7 @@ export async function createLoginRequest(
   signal: AbortSignal,
 ): Promise<LoginRequestState> {
   const serverUrl = API_BASE;
-  const relayServerUrl = "https://api.cookey.sh";
+  const relayServerUrl = RELAY_SERVER_URL;
   const targetUrl = requireAbsoluteUrl(TARGET_URL, "Target URL");
   const rid = generateRequestId();
   const deviceId = crypto.randomUUID();
