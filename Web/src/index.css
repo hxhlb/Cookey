@@ -116,8 +116,13 @@
 }
 
 @keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
 }
 
 .animate-blink {
@@ -127,26 +132,50 @@
 }
 
 @keyframes lock-shake {
-  0%, 100% { transform: translateY(0); }
-  20% { transform: translateY(-3px); }
-  40% { transform: translateY(0); }
-  60% { transform: translateY(-2px); }
-  80% { transform: translateY(0); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-3px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+  80% {
+    transform: translateY(0);
+  }
 }
 
 @keyframes lock-glow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes draw-stroke {
-  from { stroke-dashoffset: var(--dash-length); }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: var(--dash-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes fade-in-icon {
-  from { opacity: 0; }
-  to { opacity: var(--target-opacity, 1); }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--target-opacity, 1);
+  }
 }
 
 /* Entry animations (when card becomes visible) */
@@ -171,26 +200,50 @@
 
 /* Hover re-trigger: use a different animation name to force restart */
 @keyframes lock-shake-hover {
-  0%, 100% { transform: translateY(0); }
-  20% { transform: translateY(-3px); }
-  40% { transform: translateY(0); }
-  60% { transform: translateY(-2px); }
-  80% { transform: translateY(0); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  20% {
+    transform: translateY(-3px);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(-2px);
+  }
+  80% {
+    transform: translateY(0);
+  }
 }
 
 @keyframes lock-glow-hover {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 @keyframes draw-stroke-hover {
-  from { stroke-dashoffset: var(--dash-length); }
-  to { stroke-dashoffset: 0; }
+  from {
+    stroke-dashoffset: var(--dash-length);
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 @keyframes fade-in-icon-hover {
-  from { opacity: 0; }
-  to { opacity: var(--target-opacity, 1); }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: var(--target-opacity, 1);
+  }
 }
 
 .group\/card:hover .icon-lock-shackle {
