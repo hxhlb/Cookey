@@ -40,7 +40,7 @@ import { chromium } from "@playwright/test";
 
 const browser = await chromium.launch();
 const context = await browser.newContext({
-    storageState: "storageState.json",
+  storageState: "storageState.json",
 });
 const page = await context.newPage();
 await page.goto("https://example.com/account");
@@ -314,6 +314,6 @@ import { chromium } from "@playwright/test";
 
 const browser = await chromium.launch();
 const context = await browser.newContext({
-    storageState: "storageState.json",
+  storageState: "storageState.json",
 });
 ```

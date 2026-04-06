@@ -51,7 +51,9 @@ export default function Sheet({
         className="relative z-10 flex max-h-[90vh] w-full max-w-[680px] flex-col overflow-hidden rounded-t-2xl border border-border bg-bg shadow-2xl transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] xs:rounded-2xl xs:m-4"
         style={{
           opacity: visible ? 1 : 0,
-          transform: visible ? "translateY(0) scale(1)" : "translateY(20px) scale(0.98)",
+          transform: visible
+            ? "translateY(0) scale(1)"
+            : "translateY(20px) scale(0.98)",
         }}
       >
         <div className="flex items-center justify-between border-b border-border px-6 py-4">
@@ -61,7 +63,14 @@ export default function Sheet({
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-full border-0 bg-tag-bg text-muted transition-colors hover:bg-border hover:text-ink cursor-pointer"
           >
-            <svg className="h-3.5 w-3.5" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <svg
+              className="h-3.5 w-3.5"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+            >
               <path d="M1 1l12 12M13 1L1 13" />
             </svg>
           </button>

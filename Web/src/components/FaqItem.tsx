@@ -55,9 +55,7 @@ export default function FaqItem({
       >
         <span className="text-[15px] font-medium text-ink">{question}</span>
         <span className="relative flex h-5 w-5 shrink-0 items-center justify-center text-muted">
-          <span
-            className="absolute h-[1.5px] w-3 rounded-full bg-current transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
-          />
+          <span className="absolute h-[1.5px] w-3 rounded-full bg-current transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]" />
           <span
             className="absolute h-[1.5px] w-3 rounded-full bg-current transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
             style={{ transform: open ? "rotate(0deg)" : "rotate(90deg)" }}
