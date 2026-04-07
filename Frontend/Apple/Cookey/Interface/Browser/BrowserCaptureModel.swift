@@ -39,6 +39,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
         #if os(iOS) || os(visionOS)
             configuration.allowsInlineMediaPlayback = true
             configuration.ignoresViewportScaleLimits = true
+            configuration.applicationNameForUserAgent = "FxiOS/149.2 Safari/604.1"
         #endif
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
 
@@ -46,6 +47,9 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.underPageBackgroundColor = .systemBackground
+        if #available(macOS 13.3, iOS 16.4, tvOS 16.4, *) {
+            webView.isInspectable = true
+        }
         super.init()
         configuration.userContentController.add(self, contentWorld: .defaultClient, name: Self.passkeyMessageHandler)
         webView.navigationDelegate = self
@@ -63,6 +67,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
         #if os(iOS) || os(visionOS)
             configuration.allowsInlineMediaPlayback = true
             configuration.ignoresViewportScaleLimits = true
+            configuration.applicationNameForUserAgent = "FxiOS/149.2 Safari/604.1"
         #endif
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = true
 
@@ -79,6 +84,9 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
 
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.underPageBackgroundColor = .systemBackground
+        if #available(macOS 13.3, iOS 16.4, tvOS 16.4, *) {
+            webView.isInspectable = true
+        }
         super.init()
         configuration.userContentController.add(self, contentWorld: .defaultClient, name: Self.passkeyMessageHandler)
         webView.navigationDelegate = self

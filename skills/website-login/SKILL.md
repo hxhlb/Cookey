@@ -80,6 +80,7 @@ When **you** start or refresh a Cookey request for the user, paste the **human-r
 
 - Always include the **pair key** as plain text.
 - Always include the **CLI fingerprint / verification string** when the CLI prints it.
+- If you render the QR code using `--qr` or `--json --qr`, **always** wrap the ASCII QR code in a ```text ... ``` code block to prevent Markdown from destroying the line breaks. If using `--json`, the QR code is in the `qr_text` field with `\n` characters.
 - You may add the deep link or jump link, but **never** as the only actionable content.
 
 The Cookey app on **the user’s iPhone** may ask them to type the pair key and confirm the fingerprint matches the terminal.
@@ -330,13 +331,15 @@ cookey request status --latest --watch
 cookey session export --latest --out storageState.json --pretty
 ```
 
-JSON-first scripting:
+JSON-first scripting (Note: If you need to show the QR code to the user while using JSON output, use `--json --qr` and extract the `qr_text` field, formatting it carefully inside a ```text block):
 
 ```sh
-cookey request start https://example.com/login --json
+cookey request start https://github.com/login --json --qr
 cookey request status --latest --json
 cookey session export --latest --out storageState.json
 ```
+
+*(Tip: When testing the login flow, avoid stateless domains like `example.com` which will yield an empty session. Use a real site like `github.com/login` or `x.com/login` to verify cookies and localStorage are captured correctly.)*
 
 Playwright usage:
 
