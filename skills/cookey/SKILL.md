@@ -1,3 +1,8 @@
+---
+name: cookey
+description: CLI tool for capturing authenticated mobile browser sessions and exporting them as Playwright-compatible storageState JSON. Use when you need to automate login flows, import authenticated state into Playwright tests, or access mobile-only / MFA-heavy login flows from the CLI.
+---
+
 # cookey
 
 Cookey is a CLI-first tool for capturing an authenticated mobile browser session
