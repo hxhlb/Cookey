@@ -10,23 +10,21 @@ extension BrowserCaptureModel: WKUIDelegate {
         windowFeatures _: WKWindowFeatures
     ) -> WKWebView? {
         if navigationAction.targetFrame == nil {
-            // Google OAuth uses window.open to open a popup, and then uses window.opener.postMessage
+            // Many OAuth providers use window.open to open a popup, and then use window.opener.postMessage
             // to send the token back to the main window. WKWebView natively breaks window.opener unless
             // the popup is actually created as a separate WKWebView instance and returned from this delegate method.
-            if let url = navigationAction.request.url?.absoluteString, url.contains("accounts.google.com") {
-                let popupWebView = WKWebView(frame: webView.bounds, configuration: configuration)
-                popupWebView.uiDelegate = self
-                popupWebView.navigationDelegate = webView.navigationDelegate
-                popupWebView.customUserAgent = webView.customUserAgent
+            let popupWebView = WKWebView(frame: webView.bounds, configuration: configuration)
+            popupWebView.uiDelegate = self
+            popupWebView.navigationDelegate = webView.navigationDelegate
+            popupWebView.customUserAgent = webView.customUserAgent
+            if #available(macOS 13.3, iOS 16.4, tvOS 16.4, *) {
                 popupWebView.isInspectable = webView.isInspectable
-                
-                webView.addSubview(popupWebView)
-                popupWebView.snp.makeConstraints { $0.edges.equalToSuperview() }
-                
-                return popupWebView
-            } else {
-                webView.load(navigationAction.request)
             }
+            
+            webView.addSubview(popupWebView)
+            popupWebView.snp.makeConstraints { $0.edges.equalToSuperview() }
+            
+            return popupWebView
         }
         return nil
     }
