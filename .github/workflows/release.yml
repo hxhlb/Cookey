@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   prepare:
-    if: github.actor == 'Lakr233'
+    if: github.actor == 'Lakr233' || github.actor == 'eyhn'
     name: Prepare release
     runs-on: ubuntu-latest
     outputs:
@@ -53,7 +53,7 @@ jobs:
           echo "artifact_name=cookey-${VERSION}-unsigned" >> "$GITHUB_OUTPUT"
 
   build_macos:
-    if: github.actor == 'Lakr233'
+    if: github.actor == 'Lakr233' || github.actor == 'eyhn'
     name: Build macOS CLI
     runs-on: macos-26
     needs: prepare
@@ -82,7 +82,7 @@ jobs:
           if-no-files-found: error
 
   build_linux_x86_64:
-    if: github.actor == 'Lakr233'
+    if: github.actor == 'Lakr233' || github.actor == 'eyhn'
     name: Build Linux x86_64 CLI
     runs-on: ubuntu-latest
     needs: prepare
@@ -116,7 +116,7 @@ jobs:
           if-no-files-found: error
 
   build_linux_aarch64:
-    if: github.actor == 'Lakr233'
+    if: github.actor == 'Lakr233' || github.actor == 'eyhn'
     name: Build Linux aarch64 CLI
     runs-on: ubuntu-24.04-arm
     needs: prepare
@@ -150,7 +150,7 @@ jobs:
           if-no-files-found: error
 
   sign_notarize_macos:
-    if: github.actor == 'Lakr233'
+    if: github.actor == 'Lakr233' || github.actor == 'eyhn'
     name: Sign and notarize macOS CLI
     runs-on: macos-26
     needs: [prepare, build_macos]
@@ -199,7 +199,7 @@ jobs:
           if-no-files-found: error
 
   collect_release:
-    if: github.actor == 'Lakr233' && needs.prepare.outputs.publish_release == 'true'
+    if: (github.actor == 'Lakr233' || github.actor == 'eyhn') && needs.prepare.outputs.publish_release == 'true'
     name: Collect and publish release
     runs-on: ubuntu-latest
     needs:
@@ -256,7 +256,7 @@ jobs:
             build/release-assets/final/checksums.txt
 
   build_packages:
-    if: github.actor == 'Lakr233'
+    if: github.actor == 'Lakr233' || github.actor == 'eyhn'
     name: Build npm and pip packages
     runs-on: ubuntu-latest
     needs: prepare
@@ -313,7 +313,7 @@ jobs:
           retention-days: 14
 
   publish_npm:
-    if: github.actor == 'Lakr233' && needs.prepare.outputs.publish_packages == 'true'
+    if: (github.actor == 'Lakr233' || github.actor == 'eyhn') && needs.prepare.outputs.publish_packages == 'true'
     name: Publish npm packages
     needs: [prepare, build_packages]
     runs-on: ubuntu-latest
@@ -352,7 +352,7 @@ jobs:
         run: node ./scripts/publish-npm-packages.mjs --skip-build
 
   publish_pypi:
-    if: github.actor == 'Lakr233' && needs.prepare.outputs.publish_packages == 'true'
+    if: (github.actor == 'Lakr233' || github.actor == 'eyhn') && needs.prepare.outputs.publish_packages == 'true'
     name: Publish PyPI package
     needs: [prepare, build_packages]
     runs-on: ubuntu-latest
