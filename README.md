@@ -38,6 +38,14 @@ Cookey is a minimal, self-hostable, CLI-first tool that lets you sign in on your
 - Import authenticated state into Playwright tests
 - Access mobile-only or MFA-heavy login flows from the CLI
 
+## Agent Skills
+
+Install the Cookey CLI skill for Claude Code and other AI agents via [Vercel Skills CLI](https://github.com/vercel-labs/skills):
+
+```sh
+npx skills add Lakr233/Cookey
+```
+
 ## Status
 
 Cookey is organized as a multi-component repo covering the CLI, relay server, Apple app, and website.
