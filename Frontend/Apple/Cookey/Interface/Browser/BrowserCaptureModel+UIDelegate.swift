@@ -1,17 +1,38 @@
 import UIKit
 import WebKit
+import SnapKit
 
 extension BrowserCaptureModel: WKUIDelegate {
     func webView(
         _ webView: WKWebView,
-        createWebViewWith _: WKWebViewConfiguration,
+        createWebViewWith configuration: WKWebViewConfiguration,
         for navigationAction: WKNavigationAction,
         windowFeatures _: WKWindowFeatures
     ) -> WKWebView? {
         if navigationAction.targetFrame == nil {
-            webView.load(navigationAction.request)
+            // Google OAuth uses window.open to open a popup, and then uses window.opener.postMessage
+            // to send the token back to the main window. WKWebView natively breaks window.opener unless
+            // the popup is actually created as a separate WKWebView instance and returned from this delegate method.
+            if let url = navigationAction.request.url?.absoluteString, url.contains("accounts.google.com") {
+                let popupWebView = WKWebView(frame: webView.bounds, configuration: configuration)
+                popupWebView.uiDelegate = self
+                popupWebView.navigationDelegate = webView.navigationDelegate
+                popupWebView.customUserAgent = webView.customUserAgent
+                popupWebView.isInspectable = webView.isInspectable
+                
+                webView.addSubview(popupWebView)
+                popupWebView.snp.makeConstraints { $0.edges.equalToSuperview() }
+                
+                return popupWebView
+            } else {
+                webView.load(navigationAction.request)
+            }
         }
         return nil
+    }
+
+    func webViewDidClose(_ webView: WKWebView) {
+        webView.removeFromSuperview()
     }
 
     func webView(
