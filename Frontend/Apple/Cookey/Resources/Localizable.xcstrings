@@ -27,38 +27,6 @@
         }
       }
     },
-    "App Icon" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App Icon"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "App 图标"
-          }
-        }
-      }
-    },
-    "Appearance" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appearance"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "外观"
-          }
-        }
-      }
-    },
     "All Categories" : {
       "localizations" : {
         "zh-Hans" : {
@@ -165,18 +133,34 @@
         }
       }
     },
-    "Browser" : {
+    "App Icon" : {
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Browser"
+            "value" : "App Icon"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "浏览器"
+            "value" : "App 图标"
+          }
+        }
+      }
+    },
+    "Appearance" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appearance"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "外观"
           }
         }
       }
@@ -197,6 +181,22 @@
         }
       }
     },
+    "Browser" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Browser"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览器"
+          }
+        }
+      }
+    },
     "Built for Automation" : {
       "localizations" : {
         "en" : {
@@ -209,22 +209,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "为自动化而生"
-          }
-        }
-      }
-    },
-    "Choose the icon shown on your Home Screen." : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose the icon shown on your Home Screen."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选一个主屏幕上显示的图标。"
           }
         }
       }
@@ -277,6 +261,22 @@
         }
       }
     },
+    "Choose the icon shown on your Home Screen." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose the icon shown on your Home Screen."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选一个主屏幕上显示的图标。"
+          }
+        }
+      }
+    },
     "Clear" : {
       "localizations" : {
         "zh-Hans" : {
@@ -299,22 +299,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在与 %@ 通信…"
-          }
-        }
-      }
-    },
-    "Default" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Default"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "默认"
           }
         }
       }
@@ -413,6 +397,22 @@
         }
       }
     },
+    "Default" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Default"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "默认"
+          }
+        }
+      }
+    },
     "Default Server" : {
       "localizations" : {
         "en" : {
@@ -473,23 +473,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "删除 %lld 项？"
-          }
-        }
-      }
-    },
-    "Device ID: %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Device ID: %@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设备 ID：%@"
           }
         }
       }
@@ -928,13 +911,18 @@
         }
       }
     },
-    "Manage command-line devices you have verified. Removing a device will require re-verification on the next connection." : {
-      "extractionState" : "stale",
+    "Made with love @ cookey.sh" : {
       "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Made with love @ cookey.sh"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "管理已验证的命令行设备。移除后，下次连接该设备需重新验证。"
+            "value" : "用爱制作 @ cookey.sh"
           }
         }
       }
@@ -1269,17 +1257,6 @@
         }
       }
     },
-    "Public keys you have verified and trusted. Remove a key to require re-verification on the next connection." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已验证并信任的公钥。移除后，下次连接该密钥需重新验证。"
-          }
-        }
-      }
-    },
     "Refresh" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1570,6 +1547,16 @@
         }
       }
     },
+    "Share" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分享"
+          }
+        }
+      }
+    },
     "Silver" : {
       "localizations" : {
         "en" : {
@@ -1582,16 +1569,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "银色"
-          }
-        }
-      }
-    },
-    "Share" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分享"
           }
         }
       }
@@ -1918,28 +1895,6 @@
         }
       }
     },
-    "Trusted Devices" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "受信任设备"
-          }
-        }
-      }
-    },
-    "Trusted Keys" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "受信任密钥"
-          }
-        }
-      }
-    },
     "Trusted Public Keys" : {
       "localizations" : {
         "en" : {
@@ -1952,17 +1907,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "受信任的公钥"
-          }
-        }
-      }
-    },
-    "Trusted since: %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "信任于：%@"
           }
         }
       }

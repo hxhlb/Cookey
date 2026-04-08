@@ -6,8 +6,6 @@ import UIKit
 import UserNotifications
 
 final class SettingsViewController: StackScrollController {
-    static let allowRefreshKey = "wiki.qaq.cookey.settings.allow-refresh"
-    static let defaultServerKey = "wiki.qaq.cookey.settings.default-server"
     static let feedbackURL = URL(string: "https://feedback.qaq.wiki/")!
 
     static let defaultServerPlaceholder = defaultServerEndpoint.host() ?? "api.cookey.sh"
@@ -16,7 +14,7 @@ final class SettingsViewController: StackScrollController {
         icon: "arrow.trianglehead.2.clockwise",
         title: "Allow Refresh Requests",
         explain: "When enabled, the relay server can send push notifications to this device for session refresh requests. This requires system notification permissions.",
-        key: allowRefreshKey,
+        key: AppSettings.allowRefreshKey,
         defaultValue: false,
         annotation: .toggle
     )
@@ -142,7 +140,7 @@ final class SettingsViewController: StackScrollController {
         )
 
         let currentValue: String = ConfigurableKit.value(
-            forKey: Self.defaultServerKey,
+            forKey: AppSettings.defaultServerKey,
             defaultValue: ""
         )
         view.configure(value: currentValue.isEmpty ? Self.defaultServerPlaceholder : currentValue)
@@ -156,7 +154,7 @@ final class SettingsViewController: StackScrollController {
 
     private func buildDefaultServerMenu(view: ConfigurableInfoView) -> [UIMenuElement] {
         let currentValue: String = ConfigurableKit.value(
-            forKey: Self.defaultServerKey,
+            forKey: AppSettings.defaultServerKey,
             defaultValue: ""
         )
 
@@ -172,7 +170,7 @@ final class SettingsViewController: StackScrollController {
                 text: currentValue
             ) { [weak view] newValue in
                 let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-                ConfigurableKit.set(value: trimmed, forKey: Self.defaultServerKey)
+                ConfigurableKit.set(value: trimmed, forKey: AppSettings.defaultServerKey)
                 view?.configure(value: trimmed.isEmpty ? Self.defaultServerPlaceholder : trimmed)
             }
             present(input, animated: true)
@@ -194,7 +192,7 @@ final class SettingsViewController: StackScrollController {
             title: String(localized: "Use Default (\(Self.defaultServerPlaceholder))"),
             image: UIImage(systemName: "arrow.counterclockwise")
         ) { [weak view] _ in
-            ConfigurableKit.set(value: "", forKey: Self.defaultServerKey)
+            ConfigurableKit.set(value: "", forKey: AppSettings.defaultServerKey)
             view?.configure(value: Self.defaultServerPlaceholder)
         }
 
@@ -288,14 +286,14 @@ final class SettingsViewController: StackScrollController {
                             UIApplication.shared.registerForRemoteNotifications()
                         } else if enabled {
                             Logger.push.errorFile("Notification permission denied from settings flow; resetting toggle")
-                            ConfigurableKit.set(value: false, forKey: allowRefreshKey)
+                            ConfigurableKit.set(value: false, forKey: AppSettings.allowRefreshKey)
                         }
                     }
                 } catch {
                     if enabled {
                         Logger.push.errorFile("Notification authorization request failed: \(error.localizedDescription)")
                         await MainActor.run {
-                            ConfigurableKit.set(value: false, forKey: allowRefreshKey)
+                            ConfigurableKit.set(value: false, forKey: AppSettings.allowRefreshKey)
                         }
                     }
                 }
@@ -303,7 +301,7 @@ final class SettingsViewController: StackScrollController {
                 if enabled {
                     Logger.push.errorFile("Notifications unavailable for Cookey; resetting refresh toggle")
                     await MainActor.run {
-                        ConfigurableKit.set(value: false, forKey: allowRefreshKey)
+                        ConfigurableKit.set(value: false, forKey: AppSettings.allowRefreshKey)
                     }
                 }
             }

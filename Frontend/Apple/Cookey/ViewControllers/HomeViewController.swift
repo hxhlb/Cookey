@@ -47,6 +47,18 @@ class HomeViewController: UIViewController {
         $0.addTarget(self, action: #selector(typeTapped), for: .touchUpInside)
     }
 
+    private lazy var websiteButton = UIButton(type: .system).then {
+        let title = String(localized: "Made with love @ cookey.sh")
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.preferredFont(forTextStyle: .footnote),
+            .foregroundColor: UIColor.secondaryLabel.withAlphaComponent(0.5),
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+        ]
+        $0.setAttributedTitle(NSAttributedString(string: title, attributes: attributes), for: .normal)
+        $0.titleLabel?.adjustsFontForContentSizeCategory = true
+        $0.addTarget(self, action: #selector(websiteTapped), for: .touchUpInside)
+    }
+
     init(sessionModel: SessionUploadModel) {
         self.sessionModel = sessionModel
         super.init(nibName: nil, bundle: nil)
@@ -116,6 +128,7 @@ class HomeViewController: UIViewController {
         }
 
         view.addSubview(stack)
+        view.addSubview(websiteButton)
         view.addSubview(buttonStack)
 
         stack.snp.makeConstraints {
@@ -125,8 +138,13 @@ class HomeViewController: UIViewController {
 
         buttonStack.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(32)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
+            $0.bottom.equalTo(websiteButton.snp.top).offset(-16)
             $0.height.equalTo(50)
+        }
+
+        websiteButton.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(16)
         }
     }
 
@@ -174,5 +192,10 @@ class HomeViewController: UIViewController {
             self?.sessionModel.handleManualPairKey(text)
         }
         present(alert, animated: true)
+    }
+
+    @objc private func websiteTapped() {
+        guard let url = URL(string: "https://cookey.sh") else { return }
+        UIApplication.shared.open(url)
     }
 }

@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     private func refreshPushTokenIfAuthorized(_ application: UIApplication) {
         let allowed: Bool = ConfigurableKit.value(
-            forKey: SettingsViewController.allowRefreshKey,
+            forKey: AppSettings.allowRefreshKey,
             defaultValue: false
         )
         guard allowed else {

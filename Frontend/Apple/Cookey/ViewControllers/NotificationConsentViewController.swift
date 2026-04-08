@@ -95,7 +95,7 @@ class NotificationConsentViewController: UIViewController {
         enableButton.isEnabled = false
         enableButton.configuration?.showsActivityIndicator = true
         enableButton.configuration?.image = nil
-        ConfigurableKit.set(value: true, forKey: SettingsViewController.allowRefreshKey)
+        ConfigurableKit.set(value: true, forKey: AppSettings.allowRefreshKey)
         Task {
             let completed = await withTaskGroup(of: Bool.self) { group in
                 group.addTask {

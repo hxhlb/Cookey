@@ -368,7 +368,7 @@ final class SessionUploadModel: ObservableObject {
         }
 
         let allowRefresh: Bool = ConfigurableKit.value(
-            forKey: SettingsViewController.allowRefreshKey,
+            forKey: AppSettings.allowRefreshKey,
             defaultValue: false
         )
         Logger.push.infoFile("Preparing push support for rid \(deepLink.rid); allowRefresh=\(allowRefresh)")
@@ -382,7 +382,7 @@ final class SessionUploadModel: ObservableObject {
                 )
             } catch {
                 Logger.push.errorFile("Push registration failed (allowRefresh path) for rid \(deepLink.rid): \(error.localizedDescription); reverting setting and continuing without push")
-                ConfigurableKit.set(value: false, forKey: SettingsViewController.allowRefreshKey)
+                ConfigurableKit.set(value: false, forKey: AppSettings.allowRefreshKey)
             }
             return
         }
@@ -397,7 +397,7 @@ final class SessionUploadModel: ObservableObject {
                 deviceID: deepLink.deviceID,
                 requestAuthorizationIfNeeded: true
             )
-            ConfigurableKit.set(value: true, forKey: SettingsViewController.allowRefreshKey)
+            ConfigurableKit.set(value: true, forKey: AppSettings.allowRefreshKey)
         } catch {
             Logger.push.errorFile("Push registration failed for rid \(deepLink.rid): \(error.localizedDescription); continuing without push")
         }

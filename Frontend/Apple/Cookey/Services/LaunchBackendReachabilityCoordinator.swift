@@ -4,23 +4,33 @@ import Foundation
 final class LaunchBackendReachabilityCoordinator {
     typealias HealthCheckOperation = @Sendable () async throws -> HealthCheckResult
 
-    private let baseURLProvider: @Sendable () -> URL
+    private let baseURL: URL
     private let healthCheckOperation: HealthCheckOperation
     private var hasStarted = false
 
     init(
-        baseURLProvider: @escaping @Sendable () -> URL = { AppEnvironment.effectiveAPIBaseURL },
+        baseURLProvider: @escaping @Sendable () -> URL,
         healthCheckOperation: HealthCheckOperation? = nil
     ) {
-        self.baseURLProvider = baseURLProvider
+        let resolvedURL = baseURLProvider()
+        self.baseURL = resolvedURL
         self.healthCheckOperation = healthCheckOperation ?? {
             let configuration = URLSessionConfiguration.ephemeral
             configuration.waitsForConnectivity = false
             configuration.timeoutIntervalForRequest = 5
             configuration.timeoutIntervalForResource = 5
             let session = URLSession(configuration: configuration)
-            return try await RelayClient(baseURL: baseURLProvider(), session: session).healthCheck()
+            return try await RelayClient(baseURL: resolvedURL, session: session).healthCheck()
         }
+    }
+
+    convenience init(
+        healthCheckOperation: HealthCheckOperation? = nil
+    ) {
+        self.init(
+            baseURLProvider: { AppEnvironment.effectiveAPIBaseURL },
+            healthCheckOperation: healthCheckOperation
+        )
     }
 
     func warmUpIfNeeded() {
@@ -30,7 +40,7 @@ final class LaunchBackendReachabilityCoordinator {
         }
 
         hasStarted = true
-        let baseURL = baseURLProvider()
+        let baseURL = self.baseURL
         Logger.network.infoFile("Starting launch backend reachability check to \(baseURL.host() ?? baseURL.absoluteString)")
 
         Task {
