@@ -2,8 +2,7 @@ import ConfigurableKit
 import Foundation
 
 enum AppEnvironment {
-    nonisolated
-    static var effectiveAPIBaseURL: URL {
+    nonisolated static var effectiveAPIBaseURL: URL {
         let domain: String = ConfigurableKit.value(
             forKey: AppSettings.defaultServerKey,
             defaultValue: ""

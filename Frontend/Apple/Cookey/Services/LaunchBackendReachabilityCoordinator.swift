@@ -13,7 +13,7 @@ final class LaunchBackendReachabilityCoordinator {
         healthCheckOperation: HealthCheckOperation? = nil
     ) {
         let resolvedURL = baseURLProvider()
-        self.baseURL = resolvedURL
+        baseURL = resolvedURL
         self.healthCheckOperation = healthCheckOperation ?? {
             let configuration = URLSessionConfiguration.ephemeral
             configuration.waitsForConnectivity = false
@@ -40,7 +40,7 @@ final class LaunchBackendReachabilityCoordinator {
         }
 
         hasStarted = true
-        let baseURL = self.baseURL
+        let baseURL = baseURL
         Logger.network.infoFile("Starting launch backend reachability check to \(baseURL.host() ?? baseURL.absoluteString)")
 
         Task {
