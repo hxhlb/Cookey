@@ -34,7 +34,9 @@ struct LaunchBackendReachabilityCoordinatorTests {
     @Test("LaunchBackendReachabilityCoordinator swallows startup health check failures")
     func swallowsHealthCheckFailures() async throws {
         struct ExpectedFailure: LocalizedError {
-            var errorDescription: String? { "offline" }
+            var errorDescription: String? {
+                "offline"
+            }
         }
 
         let counter = InvocationCounter()
