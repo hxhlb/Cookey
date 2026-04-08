@@ -1,6 +1,6 @@
+import SnapKit
 import UIKit
 import WebKit
-import SnapKit
 
 extension BrowserCaptureModel: WKUIDelegate {
     func webView(
@@ -20,10 +20,10 @@ extension BrowserCaptureModel: WKUIDelegate {
             if #available(macOS 13.3, iOS 16.4, tvOS 16.4, *) {
                 popupWebView.isInspectable = webView.isInspectable
             }
-            
+
             webView.addSubview(popupWebView)
             popupWebView.snp.makeConstraints { $0.edges.equalToSuperview() }
-            
+
             return popupWebView
         }
         return nil
