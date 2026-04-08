@@ -220,6 +220,38 @@ type BrowserCookie struct {
 	SameSite string  `json:"sameSite"`
 }
 
+func (c BrowserCookie) MarshalJSON() ([]byte, error) {
+	type alias BrowserCookie
+	normalized := alias(c)
+	normalized.SameSite = normalizeBrowserCookieSameSite(normalized.SameSite)
+	return json.Marshal(normalized)
+}
+
+func (c *BrowserCookie) UnmarshalJSON(data []byte) error {
+	type alias BrowserCookie
+	var decoded alias
+	if err := json.Unmarshal(data, &decoded); err != nil {
+		return err
+	}
+	decoded.SameSite = normalizeBrowserCookieSameSite(decoded.SameSite)
+	*c = BrowserCookie(decoded)
+	return nil
+}
+
+func normalizeBrowserCookieSameSite(raw string) string {
+	trimmed := strings.TrimSpace(raw)
+	switch strings.ToLower(trimmed) {
+	case "lax":
+		return "Lax"
+	case "strict":
+		return "Strict"
+	case "none":
+		return "None"
+	default:
+		return trimmed
+	}
+}
+
 type OriginState struct {
 	Origin       string              `json:"origin"`
 	LocalStorage []OriginStorageItem `json:"localStorage"`
@@ -277,17 +309,17 @@ type StatusSummary struct {
 }
 
 type LoginOutput struct {
-	RID                    string `json:"rid"`
-	ServerURL              string `json:"server_url"`
-	TargetURL              string `json:"target_url"`
-	TimeoutSeconds         int    `json:"timeout_seconds"`
-	DaemonPID              int32  `json:"daemon_pid"`
-	PairKey                string `json:"pair_key"`
-	DeepLink               string `json:"deep_link"`
-	JumpLink               string `json:"jump_link"`
-	QRText                 string `json:"qr_text"`
-	ShowQR                 bool   `json:"show_qr,omitempty"`
-	Detached               bool   `json:"detached"`
+	RID                     string `json:"rid"`
+	ServerURL               string `json:"server_url"`
+	TargetURL               string `json:"target_url"`
+	TimeoutSeconds          int    `json:"timeout_seconds"`
+	DaemonPID               int32  `json:"daemon_pid"`
+	PairKey                 string `json:"pair_key"`
+	DeepLink                string `json:"deep_link"`
+	JumpLink                string `json:"jump_link"`
+	QRText                  string `json:"qr_text"`
+	ShowQR                  bool   `json:"show_qr,omitempty"`
+	Detached                bool   `json:"detached"`
 	CLIPublicKeyFingerprint string `json:"cli_public_key_fingerprint,omitempty"`
 }
 
