@@ -95,6 +95,15 @@ final class SettingsViewController: StackScrollController {
     override func setupContentViews() {
         super.setupContentViews()
 
+        // MARK: - Appearance
+
+        stackView.addArrangedSubviewWithMargin(
+            ConfigurableSectionHeaderView().with(header: String(localized: "Appearance"))
+        ) { $0.bottom /= 2 }
+        stackView.addArrangedSubview(SeparatorView())
+        stackView.addArrangedSubviewWithMargin(AppIconSettings.configurableObject.createView())
+        stackView.addArrangedSubview(SeparatorView())
+
         // MARK: - General
 
         stackView.addArrangedSubviewWithMargin(

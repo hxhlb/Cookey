@@ -43,7 +43,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     private func configureAlertController() {
         AlertControllerConfiguration.accentColor = UIColor(named: "AccentColor") ?? .systemIndigo
-        AlertControllerConfiguration.alertImage = .avatar
+        AppIconSettings.synchronizeStoredSelection()
     }
 
     func application(
