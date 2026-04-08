@@ -33,7 +33,7 @@ Suggested agent workflow:
   1. Install the `cookey` binary for the local platform.
   2. Load `skills.md` into the tool-call harness as the CLI contract and usage reference.
   3. Prefer grouped commands such as `cookey request start`, `cookey request status`, and `cookey session export`.
-  4. When presenting a login request to the user, include the pair key and CLI fingerprint as plain text, not only a link.
+  4. When presenting a login request to the user, always include the CLI-provided clickable HTTPS `jump_link`, plus the pair key and CLI fingerprint as plain text.
 
 ## Commands
   cookey request start <url>

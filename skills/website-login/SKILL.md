@@ -13,7 +13,7 @@ Cookey splits “where login happens” from “where automation runs”:
 
 1. **Local environment (`cookey` CLI + local daemon)** — You run commands here. The CLI creates a short-lived login request, agrees cryptographic keys with the phone, and waits for an encrypted payload. After delivery, you export **Playwright-compatible `storageState` JSON** (cookies + `origins` / localStorage) for local scripts.
 
-2. **User’s iPhone (Cookey app)** — The user scans the QR or opens the deep link. The app opens the **target URL** in its **embedded browser**. The user signs in like a normal mobile session (password, OTP, authenticator app, passkeys, etc.). The app reads cookies and storage, **encrypts** them, and uploads **ciphertext** to the relay.
+2. **User’s iPhone (Cookey app)** — The user scans the QR or taps the HTTPS jump link. The jump page opens the `cookey://` deep link into the app. The app opens the **target URL** in its **embedded browser**. The user signs in like a normal mobile session (password, OTP, authenticator app, passkeys, etc.). The app reads cookies and storage, **encrypts** them, and uploads **ciphertext** to the relay.
 
 3. **Relay server** — Only moves opaque encrypted blobs and request metadata. It is **not** trusted with plaintext cookies or credentials; design assumes zero-knowledge transport.
 
@@ -91,8 +91,10 @@ When **you** start or refresh a Cookey request for the user, paste the required 
 
 - Always include the **pair key** as plain text.
 - Always include the **CLI fingerprint / verification string** when the CLI prints it.
+- Always include the CLI-provided **`jump_link`** as a clickable HTTPS link.
 - If you render the QR code using `--qr` or `--json --qr`, **always** wrap the ASCII QR code in a ```text ... ``` code block to prevent Markdown from destroying the line breaks. If using `--json`, the QR code is in the `qr_text` field with `\n` characters.
-- You may add the deep link or jump link, but **never** as the only actionable content.
+- Do not rely on a bare `cookey://` deep link as the primary user action; many chat surfaces will not expose it as a tappable link.
+- The CLI-provided `jump_link` is **not** enough by itself; still include the pair key and fingerprint alongside it.
 - If using `--json`, copy `pair_key`, `cli_public_key_fingerprint`, `jump_link`, and `qr_text` from the JSON output exactly.
 
 The Cookey app on **the user’s iPhone** may ask them to type the pair key and confirm the fingerprint matches the terminal.
@@ -101,7 +103,7 @@ Use a reply shape like this:
 
 - Pair key: `ABCD-1234`
 - Fingerprint: `xxxxxx`
-- Deep link: `https://...`
+- Jump link: `https://...`
 - QR code:
 
 ```text
@@ -122,7 +124,7 @@ For agent or tool-call environments where the user cannot directly inspect stdou
 ### `cookey request start <target_url>`
 
 Create a new login request for `target_url`, register it with the relay, print
-the pair key / deep link, and start a local waiter process.
+the pair key / jump link, and start a local waiter process.
 
 Flags:
 
