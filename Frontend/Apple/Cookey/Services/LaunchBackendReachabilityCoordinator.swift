@@ -10,7 +10,7 @@ final class LaunchBackendReachabilityCoordinator {
 
     init(
         baseURLProvider: @escaping @Sendable () -> URL,
-        healthCheckOperation: HealthCheckOperation? = nil
+        healthCheckOperation: HealthCheckOperation? = nil,
     ) {
         let resolvedURL = baseURLProvider()
         baseURL = resolvedURL
@@ -25,11 +25,11 @@ final class LaunchBackendReachabilityCoordinator {
     }
 
     convenience init(
-        healthCheckOperation: HealthCheckOperation? = nil
+        healthCheckOperation: HealthCheckOperation? = nil,
     ) {
         self.init(
             baseURLProvider: { AppEnvironment.effectiveAPIBaseURL },
-            healthCheckOperation: healthCheckOperation
+            healthCheckOperation: healthCheckOperation,
         )
     }
 

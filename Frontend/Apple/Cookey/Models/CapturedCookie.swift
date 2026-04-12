@@ -29,7 +29,7 @@ struct CapturedCookie: Codable, Equatable {
         expires: Double,
         httpOnly: Bool,
         secure: Bool,
-        sameSite: String
+        sameSite: String,
     ) {
         self.name = name
         self.value = value

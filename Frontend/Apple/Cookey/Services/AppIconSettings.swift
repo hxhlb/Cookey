@@ -51,7 +51,7 @@ enum AppIconSettings {
         explain: Option.default.explain,
         key: appIconKey,
         defaultValue: Option.default.rawValue,
-        annotation: .menu { menuOptions() }
+        annotation: .menu { menuOptions() },
     )
     .whenValueChange(type: String.self) { rawValue in
         Task { @MainActor in
@@ -64,7 +64,7 @@ enum AppIconSettings {
             .init(
                 icon: $0.menuIcon,
                 title: $0.title,
-                rawValue: $0.rawValue
+                rawValue: $0.rawValue,
             )
         }
     }

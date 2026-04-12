@@ -5,8 +5,8 @@ import Testing
 @MainActor
 @Suite(.serialized)
 struct DeviceKeyManagerTests {
-    @Test("DeviceKeyManager generates and persists a 32-byte X25519 key pair")
-    func generatesAndPersistsKeyPair() throws {
+    @Test
+    func `DeviceKeyManager generates and persists a 32-byte X25519 key pair`() throws {
         try DeviceKeyManager.removeAll()
         defer {
             try? DeviceKeyManager.removeAll()

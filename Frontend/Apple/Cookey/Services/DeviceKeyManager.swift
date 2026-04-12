@@ -37,7 +37,7 @@ enum DeviceKeyManager {
 
         let pair = KeyPair(
             publicKey: Data(generated.publicKey),
-            secretKey: Data(generated.secretKey)
+            secretKey: Data(generated.secretKey),
         )
 
         try store(pair.publicKey, account: "public")

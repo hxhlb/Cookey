@@ -43,7 +43,7 @@ extension TrustedKeyListItem {
         formatter.timeStyle = .short
         return String(
             format: String(localized: "Last seen: %@"),
-            formatter.string(from: trustedCLI.lastSeenAt)
+            formatter.string(from: trustedCLI.lastSeenAt),
         )
     }
 }

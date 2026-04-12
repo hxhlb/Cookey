@@ -10,7 +10,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(
         _ application: UIApplication,
-        didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil
+        didFinishLaunchingWithOptions _: [UIApplication.LaunchOptionsKey: Any]? = nil,
     ) -> Bool {
         _ = LogStore.shared
         Logger.app.infoFile("Application finished launching")
@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     private func refreshPushTokenIfAuthorized(_ application: UIApplication) {
         let allowed: Bool = ConfigurableKit.value(
             forKey: AppSettings.allowRefreshKey,
-            defaultValue: false
+            defaultValue: false,
         )
         guard allowed else {
             Logger.push.debugFile("Skipping launch APNs refresh because refresh requests are disabled")
@@ -49,7 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func application(
         _: UIApplication,
         configurationForConnecting connectingSceneSession: UISceneSession,
-        options _: UIScene.ConnectionOptions
+        options _: UIScene.ConnectionOptions,
     ) -> UISceneConfiguration {
         let configuration = UISceneConfiguration(name: nil, sessionRole: connectingSceneSession.role)
         if connectingSceneSession.role == .windowApplication {
@@ -60,7 +60,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(
         _: UIApplication,
-        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data,
     ) {
         Logger.push.infoFile("Received APNs device token callback with \(deviceToken.count) bytes")
         Task { await pushCoordinator.handleRegisteredDeviceToken(deviceToken) }
@@ -68,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 
     func application(
         _: UIApplication,
-        didFailToRegisterForRemoteNotificationsWithError error: Error
+        didFailToRegisterForRemoteNotificationsWithError error: Error,
     ) {
         Logger.push.errorFile("APNs registration failed: \(error.localizedDescription)")
         pushCoordinator.handleRegistrationFailure(error)
@@ -77,7 +77,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func userNotificationCenter(
         _: UNUserNotificationCenter,
         willPresent _: UNNotification,
-        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+        withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void,
     ) {
         Logger.push.infoFile("Foreground push notification will be presented")
         completionHandler([.banner, .sound])
@@ -86,7 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func userNotificationCenter(
         _: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
-        withCompletionHandler completionHandler: @escaping () -> Void
+        withCompletionHandler completionHandler: @escaping () -> Void,
     ) {
         Logger.push.infoFile("User tapped push notification with keys: \(response.notification.request.content.userInfo.keys.map(String.init(describing:)).sorted())")
         pushCoordinator.handleNotificationUserInfo(response.notification.request.content.userInfo)

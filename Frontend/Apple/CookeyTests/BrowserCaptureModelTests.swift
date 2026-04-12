@@ -4,8 +4,8 @@ import Testing
 
 @MainActor
 struct BrowserCaptureModelTests {
-    @Test("BrowserCaptureModel maps captured cookies to HTTPCookie with sameSite")
-    func mapsCapturedCookies() throws {
+    @Test
+    func `BrowserCaptureModel maps captured cookies to HTTPCookie with sameSite`() throws {
         let cookies = BrowserCaptureModel.httpCookies(from: [
             CapturedCookie(
                 name: "session",
@@ -15,7 +15,7 @@ struct BrowserCaptureModelTests {
                 expires: 1_800_000_000,
                 httpOnly: true,
                 secure: true,
-                sameSite: "Strict"
+                sameSite: "Strict",
             ),
         ])
 
@@ -29,19 +29,19 @@ struct BrowserCaptureModelTests {
         #expect((cookie.properties?[.sameSitePolicy] as? String) == "strict")
     }
 
-    @Test("BrowserCaptureModel builds origin-filtered localStorage injection script with escaping")
-    func buildsLocalStorageInjectionScript() throws {
+    @Test
+    func `BrowserCaptureModel builds origin-filtered localStorage injection script with escaping`() throws {
         let script = try #require(BrowserCaptureModel.localStorageInjectionScript(from: [
             CapturedOrigin(
                 origin: "https://example.com",
                 localStorage: [
                     CapturedStorageItem(name: "quote\"key", value: "line1\nline2"),
                     CapturedStorageItem(name: "json", value: #"{"enabled":true}"#),
-                ]
+                ],
             ),
             CapturedOrigin(
                 origin: "https://ignored.example.com",
-                localStorage: []
+                localStorage: [],
             ),
         ]))
 
@@ -53,14 +53,14 @@ struct BrowserCaptureModelTests {
 
     // MARK: - httpCookies edge cases
 
-    @Test("httpCookies returns empty array for empty input")
-    func httpCookiesEmpty() {
+    @Test
+    func `httpCookies returns empty array for empty input`() {
         let cookies = BrowserCaptureModel.httpCookies(from: [])
         #expect(cookies.isEmpty)
     }
 
-    @Test("httpCookies skips expired cookies with negative expires")
-    func httpCookiesNegativeExpires() throws {
+    @Test
+    func `httpCookies skips expired cookies with negative expires`() throws {
         let cookies = BrowserCaptureModel.httpCookies(from: [
             CapturedCookie(
                 name: "token",
@@ -70,7 +70,7 @@ struct BrowserCaptureModelTests {
                 expires: -1,
                 httpOnly: false,
                 secure: false,
-                sameSite: "Lax"
+                sameSite: "Lax",
             ),
         ])
 
@@ -79,8 +79,8 @@ struct BrowserCaptureModelTests {
         #expect(cookie.expiresDate == nil)
     }
 
-    @Test("httpCookies maps httpOnly property")
-    func httpCookiesHttpOnly() throws {
+    @Test
+    func `httpCookies maps httpOnly property`() throws {
         let cookies = BrowserCaptureModel.httpCookies(from: [
             CapturedCookie(
                 name: "secret",
@@ -90,7 +90,7 @@ struct BrowserCaptureModelTests {
                 expires: 0,
                 httpOnly: true,
                 secure: false,
-                sameSite: ""
+                sameSite: "",
             ),
         ])
 
@@ -99,8 +99,8 @@ struct BrowserCaptureModelTests {
         #expect(cookie.path == "/api")
     }
 
-    @Test("httpCookies maps multiple cookies preserving order")
-    func httpCookiesMultiple() {
+    @Test
+    func `httpCookies maps multiple cookies preserving order`() {
         let cookies = BrowserCaptureModel.httpCookies(from: [
             CapturedCookie(name: "a", value: "1", domain: ".a.com", path: "/", expires: 0, httpOnly: false, secure: false, sameSite: ""),
             CapturedCookie(name: "b", value: "2", domain: ".b.com", path: "/", expires: 0, httpOnly: false, secure: true, sameSite: "None"),
@@ -118,14 +118,14 @@ struct BrowserCaptureModelTests {
 
     // MARK: - localStorageInjectionScript edge cases
 
-    @Test("localStorageInjectionScript returns nil for empty origins")
-    func localStorageScriptEmptyOrigins() {
+    @Test
+    func `localStorageInjectionScript returns nil for empty origins`() {
         let script = BrowserCaptureModel.localStorageInjectionScript(from: [])
         #expect(script == nil)
     }
 
-    @Test("localStorageInjectionScript returns nil when all origins have empty localStorage")
-    func localStorageScriptAllEmpty() {
+    @Test
+    func `localStorageInjectionScript returns nil when all origins have empty localStorage`() {
         let script = BrowserCaptureModel.localStorageInjectionScript(from: [
             CapturedOrigin(origin: "https://example.com", localStorage: []),
             CapturedOrigin(origin: "https://other.com", localStorage: []),
@@ -133,16 +133,16 @@ struct BrowserCaptureModelTests {
         #expect(script == nil)
     }
 
-    @Test("localStorageInjectionScript handles multiple origins")
-    func localStorageScriptMultipleOrigins() throws {
+    @Test
+    func `localStorageInjectionScript handles multiple origins`() throws {
         let script = try #require(BrowserCaptureModel.localStorageInjectionScript(from: [
             CapturedOrigin(
                 origin: "https://alpha.com",
-                localStorage: [CapturedStorageItem(name: "k1", value: "v1")]
+                localStorage: [CapturedStorageItem(name: "k1", value: "v1")],
             ),
             CapturedOrigin(
                 origin: "https://beta.com",
-                localStorage: [CapturedStorageItem(name: "k2", value: "v2")]
+                localStorage: [CapturedStorageItem(name: "k2", value: "v2")],
             ),
         ]))
 
@@ -152,12 +152,12 @@ struct BrowserCaptureModelTests {
         #expect(script.contains(#"window.localStorage.setItem("k2","v2")"#))
     }
 
-    @Test("localStorageInjectionScript wraps each setItem in try-catch")
-    func localStorageScriptTryCatch() throws {
+    @Test
+    func `localStorageInjectionScript wraps each setItem in try-catch`() throws {
         let script = try #require(BrowserCaptureModel.localStorageInjectionScript(from: [
             CapturedOrigin(
                 origin: "https://example.com",
-                localStorage: [CapturedStorageItem(name: "k", value: "v")]
+                localStorage: [CapturedStorageItem(name: "k", value: "v")],
             ),
         ]))
 
@@ -165,15 +165,15 @@ struct BrowserCaptureModelTests {
         #expect(script.contains("}catch(e){}"))
     }
 
-    @Test("localStorageInjectionScript escapes special characters in keys and values")
-    func localStorageScriptSpecialChars() throws {
+    @Test
+    func `localStorageInjectionScript escapes special characters in keys and values`() throws {
         let script = try #require(BrowserCaptureModel.localStorageInjectionScript(from: [
             CapturedOrigin(
                 origin: "https://example.com",
                 localStorage: [
                     CapturedStorageItem(name: "tab\there", value: "back\\slash"),
                     CapturedStorageItem(name: "<script>", value: "</script>"),
-                ]
+                ],
             ),
         ]))
 

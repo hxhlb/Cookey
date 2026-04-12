@@ -120,7 +120,7 @@ class ScannerViewController: UIViewController, AVCaptureMetadataOutputObjectsDel
     func metadataOutput(
         _: AVCaptureMetadataOutput,
         didOutput metadataObjects: [AVMetadataObject],
-        from _: AVCaptureConnection
+        from _: AVCaptureConnection,
     ) {
         guard !didScan,
               let object = metadataObjects.first as? AVMetadataMachineReadableCodeObject,

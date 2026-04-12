@@ -40,7 +40,7 @@ final class SessionUploadModel: ObservableObject {
 
     init(
         pushCoordinator: PushRegistrationCoordinator?,
-        relayClientFactory: @escaping (URL) -> RelayClient
+        relayClientFactory: @escaping (URL) -> RelayClient,
     ) {
         self.pushCoordinator = pushCoordinator
         self.relayClientFactory = relayClientFactory
@@ -105,7 +105,7 @@ final class SessionUploadModel: ObservableObject {
                     requestType: DeepLink.RequestType(rawValue: response.requestType) ?? .login,
                     expiresAt: response.expiresAt,
                     requestProof: response.requestProof,
-                    requestSecret: response.requestSecret
+                    requestSecret: response.requestSecret,
                 )
                 try RequestAuthenticator.verify(deepLink)
                 Logger.model.infoFile("Resolved pair key to rid=\(deepLink.rid) target=\(deepLink.targetURL.host() ?? deepLink.targetURL.absoluteString)")
@@ -126,7 +126,7 @@ final class SessionUploadModel: ObservableObject {
 
     func captureAndUpload(
         from browser: BrowserCaptureModel,
-        deepLink: DeepLink
+        deepLink: DeepLink,
     ) async {
         do {
             Logger.browser.infoFile("Capturing browser session for rid \(deepLink.rid)")
@@ -140,7 +140,7 @@ final class SessionUploadModel: ObservableObject {
 
     func uploadCapturedSessionData(
         _ plaintext: Data,
-        deepLink: DeepLink
+        deepLink: DeepLink,
     ) async {
         phase = .uploading
 
@@ -157,7 +157,7 @@ final class SessionUploadModel: ObservableObject {
 
             let sealed = try XSalsa20Poly1305Box.seal(
                 plaintext: plaintext,
-                recipientPublicKey: recipientPublicKey
+                recipientPublicKey: recipientPublicKey,
             )
             Logger.crypto.infoFile("Encrypted session for rid \(deepLink.rid); ciphertext size \(sealed.ciphertext.count) bytes")
 
@@ -168,12 +168,12 @@ final class SessionUploadModel: ObservableObject {
                 nonce: sealed.nonce.base64EncodedString(),
                 ciphertext: sealed.ciphertext.base64EncodedString(),
                 capturedAt: Date(),
-                requestSignature: nil
+                requestSignature: nil,
             )
             let requestSignature = try RequestAuthenticator.envelopeProof(
                 rid: deepLink.rid,
                 envelope: envelope,
-                requestSecret: requestSecret
+                requestSecret: requestSecret,
             )
             let signedEnvelope = EncryptedSessionEnvelope(
                 version: envelope.version,
@@ -182,12 +182,12 @@ final class SessionUploadModel: ObservableObject {
                 nonce: envelope.nonce,
                 ciphertext: envelope.ciphertext,
                 capturedAt: envelope.capturedAt,
-                requestSignature: requestSignature
+                requestSignature: requestSignature,
             )
 
             try await relayClientFactory(deepLink.serverURL).uploadSession(
                 rid: deepLink.rid,
-                envelope: signedEnvelope
+                envelope: signedEnvelope,
             )
             Logger.network.infoFile("Session upload finished for rid \(deepLink.rid)")
             phase = .done
@@ -321,7 +321,7 @@ final class SessionUploadModel: ObservableObject {
                 ciphertext: ciphertext,
                 nonce: nonce,
                 ephemeralPublicKey: ephemeralPublicKey,
-                recipientSecretKey: deviceSecretKey
+                recipientSecretKey: deviceSecretKey,
             )
             Logger.crypto.infoFile("Decrypted seed session for rid \(deepLink.rid): \(Self.sessionSummary(from: plaintext))")
 
@@ -347,7 +347,7 @@ final class SessionUploadModel: ObservableObject {
                 requestType: DeepLink.RequestType(rawValue: request.requestType) ?? .refresh,
                 expiresAt: request.expiresAt,
                 requestProof: request.requestProof,
-                requestSecret: request.requestSecret
+                requestSecret: request.requestSecret,
             )
             try RequestAuthenticator.verify(trustedDeepLink)
 
@@ -369,7 +369,7 @@ final class SessionUploadModel: ObservableObject {
 
         let allowRefresh: Bool = ConfigurableKit.value(
             forKey: AppSettings.allowRefreshKey,
-            defaultValue: false
+            defaultValue: false,
         )
         Logger.push.infoFile("Preparing push support for rid \(deepLink.rid); allowRefresh=\(allowRefresh)")
 
@@ -378,7 +378,7 @@ final class SessionUploadModel: ObservableObject {
                 try await pushCoordinator.ensurePushToken(
                     serverURL: deepLink.serverURL,
                     deviceID: deepLink.deviceID,
-                    requestAuthorizationIfNeeded: false
+                    requestAuthorizationIfNeeded: false,
                 )
             } catch {
                 Logger.push.errorFile("Push registration failed (allowRefresh path) for rid \(deepLink.rid): \(error.localizedDescription); reverting setting and continuing without push")
@@ -395,7 +395,7 @@ final class SessionUploadModel: ObservableObject {
             try await pushCoordinator.ensurePushToken(
                 serverURL: deepLink.serverURL,
                 deviceID: deepLink.deviceID,
-                requestAuthorizationIfNeeded: true
+                requestAuthorizationIfNeeded: true,
             )
             ConfigurableKit.set(value: true, forKey: AppSettings.allowRefreshKey)
         } catch {

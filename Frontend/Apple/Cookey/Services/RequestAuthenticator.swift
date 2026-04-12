@@ -39,7 +39,7 @@ enum RequestAuthenticator {
             deviceID: deepLink.deviceID,
             requestType: deepLink.requestType,
             expiresAt: expiresAt,
-            requestSecret: requestSecret
+            requestSecret: requestSecret,
         )
 
         guard expected == providedRequestProof else {
@@ -55,7 +55,7 @@ enum RequestAuthenticator {
         deviceID: String,
         requestType: DeepLink.RequestType,
         expiresAt: Date,
-        requestSecret: String
+        requestSecret: String,
     ) throws -> String {
         try authenticate(
             purpose: "cookey-request-v1",
@@ -68,14 +68,14 @@ enum RequestAuthenticator {
                 deviceID,
                 requestType.rawValue,
                 timestamp(expiresAt),
-            ]
+            ],
         )
     }
 
     static func envelopeProof(
         rid: String,
         envelope: EncryptedSessionEnvelope,
-        requestSecret: String
+        requestSecret: String,
     ) throws -> String {
         try authenticate(
             purpose: "cookey-session-v1",
@@ -88,14 +88,14 @@ enum RequestAuthenticator {
                 envelope.ciphertext,
                 timestamp(envelope.capturedAt),
                 String(envelope.version),
-            ]
+            ],
         )
     }
 
     private static func authenticate(
         purpose: String,
         secret: String,
-        fields: [String]
+        fields: [String],
     ) throws -> String {
         guard let secretData = Data(base64URLEncoded: secret), secretData.count >= 16 else {
             throw Error.invalidRequestSecret
@@ -104,7 +104,7 @@ enum RequestAuthenticator {
         let message = ([purpose] + fields).joined(separator: "\n")
         let mac = HMAC<SHA256>.authenticationCode(
             for: Data(message.utf8),
-            using: SymmetricKey(data: secretData)
+            using: SymmetricKey(data: secretData),
         )
         return Data(mac).base64URLEncodedString()
     }

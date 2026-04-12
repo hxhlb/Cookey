@@ -15,7 +15,7 @@ class BrowserViewController: UIViewController {
         image: UIImage(systemName: "paperplane.fill"),
         style: .plain,
         target: self,
-        action: #selector(sendTapped)
+        action: #selector(sendTapped),
     )
 
     private let activityIndicator = UIActivityIndicatorView(style: .medium)
@@ -86,7 +86,7 @@ class BrowserViewController: UIViewController {
             image: UIImage(systemName: "chevron.backward"),
             style: .plain,
             target: self,
-            action: #selector(backTapped)
+            action: #selector(backTapped),
         )
         navigationItem.rightBarButtonItem = sendButton
         navigationItem.titleView = titleStackView
@@ -112,7 +112,7 @@ class BrowserViewController: UIViewController {
                 }
                 let alert = AlertViewController(
                     title: String(localized: "Getting Started"),
-                    message: String(localized: "Please log in or complete the required actions on this page. When you are done, tap the send button in the top-right corner to package and deliver the session data to the requester.")
+                    message: String(localized: "Please log in or complete the required actions on this page. When you are done, tap the send button in the top-right corner to package and deliver the session data to the requester."),
                 ) { context in
                     context.addAction(title: String(localized: "OK"), attribute: .dangerous) { context.dispose() }
                 }
@@ -149,7 +149,7 @@ class BrowserViewController: UIViewController {
             .sink { [weak self] message in
                 let alert = AlertViewController(
                     title: String(localized: "Navigation Error"),
-                    message: message
+                    message: message,
                 ) { context in
                     context.addAction(title: String(localized: "OK"), attribute: .dangerous) { context.dispose() }
                 }
@@ -164,7 +164,7 @@ class BrowserViewController: UIViewController {
                 self?.browser.passkeyAlertPresented = false
                 let alert = AlertViewController(
                     title: String(localized: "Passkey Not Supported"),
-                    message: String(localized: "This website is requesting Passkey authentication, which is not supported in the in-app browser. Please use an alternative login method such as password or SMS verification.")
+                    message: String(localized: "This website is requesting Passkey authentication, which is not supported in the in-app browser. Please use an alternative login method such as password or SMS verification."),
                 ) { context in
                     context.addAction(title: String(localized: "OK"), attribute: .dangerous) { context.dispose() }
                 }
@@ -178,7 +178,7 @@ class BrowserViewController: UIViewController {
     @objc private func sendTapped() {
         let alert = AlertViewController(
             title: String(localized: "Send Session"),
-            message: String(localized: "This will package and send the current session state to the requester. Please confirm you have completed login or the required actions.")
+            message: String(localized: "This will package and send the current session state to the requester. Please confirm you have completed login or the required actions."),
         ) { [weak self] context in
             context.addAction(title: String(localized: "Cancel")) {
                 context.dispose()

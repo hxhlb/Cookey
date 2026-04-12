@@ -78,7 +78,7 @@ struct DeepLink: Equatable {
         requestType: RequestType,
         expiresAt: Date? = nil,
         requestProof: String? = nil,
-        requestSecret: String? = nil
+        requestSecret: String? = nil,
     ) {
         self.rid = rid
         self.serverURL = serverURL

@@ -45,7 +45,7 @@ final class PushRegistrationCoordinator: ObservableObject {
     func ensurePushToken(
         serverURL: URL,
         deviceID: String,
-        requestAuthorizationIfNeeded: Bool
+        requestAuthorizationIfNeeded: Bool,
     ) async throws {
         Logger.push.infoFile("Ensuring push token for host \(serverURL.host() ?? serverURL.absoluteString), device \(deviceID), requestAuthorizationIfNeeded=\(requestAuthorizationIfNeeded)")
         let settings = await UNUserNotificationCenter.current().notificationSettings()

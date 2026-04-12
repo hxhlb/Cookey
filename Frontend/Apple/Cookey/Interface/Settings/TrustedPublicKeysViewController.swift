@@ -7,18 +7,18 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
 
     private lazy var actionsButton = UIBarButtonItem(
         image: UIImage(systemName: "ellipsis.circle"),
-        menu: buildActionsMenu()
+        menu: buildActionsMenu(),
     )
 
     private lazy var doneButton = UIBarButtonItem(
         title: String(localized: "Done"),
         style: .done,
         target: self,
-        action: #selector(exitEditingMode)
+        action: #selector(exitEditingMode),
     )
 
     private lazy var dataSource = UITableViewDiffableDataSource<Int, UUID>(
-        tableView: tableView
+        tableView: tableView,
     ) { [weak self] (tableView: UITableView, _: IndexPath, itemID: UUID) in
         guard let self, let item = item(for: itemID) else {
             return UITableViewCell()
@@ -106,7 +106,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
 
     override func tableView(
         _: UITableView,
-        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath
+        trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath,
     ) -> UISwipeActionsConfiguration? {
         guard !tableView.isEditing,
               let itemID = dataSource.itemIdentifier(for: indexPath)
@@ -114,7 +114,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
 
         let delete = UIContextualAction(
             style: .destructive,
-            title: String(localized: "Delete")
+            title: String(localized: "Delete"),
         ) { [weak self] _, _, completion in
             self?.deleteItems(with: [itemID], animated: true)
             completion(true)
@@ -127,7 +127,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
     override func tableView(
         _: UITableView,
         contextMenuConfigurationForRowAt indexPath: IndexPath,
-        point _: CGPoint
+        point _: CGPoint,
     ) -> UIContextMenuConfiguration? {
         guard !tableView.isEditing,
               let itemID = dataSource.itemIdentifier(for: indexPath)
@@ -138,7 +138,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
                 UIAction(
                     title: String(localized: "Delete"),
                     image: UIImage(systemName: "trash"),
-                    attributes: [.destructive]
+                    attributes: [.destructive],
                 ) { _ in
                     self?.deleteItems(with: [itemID], animated: true)
                 },
@@ -178,7 +178,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
         UIMenu(children: [
             UIAction(
                 title: String(localized: "Select"),
-                image: UIImage(systemName: "checkmark.circle")
+                image: UIImage(systemName: "checkmark.circle"),
             ) { [weak self] _ in
                 self?.setEditing(true, animated: true)
             },
@@ -193,7 +193,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
                     title: deleteButtonTitle(for: selectedCount),
                     style: .plain,
                     target: self,
-                    action: #selector(deleteSelectedItems)
+                    action: #selector(deleteSelectedItems),
                 )
                 : nil
             navigationItem.leftBarButtonItem?.tintColor = .systemRed
@@ -209,7 +209,7 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
         guard count > 0 else { return String(localized: "Delete") }
         return String.localizedStringWithFormat(
             String(localized: "Delete (%lld)"),
-            count
+            count,
         )
     }
 
@@ -221,21 +221,21 @@ final class TrustedPublicKeysViewController: UITableViewController, UISearchResu
         let ids = Set(
             (tableView.indexPathsForSelectedRows ?? []).compactMap {
                 dataSource.itemIdentifier(for: $0)
-            }
+            },
         )
         guard !ids.isEmpty else { return }
 
         let alert = UIAlertController(
             title: String.localizedStringWithFormat(
                 String(localized: "Delete %lld Item(s)?"),
-                ids.count
+                ids.count,
             ),
             message: String(localized: "This action cannot be undone."),
-            preferredStyle: .actionSheet
+            preferredStyle: .actionSheet,
         )
         alert.addAction(UIAlertAction(
             title: String(localized: "Delete"),
-            style: .destructive
+            style: .destructive,
         ) { [weak self] _ in
             self?.deleteItems(with: ids, animated: true)
             self?.setEditing(false, animated: true)

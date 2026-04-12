@@ -29,8 +29,8 @@ private final class LockedBox<Value>: @unchecked Sendable {
 @Suite(.serialized)
 @MainActor
 struct CookeyTests {
-    @Test("DeepLink verifies with valid proof and secret")
-    func verifiesDeepLink() throws {
+    @Test
+    func `DeepLink verifies with valid proof and secret`() throws {
         let expiresAt = try #require(ISO8601DateFormatter().date(from: "2026-04-02T12:00:00Z"))
         let serverURL = try #require(URL(string: "https://api.cookey.sh"))
         let targetURL = try #require(URL(string: "https://www.qaq.wiki/wp-admin"))
@@ -47,7 +47,7 @@ struct CookeyTests {
             deviceID: "device-123",
             requestType: .login,
             expiresAt: expiresAt,
-            requestSecret: requestSecret
+            requestSecret: requestSecret,
         )
 
         let deepLink = DeepLink(
@@ -59,7 +59,7 @@ struct CookeyTests {
             requestType: .login,
             expiresAt: expiresAt,
             requestProof: requestProof,
-            requestSecret: requestSecret
+            requestSecret: requestSecret,
         )
         #expect(deepLink.rid == "r_123")
         #expect(deepLink.serverURL == serverURL)
@@ -71,23 +71,22 @@ struct CookeyTests {
     }
 
     @Test(
-        "validateCapturedSessionData rejects malformed payloads",
         arguments: [
             Data(),
             Data("{}".utf8),
             Data(#"{"cookies":[]}"#.utf8),
             Data(#"{"origins":[]}"#.utf8),
             Data("[]".utf8),
-        ]
+        ],
     )
-    func rejectsMalformedCapturedPayload(_ payload: Data) throws {
+    func `validateCapturedSessionData rejects malformed payloads`(_ payload: Data) throws {
         #expect(throws: Error.self) {
             try SessionUploadModel.validateCapturedSessionData(payload)
         }
     }
 
-    @Test("validateCapturedSessionData accepts cookies + origins payload")
-    func acceptsCapturedPayload() throws {
+    @Test
+    func `validateCapturedSessionData accepts cookies + origins payload`() throws {
         let payload = Data(
             #"""
             {
@@ -115,14 +114,14 @@ struct CookeyTests {
                 }
               ]
             }
-            """#.utf8
+            """#.utf8,
         )
 
         try SessionUploadModel.validateCapturedSessionData(payload)
     }
 
-    @Test("encodeCapturedSession preserves browser session JSON")
-    func encodesCapturedSession() throws {
+    @Test
+    func `encodeCapturedSession preserves browser session JSON`() throws {
         let capturedSession = CapturedSession(
             cookies: [
                 CapturedCookie(
@@ -133,7 +132,7 @@ struct CookeyTests {
                     expires: -1,
                     httpOnly: true,
                     secure: true,
-                    sameSite: "Lax"
+                    sameSite: "Lax",
                 ),
                 CapturedCookie(
                     name: "cf_clearance",
@@ -143,7 +142,7 @@ struct CookeyTests {
                     expires: 1_806_582_709,
                     httpOnly: true,
                     secure: true,
-                    sameSite: "Lax"
+                    sameSite: "Lax",
                 ),
             ],
             origins: [
@@ -151,10 +150,10 @@ struct CookeyTests {
                     origin: "https://www.qaq.wiki",
                     localStorage: [
                         CapturedStorageItem(name: "dracula_mode", value: "dark"),
-                    ]
+                    ],
                 ),
             ],
-            deviceInfo: nil
+            deviceInfo: nil,
         )
 
         let payload = try SessionUploadModel.encodeCapturedSession(capturedSession)
@@ -164,8 +163,8 @@ struct CookeyTests {
         #expect(decoded == capturedSession)
     }
 
-    @Test("uploadCapturedSessionData posts decryptable envelope")
-    func uploadsDecryptableEnvelope() async throws {
+    @Test
+    func `uploadCapturedSessionData posts decryptable envelope`() async throws {
         let sodium = Sodium()
         let recipient = try #require(sodium.box.keyPair())
         let serverURL = try #require(URL(string: "https://api.cookey.test/\(UUID().uuidString)"))
@@ -183,7 +182,7 @@ struct CookeyTests {
             deviceID: "device-test",
             requestType: .login,
             expiresAt: expiresAt,
-            requestSecret: requestSecret
+            requestSecret: requestSecret,
         )
 
         let deepLink = try DeepLink(
@@ -195,7 +194,7 @@ struct CookeyTests {
             requestType: .login,
             expiresAt: expiresAt,
             requestProof: requestProof,
-            requestSecret: requestSecret
+            requestSecret: requestSecret,
         )
 
         let capturedSession = CapturedSession(
@@ -208,7 +207,7 @@ struct CookeyTests {
                     expires: -1,
                     httpOnly: true,
                     secure: true,
-                    sameSite: "Lax"
+                    sameSite: "Lax",
                 ),
                 CapturedCookie(
                     name: "cf_clearance",
@@ -218,7 +217,7 @@ struct CookeyTests {
                     expires: 1_806_582_709,
                     httpOnly: true,
                     secure: true,
-                    sameSite: "Lax"
+                    sameSite: "Lax",
                 ),
             ],
             origins: [
@@ -226,10 +225,10 @@ struct CookeyTests {
                     origin: "https://www.qaq.wiki",
                     localStorage: [
                         CapturedStorageItem(name: "dracula_mode", value: "dark"),
-                    ]
+                    ],
                 ),
             ],
-            deviceInfo: nil
+            deviceInfo: nil,
         )
         let plaintext = try SessionUploadModel.encodeCapturedSession(capturedSession)
 
@@ -246,19 +245,19 @@ struct CookeyTests {
                         let recordedRequest = RecordedRequest(
                             method: request.httpMethod,
                             url: request.url,
-                            body: request.httpBody
+                            body: request.httpBody,
                         )
                         requestBox.withLock { $0 = recordedRequest }
                         let response = HTTPURLResponse(
                             url: baseURL,
                             statusCode: 200,
                             httpVersion: nil,
-                            headerFields: ["Content-Type": "application/json"]
+                            headerFields: ["Content-Type": "application/json"],
                         )!
                         return (Data(), response)
-                    }
+                    },
                 )
-            }
+            },
         )
         await model.uploadCapturedSessionData(plaintext, deepLink: deepLink)
 
@@ -282,9 +281,9 @@ struct CookeyTests {
                 nonce: envelope.nonce,
                 ciphertext: envelope.ciphertext,
                 capturedAt: envelope.capturedAt,
-                requestSignature: nil
+                requestSignature: nil,
             ),
-            requestSecret: requestSecret
+            requestSecret: requestSecret,
         )
 
         var sharedSecret = [UInt8](repeating: 0, count: Int(crypto_scalarmult_bytes()))
@@ -294,14 +293,14 @@ struct CookeyTests {
             crypto_scalarmult(
                 &sharedSecret,
                 &recipientSecretKey,
-                &ephemeralPublicKeyBytes
-            ) == 0
+                &ephemeralPublicKeyBytes,
+            ) == 0,
         )
 
         let opened = try XSalsa20Poly1305Box.open(
             ciphertext: ciphertext,
             nonce: nonce,
-            sharedSecret: Data(sharedSecret)
+            sharedSecret: Data(sharedSecret),
         )
 
         #expect(envelope.version == 1)
@@ -311,8 +310,8 @@ struct CookeyTests {
         #expect(model.phase == SessionUploadModel.Phase.done)
     }
 
-    @Test("PushRegistrationCoordinator stores token for waiting registration")
-    func coordinatorStoresWaitingToken() async throws {
+    @Test
+    func `PushRegistrationCoordinator stores token for waiting registration`() async throws {
         PushTokenStore.currentToken = nil
         PushTokenStore.currentEnvironment = nil
         let coordinator = PushRegistrationCoordinator()
@@ -327,8 +326,8 @@ struct CookeyTests {
         #expect(coordinator.state == .idle)
     }
 
-    @Test("PushRegistrationCoordinator refreshes stored token without relay registration")
-    func coordinatorRefreshesStoredToken() async {
+    @Test
+    func `PushRegistrationCoordinator refreshes stored token without relay registration`() async {
         PushTokenStore.currentToken = nil
         PushTokenStore.currentEnvironment = nil
         let coordinator = PushRegistrationCoordinator()

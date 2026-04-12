@@ -79,7 +79,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
             let userScript = WKUserScript(
                 source: localStorageScript,
                 injectionTime: .atDocumentStart,
-                forMainFrameOnly: true
+                forMainFrameOnly: true,
             )
             configuration.userContentController.addUserScript(userScript)
         }
@@ -206,7 +206,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
                 expires: cookie.expiresDate?.timeIntervalSince1970 ?? -1,
                 httpOnly: cookie.isHTTPOnly,
                 secure: cookie.isSecure,
-                sameSite: cookie.properties?[.sameSitePolicy] as? String ?? "Lax"
+                sameSite: cookie.properties?[.sameSitePolicy] as? String ?? "Lax",
             )
         }
     }
@@ -258,7 +258,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
             deviceID: deviceID,
             apnToken: token,
             apnEnvironment: environment,
-            publicKey: DeviceKeyManager.publicKeyBase64()
+            publicKey: DeviceKeyManager.publicKeyBase64(),
         )
     }
 
@@ -332,7 +332,7 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
             source: passkeyPageScript,
             injectionTime: .atDocumentStart,
             forMainFrameOnly: false,
-            in: .page
+            in: .page,
         )
         controller.addUserScript(pageScript)
 
@@ -341,14 +341,14 @@ final class BrowserCaptureModel: NSObject, ObservableObject, WKScriptMessageHand
             source: passkeyRelayScript,
             injectionTime: .atDocumentStart,
             forMainFrameOnly: false,
-            in: .defaultClient
+            in: .defaultClient,
         )
         controller.addUserScript(relayScript)
     }
 
     nonisolated func userContentController(
         _: WKUserContentController,
-        didReceive _: WKScriptMessage
+        didReceive _: WKScriptMessage,
     ) {
         Task { @MainActor in
             passkeyAlertPresented = true

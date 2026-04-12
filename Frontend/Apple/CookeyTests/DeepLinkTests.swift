@@ -3,8 +3,8 @@ import Foundation
 import Testing
 
 struct DeepLinkTests {
-    @Test("PairKeyDeepLink parses host-only HTTPS format")
-    func parsesPairKeyDeepLink() throws {
+    @Test
+    func `PairKeyDeepLink parses host-only HTTPS format`() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N?host=api.cookey.sh"))
 
         let deepLink = try #require(PairKeyDeepLink(url: url))
@@ -12,8 +12,8 @@ struct DeepLinkTests {
         #expect(deepLink.serverURL == URL(string: "https://api.cookey.sh"))
     }
 
-    @Test("PairKeyDeepLink uses default server when host is omitted")
-    func parsesPairKeyDeepLinkWithoutHost() throws {
+    @Test
+    func `PairKeyDeepLink uses default server when host is omitted`() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N"))
 
         let deepLink = try #require(PairKeyDeepLink(url: url))
@@ -21,14 +21,14 @@ struct DeepLinkTests {
         #expect(deepLink.serverURL == AppEnvironment.effectiveAPIBaseURL)
     }
 
-    @Test("PairKeyDeepLink rejects custom server paths")
-    func rejectsPairKeyDeepLinkWithPath() throws {
+    @Test
+    func `PairKeyDeepLink rejects custom server paths`() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N?host=api.cookey.sh/path"))
         #expect(PairKeyDeepLink(url: url) == nil)
     }
 
-    @Test("PairKeyDeepLink rejects server values with scheme")
-    func rejectsPairKeyDeepLinkWithScheme() throws {
+    @Test
+    func `PairKeyDeepLink rejects server values with scheme`() throws {
         let url = try #require(URL(string: "cookey://SM8ND67N?host=https://api.cookey.sh"))
         #expect(PairKeyDeepLink(url: url) == nil)
     }

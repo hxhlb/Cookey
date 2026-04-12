@@ -16,7 +16,7 @@ final class SettingsViewController: StackScrollController {
         explain: "When enabled, the relay server can send push notifications to this device for session refresh requests. This requires system notification permissions.",
         key: AppSettings.allowRefreshKey,
         defaultValue: false,
-        annotation: .toggle
+        annotation: .toggle,
     )
     .whenValueChange(type: Bool.self, to: whenValueChanged)
 
@@ -24,7 +24,7 @@ final class SettingsViewController: StackScrollController {
         icon: "ellipsis.bubble",
         title: "Submit Feedback",
         explain: "Report bugs, request features, or share your thoughts about Cookey.",
-        ephemeralAnnotation: .action(handler: openFeedback)
+        ephemeralAnnotation: .action(handler: openFeedback),
     )
 
     static let trustedKeysObject = ConfigurableObject(
@@ -33,7 +33,7 @@ final class SettingsViewController: StackScrollController {
         explain: "Manage command-line public keys you have verified. Removing a key will require re-verification on the next connection.",
         ephemeralAnnotation: .action { controller in
             controller.navigationController?.pushViewController(TrustedPublicKeysViewController(), animated: true)
-        }
+        },
     )
 
     static let logsObject = ConfigurableObject(
@@ -42,7 +42,7 @@ final class SettingsViewController: StackScrollController {
         explain: "Inspect recent application logs for troubleshooting.",
         ephemeralAnnotation: .action { controller in
             controller.navigationController?.pushViewController(LogViewerController(), animated: true)
-        }
+        },
     )
 
     init() {
@@ -63,25 +63,25 @@ final class SettingsViewController: StackScrollController {
             image: UIImage(systemName: "ellipsis.circle"),
             style: .plain,
             target: nil,
-            action: nil
+            action: nil,
         ).then {
             $0.menu = UIMenu(children: [
                 UIAction(
                     title: String(localized: "Guide"),
-                    image: UIImage(systemName: "sparkles")
+                    image: UIImage(systemName: "sparkles"),
                 ) { [weak self] _ in
                     self?.presentWhatsNew()
                 },
                 UIMenu(options: .displayInline, children: [
                     UIAction(
                         title: String(localized: "Privacy Policy"),
-                        image: UIImage(systemName: "lock.shield")
+                        image: UIImage(systemName: "lock.shield"),
                     ) { [weak self] _ in
                         self?.openPrivacyPolicy()
                     },
                     UIAction(
                         title: String(localized: "Open Source Licenses"),
-                        image: UIImage(systemName: "flag.filled.and.flag.crossed")
+                        image: UIImage(systemName: "flag.filled.and.flag.crossed"),
                     ) { [weak self] _ in
                         self?.openOpenSourceLicenses()
                     },
@@ -97,7 +97,7 @@ final class SettingsViewController: StackScrollController {
 
         #if !targetEnvironment(macCatalyst)
             stackView.addArrangedSubviewWithMargin(
-                ConfigurableSectionHeaderView().with(header: String(localized: "Appearance"))
+                ConfigurableSectionHeaderView().with(header: String(localized: "Appearance")),
             ) { $0.bottom /= 2 }
             stackView.addArrangedSubview(SeparatorView())
             stackView.addArrangedSubviewWithMargin(AppIconSettings.configurableObject.createView())
@@ -107,7 +107,7 @@ final class SettingsViewController: StackScrollController {
         // MARK: - General
 
         stackView.addArrangedSubviewWithMargin(
-            ConfigurableSectionHeaderView().with(header: String(localized: "General"))
+            ConfigurableSectionHeaderView().with(header: String(localized: "General")),
         ) { $0.bottom /= 2 }
         stackView.addArrangedSubview(SeparatorView())
         stackView.addArrangedSubviewWithMargin(makeDefaultServerView())
@@ -120,7 +120,7 @@ final class SettingsViewController: StackScrollController {
         // MARK: - Contact Us
 
         stackView.addArrangedSubviewWithMargin(
-            ConfigurableSectionHeaderView().with(header: String(localized: "Contact Us"))
+            ConfigurableSectionHeaderView().with(header: String(localized: "Contact Us")),
         ) { $0.bottom /= 2 }
         stackView.addArrangedSubview(SeparatorView())
         for object in [Self.logsObject, Self.feedbackObject] {
@@ -138,12 +138,12 @@ final class SettingsViewController: StackScrollController {
         view.configure(icon: .init(systemName: "server.rack"))
         view.configure(title: "Default Server")
         view.configure(
-            description: "The server used when no relay is specified. HTTPS is enforced automatically."
+            description: "The server used when no relay is specified. HTTPS is enforced automatically.",
         )
 
         let currentValue: String = ConfigurableKit.value(
             forKey: AppSettings.defaultServerKey,
-            defaultValue: ""
+            defaultValue: "",
         )
         view.configure(value: currentValue.isEmpty ? Self.defaultServerPlaceholder : currentValue)
 
@@ -157,19 +157,19 @@ final class SettingsViewController: StackScrollController {
     private func buildDefaultServerMenu(view: ConfigurableInfoView) -> [UIMenuElement] {
         let currentValue: String = ConfigurableKit.value(
             forKey: AppSettings.defaultServerKey,
-            defaultValue: ""
+            defaultValue: "",
         )
 
         let editAction = UIAction(
             title: String(localized: "Edit"),
-            image: UIImage(systemName: "character.cursor.ibeam")
+            image: UIImage(systemName: "character.cursor.ibeam"),
         ) { [weak self, weak view] _ in
             guard let self, let view else { return }
             let input = AlertInputViewController(
                 title: String(localized: "Edit Default Server"),
                 message: String(localized: "Enter a domain name — HTTPS is enforced automatically."),
                 placeholder: Self.defaultServerPlaceholder,
-                text: currentValue
+                text: currentValue,
             ) { [weak view] newValue in
                 let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
                 ConfigurableKit.set(value: trimmed, forKey: AppSettings.defaultServerKey)
@@ -183,7 +183,7 @@ final class SettingsViewController: StackScrollController {
         if !currentValue.isEmpty {
             let copyAction = UIAction(
                 title: String(localized: "Copy"),
-                image: UIImage(systemName: "doc.on.doc")
+                image: UIImage(systemName: "doc.on.doc"),
             ) { _ in
                 UIPasteboard.general.string = currentValue
             }
@@ -192,7 +192,7 @@ final class SettingsViewController: StackScrollController {
 
         let useDefaultAction = UIAction(
             title: String(localized: "Use Default (\(Self.defaultServerPlaceholder))"),
-            image: UIImage(systemName: "arrow.counterclockwise")
+            image: UIImage(systemName: "arrow.counterclockwise"),
         ) { [weak view] _ in
             ConfigurableKit.set(value: "", forKey: AppSettings.defaultServerKey)
             view?.configure(value: Self.defaultServerPlaceholder)
@@ -250,7 +250,7 @@ final class SettingsViewController: StackScrollController {
             $0.text = lines.joined(separator: "\n")
             $0.font = .monospacedSystemFont(
                 ofSize: UIFont.preferredFont(forTextStyle: .caption2).pointSize,
-                weight: .regular
+                weight: .regular,
             )
             $0.textColor = .tertiaryLabel
             $0.textAlignment = .center

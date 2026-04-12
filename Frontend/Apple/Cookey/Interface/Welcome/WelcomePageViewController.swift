@@ -23,15 +23,15 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
     private let pages: [Page] = [
         Page(
             title: "Install the Skill",
-            subtitle: "Copy the instructions and send to your AI agent. It will handle the rest."
+            subtitle: "Copy the instructions and send to your AI agent. It will handle the rest.",
         ),
         Page(
             title: "Ask your Agent",
-            subtitle: "Tell your AI to log in to a website. It will generate a secure QR code in the terminal or chat. If scanning isn't possible, ask it for a link instead."
+            subtitle: "Tell your AI to log in to a website. It will generate a secure QR code in the terminal or chat. If scanning isn't possible, ask it for a link instead.",
         ),
         Page(
             title: "Scan & Approve",
-            subtitle: "Scan the QR code with this app and complete login. Your session will be securely delivered back to your AI."
+            subtitle: "Scan the QR code with this app and complete login. Your session will be securely delivered back to your AI.",
         ),
     ]
 
@@ -147,7 +147,7 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
             let stepView = SetupStepView(
                 title: String(localized: page.title),
                 subtitle: String(localized: page.subtitle),
-                accessory: accessories[i]
+                accessory: accessories[i],
             )
             stackView.addArrangedSubview(stepView)
             stepView.snp.makeConstraints { make in
@@ -393,7 +393,7 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
             UIView.animate(
                 withDuration: 0.45,
                 delay: Double(i) * 0.2,
-                options: .curveEaseOut
+                options: .curveEaseOut,
             ) {
                 chatView.alpha = 1
                 chatView.transform = .identity
@@ -404,7 +404,7 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
         UIView.animate(
             withDuration: 0.8,
             delay: Double(agentChatViews.count) * 0.2,
-            options: .curveEaseOut
+            options: .curveEaseOut,
         ) {
             self.agentQRBlurView?.effect = nil
         }
@@ -510,7 +510,7 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
                 delay: 0,
                 usingSpringWithDamping: 0.88,
                 initialSpringVelocity: 0.3,
-                options: [.curveEaseInOut, .allowUserInteraction]
+                options: [.curveEaseInOut, .allowUserInteraction],
             ) {
                 self.scrollView.contentOffset = target
             } completion: { _ in
@@ -531,7 +531,7 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
             delay: 0,
             usingSpringWithDamping: 0.88,
             initialSpringVelocity: 0.3,
-            options: [.curveEaseInOut, .allowUserInteraction]
+            options: [.curveEaseInOut, .allowUserInteraction],
         ) {
             self.scrollView.contentOffset = target
         } completion: { _ in
@@ -562,7 +562,7 @@ class WelcomePageViewController: UIViewController, UIScrollViewDelegate {
 
 extension WelcomePageViewController {
     static func makePresentedController(
-        onComplete: (() -> Void)? = nil
+        onComplete: (() -> Void)? = nil,
     ) -> UIViewController {
         let controller = WelcomePageViewController(onComplete: onComplete)
 
@@ -575,7 +575,7 @@ extension WelcomePageViewController {
             return AlertBaseController(
                 rootViewController: navigationController,
                 preferredWidth: controller.preferredContentSize.width,
-                preferredHeight: controller.preferredContentSize.height
+                preferredHeight: controller.preferredContentSize.height,
             )
         #else
             navigationController.modalTransitionStyle = .coverVertical
@@ -693,11 +693,11 @@ private class ReceiptView: UIView {
         path.usesEvenOddFillRule = true
         path.append(UIBezierPath(
             arcCenter: CGPoint(x: 0, y: tearY),
-            radius: notchR, startAngle: 0, endAngle: .pi * 2, clockwise: true
+            radius: notchR, startAngle: 0, endAngle: .pi * 2, clockwise: true,
         ))
         path.append(UIBezierPath(
             arcCenter: CGPoint(x: bounds.width, y: tearY),
-            radius: notchR, startAngle: 0, endAngle: .pi * 2, clockwise: true
+            radius: notchR, startAngle: 0, endAngle: .pi * 2, clockwise: true,
         ))
 
         let mask = CAShapeLayer()
@@ -778,19 +778,19 @@ private class QRScanAnimationView: UIView {
         let gridInset: CGFloat = 28
         let area = CGRect(
             x: r.minX + gridInset, y: r.minY + gridInset,
-            width: qrSize - gridInset * 2, height: qrSize - gridInset * 2
+            width: qrSize - gridInset * 2, height: qrSize - gridInset * 2,
         )
         let finderSize: CGFloat = 28
         let dotSize: CGFloat = 5
 
-        // Three finder patterns
+        /// Three finder patterns
         func addFinder(at origin: CGPoint) {
             let inner = finderSize * 0.45
             dp.append(UIBezierPath(roundedRect: CGRect(x: origin.x, y: origin.y, width: finderSize, height: finderSize), cornerRadius: 2))
             dp.append(UIBezierPath(roundedRect: CGRect(
                 x: origin.x + (finderSize - inner) / 2,
                 y: origin.y + (finderSize - inner) / 2,
-                width: inner, height: inner
+                width: inner, height: inner,
             ), cornerRadius: 1))
         }
 
@@ -811,9 +811,9 @@ private class QRScanAnimationView: UIView {
                 roundedRect: CGRect(
                     x: area.minX + area.width * px,
                     y: area.minY + area.height * py,
-                    width: dotSize, height: dotSize
+                    width: dotSize, height: dotSize,
                 ),
-                cornerRadius: 1
+                cornerRadius: 1,
             ))
         }
 

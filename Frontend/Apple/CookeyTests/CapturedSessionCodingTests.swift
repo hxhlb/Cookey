@@ -4,8 +4,8 @@ import Testing
 
 @MainActor
 struct CapturedSessionCodingTests {
-    @Test("CapturedSession coding preserves device_info when present")
-    func encodesAndDecodesWithDeviceInfo() throws {
+    @Test
+    func `CapturedSession coding preserves device_info when present`() throws {
         let session = CapturedSession(
             cookies: [
                 CapturedCookie(
@@ -16,21 +16,21 @@ struct CapturedSessionCodingTests {
                     expires: -1,
                     httpOnly: true,
                     secure: true,
-                    sameSite: "Lax"
+                    sameSite: "Lax",
                 ),
             ],
             origins: [
                 CapturedOrigin(
                     origin: "https://example.com",
-                    localStorage: [CapturedStorageItem(name: "token", value: "value")]
+                    localStorage: [CapturedStorageItem(name: "token", value: "value")],
                 ),
             ],
             deviceInfo: DeviceInfo(
                 deviceID: "device-123",
                 apnToken: "token-123",
                 apnEnvironment: "sandbox",
-                publicKey: "public-key"
-            )
+                publicKey: "public-key",
+            ),
         )
 
         let data = try JSONEncoder().encode(session)
@@ -43,12 +43,12 @@ struct CapturedSessionCodingTests {
         #expect(decoded == session)
     }
 
-    @Test("CapturedSession coding omits device_info when absent")
-    func encodesAndDecodesWithoutDeviceInfo() throws {
+    @Test
+    func `CapturedSession coding omits device_info when absent`() throws {
         let session = CapturedSession(
             cookies: [],
             origins: [],
-            deviceInfo: nil
+            deviceInfo: nil,
         )
 
         let data = try JSONEncoder().encode(session)
@@ -61,8 +61,8 @@ struct CapturedSessionCodingTests {
         #expect(decoded.origins.isEmpty)
     }
 
-    @Test("CapturedSession decoding treats null localStorage as empty array")
-    func decodesNullLocalStorageAsEmptyArray() throws {
+    @Test
+    func `CapturedSession decoding treats null localStorage as empty array`() throws {
         let payload = """
         {
           "cookies": [],
@@ -81,8 +81,8 @@ struct CapturedSessionCodingTests {
         #expect(decoded.origins[0].localStorage.isEmpty)
     }
 
-    @Test("CapturedSession decoding treats null cookies as empty array")
-    func decodesNullCookiesAsEmptyArray() throws {
+    @Test
+    func `CapturedSession decoding treats null cookies as empty array`() throws {
         let payload = """
         {
           "cookies": null,
@@ -95,8 +95,8 @@ struct CapturedSessionCodingTests {
         #expect(decoded.origins.isEmpty)
     }
 
-    @Test("CapturedCookie decoding defaults null fields")
-    func decodesCookieWithNullFieldsUsingDefaults() throws {
+    @Test
+    func `CapturedCookie decoding defaults null fields`() throws {
         let payload = """
         {
           "cookies": [

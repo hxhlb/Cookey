@@ -1,9 +1,9 @@
 import AlertController
+import ColorfulX
 import Combine
 import SnapKit
 import Then
 import UIKit
-import ColorfulX
 
 class HomeViewController: UIViewController {
     private let sessionModel: SessionUploadModel
@@ -23,7 +23,7 @@ class HomeViewController: UIViewController {
         $0.noise = 0
         $0.speed /= 2
     }
-    
+
     private let iconView = UIImageView().then {
         $0.image = UIImage(systemName: "qrcode.viewfinder")
         $0.tintColor = .label
@@ -104,7 +104,7 @@ class HomeViewController: UIViewController {
             image: UIImage(systemName: "gearshape"),
             style: .plain,
             target: self,
-            action: #selector(settingsTapped)
+            action: #selector(settingsTapped),
         )
         setupLayout()
     }
@@ -145,7 +145,7 @@ class HomeViewController: UIViewController {
         backgroundView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(-128)
         }
-        
+
         let buttonStack = UIStackView(arrangedSubviews: [scanButton, typeButton]).then {
             $0.axis = .horizontal
             $0.distribution = .fillEqually
@@ -209,7 +209,7 @@ class HomeViewController: UIViewController {
             else {
                 let alert = AlertViewController(
                     title: String(localized: "Invalid Link"),
-                    message: String(localized: "No valid Cookey link found in the clipboard.")
+                    message: String(localized: "No valid Cookey link found in the clipboard."),
                 ) { context in
                     context.addAction(title: String(localized: "OK"), attribute: .dangerous) {
                         context.dispose()
@@ -233,7 +233,7 @@ class HomeViewController: UIViewController {
             placeholder: "XXXX-XXXX",
             text: "",
             cancelButtonText: String(localized: "Cancel"),
-            doneButtonText: String(localized: "Submit")
+            doneButtonText: String(localized: "Submit"),
         ) { [weak self] text in
             self?.sessionModel.handleManualPairKey(text)
         }

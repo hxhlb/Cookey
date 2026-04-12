@@ -12,15 +12,15 @@ struct LaunchBackendReachabilityCoordinatorTests {
         }
     }
 
-    @Test("LaunchBackendReachabilityCoordinator runs startup health check only once")
-    func runsHealthCheckOnlyOnce() async throws {
+    @Test
+    func `LaunchBackendReachabilityCoordinator runs startup health check only once`() async throws {
         let counter = InvocationCounter()
         let coordinator = LaunchBackendReachabilityCoordinator(
             baseURLProvider: { URL(string: "https://api.cookey.test")! },
             healthCheckOperation: {
                 await counter.increment()
                 return HealthCheckResult(body: "ok", serverName: "test-relay", checkedAt: Date())
-            }
+            },
         )
 
         coordinator.warmUpIfNeeded()
@@ -31,8 +31,8 @@ struct LaunchBackendReachabilityCoordinatorTests {
         #expect(count == 1)
     }
 
-    @Test("LaunchBackendReachabilityCoordinator swallows startup health check failures")
-    func swallowsHealthCheckFailures() async throws {
+    @Test
+    func `LaunchBackendReachabilityCoordinator swallows startup health check failures`() async throws {
         struct ExpectedFailure: LocalizedError {
             var errorDescription: String? {
                 "offline"
@@ -45,7 +45,7 @@ struct LaunchBackendReachabilityCoordinatorTests {
             healthCheckOperation: {
                 await counter.increment()
                 throw ExpectedFailure()
-            }
+            },
         )
 
         coordinator.warmUpIfNeeded()

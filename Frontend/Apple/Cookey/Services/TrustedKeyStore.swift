@@ -56,7 +56,7 @@ enum TrustedKeyStore {
                 fingerprint: fingerprint,
                 firstTrustedAt: entry.firstTrustedAt,
                 lastSeenAt: now,
-                label: entry.label
+                label: entry.label,
             )
             entries[index] = entry
         } else {
@@ -66,7 +66,7 @@ enum TrustedKeyStore {
                 fingerprint: fingerprint,
                 firstTrustedAt: now,
                 lastSeenAt: now,
-                label: nil
+                label: nil,
             ))
         }
 

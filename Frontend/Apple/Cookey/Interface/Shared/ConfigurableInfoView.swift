@@ -19,7 +19,7 @@ class ConfigurableInfoView: ConfigurableView {
             .foregroundColor: UIColor.tintColor,
             .font: UIFont.systemFont(
                 ofSize: UIFont.preferredFont(forTextStyle: .subheadline).pointSize,
-                weight: .semibold
+                weight: .semibold,
             ),
             .underlineStyle: NSUnderlineStyle.single.rawValue,
         ])

@@ -28,7 +28,7 @@ public enum XSalsa20Poly1305Box {
         guard let plaintext = sodium.secretBox.open(
             authenticatedCipherText: Array(ciphertext),
             secretKey: secretBoxKey,
-            nonce: Array(nonce)
+            nonce: Array(nonce),
         ) else {
             throw CryptoBoxError.authenticationFailed
         }
@@ -40,7 +40,7 @@ public enum XSalsa20Poly1305Box {
         ciphertext: Data,
         nonce: Data,
         ephemeralPublicKey: Data,
-        recipientSecretKey: Data
+        recipientSecretKey: Data,
     ) throws -> Data {
         guard ephemeralPublicKey.count == Int(crypto_box_publickeybytes()) else {
             throw CryptoBoxError.invalidEphemeralPublicKey
@@ -64,7 +64,7 @@ public enum XSalsa20Poly1305Box {
             authenticatedCipherText: Array(ciphertext),
             senderPublicKey: senderPublicKey,
             recipientSecretKey: recipientSecretKeyBytes,
-            nonce: Array(nonce)
+            nonce: Array(nonce),
         ) else {
             throw CryptoBoxError.authenticationFailed
         }
@@ -74,11 +74,11 @@ public enum XSalsa20Poly1305Box {
 
     public static func seal(
         plaintext: Data,
-        recipientPublicKey: Data
+        recipientPublicKey: Data,
     ) throws -> (
         ephemeralPublicKey: Data,
         nonce: Data,
-        ciphertext: Data
+        ciphertext: Data,
     ) {
         let recipientKey = Array(recipientPublicKey)
         guard recipientKey.count == sodium.box.PublicKeyBytes else {
@@ -92,7 +92,7 @@ public enum XSalsa20Poly1305Box {
         guard let sealed = sodium.box.seal(
             message: Array(plaintext),
             recipientPublicKey: recipientKey,
-            senderSecretKey: ephemeralKeyPair.secretKey
+            senderSecretKey: ephemeralKeyPair.secretKey,
         ) as (authenticatedCipherText: Bytes, nonce: Box.Nonce)? else {
             throw CryptoBoxError.randomGenerationFailed
         }
@@ -100,7 +100,7 @@ public enum XSalsa20Poly1305Box {
         return (
             ephemeralPublicKey: Data(ephemeralKeyPair.publicKey),
             nonce: Data(sealed.nonce),
-            ciphertext: Data(sealed.authenticatedCipherText)
+            ciphertext: Data(sealed.authenticatedCipherText),
         )
     }
 
@@ -118,7 +118,7 @@ public enum XSalsa20Poly1305Box {
             &derivedKey,
             &zeroInput,
             &sharedSecretBytes,
-            &constant
+            &constant,
         ) == 0 else {
             throw CryptoBoxError.authenticationFailed
         }

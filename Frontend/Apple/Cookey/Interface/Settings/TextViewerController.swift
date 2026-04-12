@@ -42,7 +42,7 @@ class TextViewerController: UIViewController {
             primaryAction: UIAction { [weak self] _ in
                 guard let text = self?.textView.text else { return }
                 UIPasteboard.general.string = text
-            }
+            },
         )
     }
 }

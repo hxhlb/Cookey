@@ -4,7 +4,7 @@ extension BrowserCaptureModel: WKNavigationDelegate {
     func webView(
         _: WKWebView,
         decidePolicyFor _: WKNavigationAction,
-        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
+        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void,
     ) {
         // Prevent universal links from hijacking the login flow (e.g., "Sign in with Google"
         // opening the Google app). Firefox iOS, Brave, and DuckDuckGo all use this undocumented
@@ -27,7 +27,7 @@ extension BrowserCaptureModel: WKNavigationDelegate {
     func webView(
         _: WKWebView,
         didFail _: WKNavigation!,
-        withError error: Error
+        withError error: Error,
     ) {
         errorMessage = error.localizedDescription
     }
@@ -35,7 +35,7 @@ extension BrowserCaptureModel: WKNavigationDelegate {
     func webView(
         _: WKWebView,
         didFailProvisionalNavigation _: WKNavigation!,
-        withError error: Error
+        withError error: Error,
     ) {
         errorMessage = error.localizedDescription
     }

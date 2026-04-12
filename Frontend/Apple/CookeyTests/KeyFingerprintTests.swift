@@ -14,8 +14,8 @@ struct KeyFingerprintTests {
 
     // MARK: - KeyFingerprint Tests
 
-    @Test("Golden fixture: compute matches expected fingerprint from Go implementation")
-    func goldenFixtureFingerprint() throws {
+    @Test
+    func `Golden fixture: compute matches expected fingerprint from Go implementation`() throws {
         let fingerprint = try KeyFingerprint.compute(fromX25519PublicKeyBase64: Self.goldenKeyBase64)
         #expect(fingerprint == Self.goldenFingerprint)
 
@@ -27,28 +27,28 @@ struct KeyFingerprintTests {
         #expect(emoji == Self.goldenEmoji)
     }
 
-    @Test("Emoji table checksum matches Go implementation")
-    func emojiTableChecksum() {
+    @Test
+    func `Emoji table checksum matches Go implementation`() {
         let checksum = KeyFingerprint.emojiTableChecksum()
         #expect(checksum == Self.goldenEmojiTableChecksum)
     }
 
-    @Test("Empty string throws invalidPublicKey")
-    func emptyStringThrows() {
+    @Test
+    func `Empty string throws invalidPublicKey`() {
         #expect(throws: KeyFingerprintError.invalidPublicKey) {
             try KeyFingerprint.compute(fromX25519PublicKeyBase64: "")
         }
     }
 
-    @Test("Invalid base64 throws invalidPublicKey")
-    func invalidBase64Throws() {
+    @Test
+    func `Invalid base64 throws invalidPublicKey`() {
         #expect(throws: KeyFingerprintError.invalidPublicKey) {
             try KeyFingerprint.compute(fromX25519PublicKeyBase64: "not-valid-base64!!!")
         }
     }
 
-    @Test("Wrong-length key throws invalidPublicKey")
-    func wrongLengthKeyThrows() {
+    @Test
+    func `Wrong-length key throws invalidPublicKey`() {
         // 16 bytes instead of 32
         let shortKey = Data(repeating: 0xAB, count: 16).base64EncodedString()
         #expect(throws: KeyFingerprintError.invalidPublicKey) {
@@ -62,8 +62,8 @@ struct KeyFingerprintTests {
         }
     }
 
-    @Test("Deterministic: same key always produces same fingerprint")
-    func deterministic() throws {
+    @Test
+    func `Deterministic: same key always produces same fingerprint`() throws {
         let first = try KeyFingerprint.compute(fromX25519PublicKeyBase64: Self.goldenKeyBase64)
         let second = try KeyFingerprint.compute(fromX25519PublicKeyBase64: Self.goldenKeyBase64)
         let third = try KeyFingerprint.compute(fromX25519PublicKeyBase64: Self.goldenKeyBase64)
@@ -78,8 +78,8 @@ struct KeyFingerprintTests {
     private static let testKeyA = Data(repeating: 0x01, count: 32).base64EncodedString()
     private static let testKeyB = Data(repeating: 0x02, count: 32).base64EncodedString()
 
-    @Test("verify returns .firstTime for unknown device and key")
-    func verifyFirstTime() {
+    @Test
+    func `verify returns .firstTime for unknown device and key`() {
         let deviceID = "first-time-\(UUID().uuidString)"
         let key = Data(repeating: 0xAA, count: 32).base64EncodedString()
 
@@ -92,8 +92,8 @@ struct KeyFingerprintTests {
         }
     }
 
-    @Test("verify returns .trusted after trust() with same device and key")
-    func verifyTrusted() throws {
+    @Test
+    func `verify returns .trusted after trust() with same device and key`() throws {
         let deviceID = Self.testDeviceA
         let key = Self.testKeyA
         let fingerprint = try KeyFingerprint.compute(fromX25519PublicKeyBase64: key)
@@ -109,8 +109,8 @@ struct KeyFingerprintTests {
         }
     }
 
-    @Test("verify returns .keyChanged when same deviceID but different key")
-    func verifyKeyChanged() throws {
+    @Test
+    func `verify returns .keyChanged when same deviceID but different key`() throws {
         let deviceID = "key-changed-\(UUID().uuidString)"
         let originalKey = Self.testKeyA
         let newKey = Self.testKeyB
@@ -121,7 +121,7 @@ struct KeyFingerprintTests {
         TrustedKeyStore.trust(
             deviceID: deviceID,
             publicKeyBase64: originalKey,
-            fingerprint: originalFingerprint
+            fingerprint: originalFingerprint,
         )
 
         let state = TrustedKeyStore.verify(deviceID: deviceID, publicKeyBase64: newKey)
@@ -131,8 +131,8 @@ struct KeyFingerprintTests {
         }
     }
 
-    @Test("verify returns .knownKeyNewDevice when different deviceID but same key")
-    func verifyKnownKeyNewDevice() throws {
+    @Test
+    func `verify returns .knownKeyNewDevice when different deviceID but same key`() throws {
         let deviceA = "known-key-a-\(UUID().uuidString)"
         let deviceB = "known-key-b-\(UUID().uuidString)"
         let sharedKey = Self.testKeyA
@@ -146,7 +146,7 @@ struct KeyFingerprintTests {
         TrustedKeyStore.trust(
             deviceID: deviceA,
             publicKeyBase64: sharedKey,
-            fingerprint: fingerprint
+            fingerprint: fingerprint,
         )
 
         let state = TrustedKeyStore.verify(deviceID: deviceB, publicKeyBase64: sharedKey)

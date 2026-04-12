@@ -82,7 +82,7 @@ class UploadProgressViewController: UIViewController {
             subtitleLabel.text = String(localized: "Your terminal can export the session now.")
             navigationItem.rightBarButtonItem = UIBarButtonItem(
                 title: String(localized: "Done"), style: .done,
-                target: self, action: #selector(doneTapped)
+                target: self, action: #selector(doneTapped),
             )
 
         case let .failed(message):
@@ -93,7 +93,7 @@ class UploadProgressViewController: UIViewController {
             subtitleLabel.text = message
             navigationItem.rightBarButtonItem = UIBarButtonItem(
                 title: String(localized: "Done"), style: .done,
-                target: self, action: #selector(doneTapped)
+                target: self, action: #selector(doneTapped),
             )
 
         default:

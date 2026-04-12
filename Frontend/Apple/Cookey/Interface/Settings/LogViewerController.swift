@@ -74,7 +74,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         hasShownWarning = true
         let alert = AlertViewController(
             title: String(localized: "Sensitive Data Warning"),
-            message: String(localized: "Logs may contain sensitive information such as session tokens and request details. Sharing or taking screenshots could expose your credentials.")
+            message: String(localized: "Logs may contain sensitive information such as session tokens and request details. Sharing or taking screenshots could expose your credentials."),
         ) { context in
             context.addAction(title: String(localized: "OK"), attribute: .dangerous) {
                 context.dispose()
@@ -107,7 +107,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         let levelActions = LogLevel.allCases.map { level in
             UIAction(
                 title: level.rawValue,
-                image: selectedLevels.contains(level) ? UIImage(systemName: "checkmark") : nil
+                image: selectedLevels.contains(level) ? UIImage(systemName: "checkmark") : nil,
             ) { [weak self] _ in
                 self?.toggleLevel(level)
             }
@@ -115,7 +115,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         let levelMenu = UIMenu(
             title: String(localized: "Filter by Level"),
             image: UIImage(systemName: "slider.horizontal.3"),
-            children: levelActions
+            children: levelActions,
         )
 
         let categoryActions: [UIAction]
@@ -127,7 +127,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
             var actions = [
                 UIAction(
                     title: String(localized: "All Categories"),
-                    image: selectedCategories.isEmpty ? UIImage(systemName: "checkmark") : nil
+                    image: selectedCategories.isEmpty ? UIImage(systemName: "checkmark") : nil,
                 ) { [weak self] _ in
                     self?.selectedCategories.removeAll()
                     self?.applyFilters()
@@ -137,7 +137,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
             actions.append(contentsOf: allCategories.sorted().map { category in
                 UIAction(
                     title: category,
-                    image: selectedCategories.contains(category) ? UIImage(systemName: "checkmark") : nil
+                    image: selectedCategories.contains(category) ? UIImage(systemName: "checkmark") : nil,
                 ) { [weak self] _ in
                     self?.toggleCategory(category)
                 }
@@ -147,19 +147,19 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         let categoryMenu = UIMenu(
             title: String(localized: "Filter by Category"),
             image: UIImage(systemName: "tag"),
-            children: categoryActions
+            children: categoryActions,
         )
 
         let refreshAction = UIAction(
             title: String(localized: "Refresh"),
-            image: UIImage(systemName: "arrow.clockwise")
+            image: UIImage(systemName: "arrow.clockwise"),
         ) { [weak self] _ in
             self?.reload()
         }
 
         let shareAction = UIAction(
             title: String(localized: "Share"),
-            image: UIImage(systemName: "square.and.arrow.up")
+            image: UIImage(systemName: "square.and.arrow.up"),
         ) { [weak self] _ in
             self?.shareLog()
         }
@@ -167,7 +167,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         let clearAction = UIAction(
             title: String(localized: "Clear"),
             image: UIImage(systemName: "trash"),
-            attributes: .destructive
+            attributes: .destructive,
         ) { [weak self] _ in
             self?.clearLog()
         }
@@ -348,7 +348,7 @@ final class LogViewerController: UIViewController, UITableViewDataSource, UITabl
         let identifier = "LogCell"
         let cell = tableView.dequeueReusableCell(withIdentifier: identifier) ?? UITableViewCell(
             style: .subtitle,
-            reuseIdentifier: identifier
+            reuseIdentifier: identifier,
         )
 
         let logLine = displayLines[indexPath.row]

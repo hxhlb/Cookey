@@ -7,7 +7,7 @@ extension BrowserCaptureModel: WKUIDelegate {
         _ webView: WKWebView,
         createWebViewWith configuration: WKWebViewConfiguration,
         for navigationAction: WKNavigationAction,
-        windowFeatures: WKWindowFeatures
+        windowFeatures: WKWindowFeatures,
     ) -> WKWebView? {
         if navigationAction.targetFrame == nil {
             // If it's a regular target="_blank" link click without explicit popup dimensions,
@@ -38,7 +38,7 @@ extension BrowserCaptureModel: WKUIDelegate {
                 systemItem: .done,
                 primaryAction: UIAction { [weak popupVC] _ in
                     popupVC?.dismiss(animated: true)
-                }
+                },
             )
 
             let navVC = UINavigationController(rootViewController: popupVC)
@@ -67,7 +67,7 @@ extension BrowserCaptureModel: WKUIDelegate {
         _ webView: WKWebView,
         runJavaScriptAlertPanelWithMessage message: String,
         initiatedByFrame _: WKFrameInfo,
-        completionHandler: @escaping () -> Void
+        completionHandler: @escaping () -> Void,
     ) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: String(localized: "OK"), style: .default) { _ in
@@ -80,7 +80,7 @@ extension BrowserCaptureModel: WKUIDelegate {
         _ webView: WKWebView,
         runJavaScriptConfirmPanelWithMessage message: String,
         initiatedByFrame _: WKFrameInfo,
-        completionHandler: @escaping (Bool) -> Void
+        completionHandler: @escaping (Bool) -> Void,
     ) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: String(localized: "Cancel"), style: .cancel) { _ in
@@ -97,7 +97,7 @@ extension BrowserCaptureModel: WKUIDelegate {
         runJavaScriptTextInputPanelWithPrompt prompt: String,
         defaultText: String?,
         initiatedByFrame _: WKFrameInfo,
-        completionHandler: @escaping (String?) -> Void
+        completionHandler: @escaping (String?) -> Void,
     ) {
         let alert = UIAlertController(title: nil, message: prompt, preferredStyle: .alert)
         alert.addTextField { textField in
@@ -115,7 +115,7 @@ extension BrowserCaptureModel: WKUIDelegate {
     private func presentAlert(
         _ alert: UIAlertController,
         on webView: WKWebView,
-        fallback: @escaping () -> Void
+        fallback: @escaping () -> Void,
     ) {
         guard let viewController = topViewController(for: webView.window) else {
             fallback()

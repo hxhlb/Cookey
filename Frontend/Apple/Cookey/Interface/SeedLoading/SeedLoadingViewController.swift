@@ -143,7 +143,7 @@ final class SeedLoadingViewController: UIViewController {
             let host = deepLink.serverURL.host(percentEncoded: false) ?? deepLink.serverURL.absoluteString
             let alert = AlertViewController(
                 title: String(localized: "Enable Push Notifications for Cookey?"),
-                message: String(localized: "If you enable push notifications, future login or session refresh requests for \(host) can be sent directly to this device — no need to scan a QR code or enter a pairing code again.\n\nThis is optional — Cookey works perfectly without notifications. You can change this later in Settings.")
+                message: String(localized: "If you enable push notifications, future login or session refresh requests for \(host) can be sent directly to this device — no need to scan a QR code or enter a pairing code again.\n\nThis is optional — Cookey works perfectly without notifications. You can change this later in Settings."),
             ) { [weak self] context in
                 context.addAction(title: String(localized: "Not Now")) {
                     context.dispose {

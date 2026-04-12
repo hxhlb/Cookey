@@ -72,7 +72,7 @@ enum KeyFingerprint {
         // Bytes 0–5 → hex formatted as "xxyy:xxyy:xxyy"
         let hex = String(
             format: "%02x%02x:%02x%02x:%02x%02x",
-            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5]
+            bytes[0], bytes[1], bytes[2], bytes[3], bytes[4], bytes[5],
         )
 
         // Bytes 6–11 → 6 emoji from lookup table

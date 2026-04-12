@@ -13,14 +13,46 @@ Cookey/
 ├── App/
 │   ├── AppDelegate.swift                  # UIApplicationDelegate (push notifications, deep links)
 │   ├── AppEnvironment.swift               # API endpoint config
+│   ├── AppSettings.swift                  # User-facing settings model
 │   ├── FlowCoordinator.swift              # UIKit navigation state machine
 │   └── SceneDelegate.swift                # UIWindowScene lifecycle and deep link handling
-├── Interface/
+├── Interface/                             # All screens, grouped by feature
 │   ├── Browser/
+│   │   ├── BrowserViewController.swift    # In-app browser (WKWebView)
 │   │   ├── BrowserCaptureModel.swift      # WKWebView cookie/localStorage capture model
-│   │   └── BrowserCaptureModel+Navigation.swift  # Navigation delegate extension
-│   └── Scanner/
-│       └── ScannerContainerView@iOS.swift # AVCaptureSession QR scanner (UIViewRepresentable)
+│   │   ├── BrowserCaptureModel+Navigation.swift  # Navigation delegate extension
+│   │   └── BrowserCaptureModel+UIDelegate.swift  # UI delegate extension
+│   ├── Home/
+│   │   └── HomeViewController.swift       # Home/idle screen
+│   ├── KeyVerification/
+│   │   └── KeyVerificationViewController.swift  # Public key fingerprint verification
+│   ├── NotificationConsent/
+│   │   └── NotificationConsentViewController.swift  # Push permission prompt
+│   ├── PairKeyLoading/
+│   │   └── PairKeyLoadingViewController.swift  # Pair key resolution from server
+│   ├── Scanner/
+│   │   ├── ScannerViewController.swift    # QR scanner screen
+│   │   └── ScannerContainerView@iOS.swift # AVCaptureSession QR scanner (UIViewRepresentable)
+│   ├── SeedLoading/
+│   │   └── SeedLoadingViewController.swift  # Seed session download for refresh flows
+│   ├── Settings/
+│   │   ├── SettingsViewController.swift   # App settings screen
+│   │   ├── LogViewerController.swift      # Log viewer sub-screen
+│   │   ├── TextViewerController.swift     # Generic text viewer
+│   │   └── TrustedPublicKeysViewController.swift  # Trusted keys management
+│   ├── Shared/
+│   │   └── ConfigurableInfoView.swift     # Reusable info display component
+│   ├── Upload/
+│   │   └── UploadProgressViewController.swift  # Upload status display
+│   └── Welcome/
+│       ├── WelcomePageViewController.swift  # Welcome/onboarding flow
+│       ├── WelcomeExperience.swift        # Welcome experience model
+│       └── SetupStepView.swift            # Setup step SwiftUI view
+├── Logging/
+│   ├── Logger+FileLogging.swift           # File logging extension
+│   ├── Logger+Subsystem.swift             # Subsystem constants
+│   ├── LogLevel.swift                     # Log level enum
+│   └── LogStore.swift                     # In-memory log storage
 ├── Models/
 │   ├── CapturedCookie.swift               # Single captured cookie
 │   ├── CapturedOrigin.swift               # Origin with cookies and storage items
@@ -28,25 +60,27 @@ Cookey/
 │   ├── CapturedStorageItem.swift          # Single localStorage key-value pair
 │   ├── DeepLink.swift                     # cookey:// URL scheme parsing (login + refresh types)
 │   ├── EncryptedSessionEnvelope.swift     # Encrypted session wire format
-│   └── HealthCheckResult.swift            # Server health check response
+│   ├── HealthCheckResult.swift            # Server health check response
+│   ├── PairKeyResolveResponse.swift       # Pair key resolution response
+│   ├── RequestStatusResponse.swift        # Request status response
+│   └── SeedSessionPayload.swift           # Seed session payload
 ├── Networking/
 │   └── RelayClient.swift                  # URLSession HTTP client (health, upload, seed, APNs)
 ├── Services/
+│   ├── AppIconSettings.swift              # App icon selection
 │   ├── DeviceKeyManager.swift             # Ed25519/X25519 device key persistence and derivation
 │   ├── HealthCheckModel.swift             # Server health polling
+│   ├── KeyFingerprint.swift               # Public key fingerprint generation
+│   ├── LaunchBackendReachabilityCoordinator.swift  # Backend reachability on launch
 │   ├── NotificationPromptResponse.swift   # Push consent enum
 │   ├── NotificationPromptStore.swift      # Persisted push consent state
 │   ├── PushRegistrationCoordinator@iOS.swift  # APNs device token handling
 │   ├── PushTokenStore.swift               # Persistent APNs token storage
+│   ├── RequestAuthenticator.swift         # Request signing
 │   ├── SessionUploadModel.swift           # Upload state machine
-│   └── SessionUploadModel+UploadError.swift   # Upload error types
-├── ViewControllers/
-│   ├── BrowserViewController.swift        # In-app browser (WKWebView)
-│   ├── HomeViewController.swift           # Home/idle screen
-│   ├── NotificationConsentViewController.swift  # Push permission prompt
-│   ├── ScannerViewController.swift        # QR scanner screen
-│   ├── SeedLoadingViewController.swift    # Seed session download for refresh flows
-│   └── UploadProgressViewController.swift # Upload status display
+│   ├── SessionUploadModel+UploadError.swift   # Upload error types
+│   ├── TrustedKeyListDataSource.swift     # Trusted key list data source
+│   └── TrustedKeyStore.swift              # Trusted public key persistence
 ├── main.swift                             # App entry point
 └── Resources/
 CookeyTests/
@@ -55,12 +89,15 @@ CookeyTests/
 ├── CookeyTests.swift
 ├── CryptoBoxOpenTests.swift
 ├── DeepLinkTests.swift
-└── DeviceKeyManagerTests.swift
+├── DeviceKeyManagerTests.swift
+├── KeyFingerprintTests.swift
+├── LaunchBackendReachabilityCoordinatorTests.swift
+└── LogStoreTests.swift
 ```
 
 ## Key Concepts
 
-- **ViewControllers**: UIKit-based screens managed by `FlowCoordinator`, which drives navigation between home, scanner, seed loading, browser, upload progress, and notification consent
+- **Interface**: UIKit-based screens grouped by feature under `Interface/`, managed by `FlowCoordinator` which drives navigation between home, scanner, seed loading, browser, upload progress, and notification consent
 - **State machine**: `SessionUploadModel` drives the upload flow; `FlowCoordinator` drives overall app navigation
 - **Pair-key deep link**: `cookey://SM8ND67N?host=api.cookey.sh` (host only, HTTPS implied, no custom path)
 - **Authenticated request deep link**: `cookey://login?rid=...&server=...&target=...&pubkey=...&device_id=...&request_type=login|refresh`

@@ -9,7 +9,7 @@ struct RelayClient {
 
     init(
         baseURL: URL,
-        session: URLSession = .shared
+        session: URLSession = .shared,
     ) {
         self.baseURL = baseURL
         self.session = session
@@ -23,7 +23,7 @@ struct RelayClient {
     init(
         baseURL: URL,
         session: URLSession = .shared,
-        requestExecutor: @escaping @Sendable (URLRequest) throws -> (Data, URLResponse)
+        requestExecutor: @escaping @Sendable (URLRequest) throws -> (Data, URLResponse),
     ) {
         self.baseURL = baseURL
         self.session = session
@@ -48,14 +48,14 @@ struct RelayClient {
             throw NSError(
                 domain: "Cookey.RelayClient",
                 code: httpResponse.statusCode,
-                userInfo: [NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode)"]
+                userInfo: [NSLocalizedDescriptionKey: "Unexpected status code \(httpResponse.statusCode)"],
             )
         }
 
         return HealthCheckResult(
             body: String(decoding: data, as: UTF8.self),
             serverName: httpResponse.value(forHTTPHeaderField: "Server") ?? "unknown",
-            checkedAt: Date()
+            checkedAt: Date(),
         )
     }
 
@@ -99,7 +99,7 @@ struct RelayClient {
     private func sendRequest(
         to url: URL,
         method: String,
-        body: (some Encodable)?
+        body: (some Encodable)?,
     ) async throws -> HTTPURLResponse {
         var request = URLRequest(url: url)
         request.httpMethod = method
@@ -147,7 +147,7 @@ struct RelayClient {
         return NSError(
             domain: "Cookey.RelayClient",
             code: statusCode,
-            userInfo: [NSLocalizedDescriptionKey: "Unexpected status code \(statusCode): \(body)"]
+            userInfo: [NSLocalizedDescriptionKey: "Unexpected status code \(statusCode): \(body)"],
         )
     }
 
@@ -162,7 +162,7 @@ struct RelayClient {
 
     private static func performRequest(
         _ request: URLRequest,
-        with session: URLSession
+        with session: URLSession,
     ) async throws -> (Data, URLResponse) {
         try await session.data(for: request)
     }

@@ -40,21 +40,21 @@ Both APNs and FCM are optional and independently configurable via environment va
 
 ### APNs (iOS)
 
-| Variable | Description |
-|---|---|
-| `COOKEY_APNS_TEAM_ID` | Apple Developer team ID |
-| `COOKEY_APNS_KEY_ID` | APNs authentication key ID |
-| `COOKEY_APNS_BUNDLE_ID` | iOS app bundle identifier |
+| Variable                       | Description                         |
+| ------------------------------ | ----------------------------------- |
+| `COOKEY_APNS_TEAM_ID`          | Apple Developer team ID             |
+| `COOKEY_APNS_KEY_ID`           | APNs authentication key ID          |
+| `COOKEY_APNS_BUNDLE_ID`        | iOS app bundle identifier           |
 | `COOKEY_APNS_PRIVATE_KEY_PATH` | Path to APNs `.p8` private key file |
 
 All four are required to enable APNs.
 
 ### FCM (Android)
 
-| Variable | Description |
-|---|---|
-| `COOKEY_FCM_SERVICE_ACCOUNT_PATH` | Path to Firebase service account JSON file |
-| `COOKEY_FCM_PROJECT_ID` | Firebase project ID (auto-detected from service account file if omitted) |
+| Variable                          | Description                                                              |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `COOKEY_FCM_SERVICE_ACCOUNT_PATH` | Path to Firebase service account JSON file                               |
+| `COOKEY_FCM_PROJECT_ID`           | Firebase project ID (auto-detected from service account file if omitted) |
 
 Only `COOKEY_FCM_SERVICE_ACCOUNT_PATH` is required; `project_id` is read from the JSON file automatically.
 

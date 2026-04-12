@@ -5,7 +5,7 @@ enum AppEnvironment {
     nonisolated static var effectiveAPIBaseURL: URL {
         let domain: String = ConfigurableKit.value(
             forKey: AppSettings.defaultServerKey,
-            defaultValue: ""
+            defaultValue: "",
         )
         let trimmed = domain.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty,

@@ -9,7 +9,7 @@ let package = Package(
     dependencies: [
         .package(
             url: "https://github.com/jedisct1/swift-sodium.git",
-            revision: "2b2f23c75ebcc40162dce904881c1be11d730cc7"
+            revision: "2b2f23c75ebcc40162dce904881c1be11d730cc7",
         ),
     ],
     targets: [
@@ -18,7 +18,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Sodium", package: "swift-sodium"),
                 .product(name: "Clibsodium", package: "swift-sodium"),
-            ]
+            ],
         ),
         .testTarget(
             name: "CryptoBoxTests",
@@ -26,7 +26,7 @@ let package = Package(
                 "CryptoBox",
                 .product(name: "Sodium", package: "swift-sodium"),
                 .product(name: "Clibsodium", package: "swift-sodium"),
-            ]
+            ],
         ),
-    ]
+    ],
 )
