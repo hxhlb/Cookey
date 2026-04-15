@@ -32,6 +32,7 @@ pip install cookey
 Alternatively, download prebuilt binaries:
 
 - macOS: https://github.com/Lakr233/Cookey/releases/latest/download/cookey-macOS.zip
+- Windows x86_64: https://github.com/Lakr233/Cookey/releases/latest/download/cookey-windows-x86_64.zip
 - Linux x86_64: https://github.com/Lakr233/Cookey/releases/latest/download/cookey-linux-x86_64.zip
 - Linux aarch64: https://github.com/Lakr233/Cookey/releases/latest/download/cookey-linux-aarch64.zip
 

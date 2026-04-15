@@ -1,6 +1,6 @@
 # CommandLineTool
 
-Go executable module targeting macOS 13+ and Linux. The `cookey` binary is the user-facing CLI tool.
+Go executable module targeting macOS 13+, Linux, and Windows x64. The `cookey` binary is the user-facing CLI tool.
 
 ## Dependencies
 
@@ -79,7 +79,7 @@ Go executable module targeting macOS 13+ and Linux. The `cookey` binary is the u
 ## Daemon Process Model
 
 - Default behavior is detached. `request start` / `request refresh` call `daemon.LaunchDetached`, which re-executes the current binary as `cookey __daemon <payload>`.
-- Detached daemons start in a new session with `setsid`, and stdin/stdout/stderr are redirected to `/dev/null`.
+- Detached daemons start with platform-specific background process settings, and stdin/stdout/stderr are redirected to the platform null device.
 - The parent CLI process waits only until the daemon descriptor file is written, then returns success to the caller.
 - `--attach` skips detached launch and runs the same wait/decrypt/write flow inline via `daemon.RunInline`.
 - Inline mode means the current process must stay alive until delivery completes. This is only safe when the caller intentionally keeps the process attached.

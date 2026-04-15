@@ -35,10 +35,21 @@ export const targets = [
     arch: "arm64",
     exe: false,
   },
+  {
+    goos: "windows",
+    goarch: "amd64",
+    platform: "win32",
+    arch: "x64",
+    exe: true,
+  },
 ];
 
+function platformLabel(platform) {
+  return platform === "win32" ? "windows" : platform;
+}
+
 export function formatTarget(target) {
-  return `${target.platform}-${target.arch}`;
+  return `${platformLabel(target.platform)}-${target.arch}`;
 }
 
 export function binaryName(target) {
@@ -46,11 +57,11 @@ export function binaryName(target) {
 }
 
 export function releaseAssetName(version, target) {
-  return `cookey-v${version}-${target.platform}-${target.arch}${target.exe ? ".exe" : ""}`;
+  return `cookey-v${version}-${platformLabel(target.platform)}-${target.arch}${target.exe ? ".exe" : ""}`;
 }
 
 export function platformPackageDirName(target) {
-  return `cli-${target.platform}-${target.arch}`;
+  return `cli-${platformLabel(target.platform)}-${target.arch}`;
 }
 
 export function platformPackageName(target) {

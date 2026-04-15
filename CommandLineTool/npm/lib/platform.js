@@ -30,6 +30,13 @@ const TARGETS = {
     packageName: "@cookey/cli-linux-arm64",
     packageDirName: "cli-linux-arm64",
   },
+  "win32-x64": {
+    platform: "win32",
+    arch: "x64",
+    binaryName: "cookey.exe",
+    packageName: "@cookey/cli-windows-x64",
+    packageDirName: "cli-windows-x64",
+  },
 };
 
 function formatTarget(platform = process.platform, arch = process.arch) {

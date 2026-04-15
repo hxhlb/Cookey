@@ -6,12 +6,16 @@ Cookey captures authenticated browser sessions from a mobile device and delivers
 them encrypted to a CLI terminal as Playwright-compatible `storageState` JSON.
 
 ## Install
-Download the latest binary from GitHub Releases:
-  https://github.com/Lakr233/Cookey/releases/latest/download/cookey-macOS.zip
+Install from npm:
+  npm install -g @cookey/cli
+
+Or download the latest binary from GitHub Releases:
 
 Assets:
   https://github.com/Lakr233/Cookey/releases/latest/download/cookey-macOS.zip
     macOS universal (arm64 + x86_64), signed & notarized
+  https://github.com/Lakr233/Cookey/releases/latest/download/cookey-windows-x86_64.zip
+    Windows x86_64
   https://github.com/Lakr233/Cookey/releases/latest/download/cookey-linux-x86_64.zip
     Linux x86_64
   https://github.com/Lakr233/Cookey/releases/latest/download/cookey-linux-aarch64.zip
