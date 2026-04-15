@@ -7,6 +7,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     let pushCoordinator = PushRegistrationCoordinator()
     let launchBackendReachabilityCoordinator = LaunchBackendReachabilityCoordinator()
     lazy var sessionModel = SessionUploadModel(pushCoordinator: pushCoordinator)
+    private var isPresentingExitConfirmation = false
 
     func application(
         _ application: UIApplication,
@@ -58,6 +59,44 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         return configuration
     }
 
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+
+        #if targetEnvironment(macCatalyst)
+            builder.replace(
+                menu: .close,
+                with: UIMenu(
+                    title: "",
+                    options: .displayInline,
+                    children: [
+                        UIKeyCommand(
+                            title: String(localized: "Close"),
+                            action: #selector(requestAppExitFromMenu(_:)),
+                            input: "w",
+                            modifierFlags: .command,
+                        ),
+                    ],
+                ),
+            )
+
+            builder.replace(
+                menu: .quit,
+                with: UIMenu(
+                    title: "",
+                    options: .displayInline,
+                    children: [
+                        UIKeyCommand(
+                            title: String(localized: "Exit"),
+                            action: #selector(requestAppExitFromMenu(_:)),
+                            input: "q",
+                            modifierFlags: .command,
+                        ),
+                    ],
+                ),
+            )
+        #endif
+    }
+
     func application(
         _: UIApplication,
         didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data,
@@ -92,6 +131,63 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         pushCoordinator.handleNotificationUserInfo(response.notification.request.content.userInfo)
         completionHandler()
     }
+
+    #if targetEnvironment(macCatalyst)
+        @objc func terminate(_: Any?) {
+            requestApplicationExit()
+        }
+
+        @objc override func performClose(_: Any?) {
+            requestApplicationExit()
+        }
+
+        @objc private func requestAppExitFromMenu(_: Any?) {
+            requestApplicationExit()
+        }
+
+        func requestApplicationExit() {
+            requestProtectedTermination {
+                terminateApplication()
+            }
+        }
+
+        private func requestProtectedTermination(_ action: @escaping () -> Void) {
+            guard sessionModel.hasExecutingFlow else {
+                action()
+                return
+            }
+            presentExitConfirmationIfNeeded(action: action)
+        }
+
+        private func presentExitConfirmationIfNeeded(action: @escaping () -> Void) {
+            guard !isPresentingExitConfirmation else { return }
+            guard let rootViewController = mainWindow?.rootViewController else {
+                action()
+                return
+            }
+
+            isPresentingExitConfirmation = true
+
+            let alert = AlertViewController(
+                title: String(localized: "Exit"),
+                message: String(localized: "Exiting now will interrupt the current Cookey request."),
+            ) { [weak self] context in
+                context.addAction(title: String(localized: "Cancel")) {
+                    self?.isPresentingExitConfirmation = false
+                    context.dispose()
+                }
+                context.addAction(title: String(localized: "Exit"), attribute: .dangerous) {
+                    self?.isPresentingExitConfirmation = false
+                    context.dispose {
+                        action()
+                    }
+                }
+            }
+
+            let presenter = topMostViewController(from: rootViewController) ?? rootViewController
+            presenter.present(alert, animated: true)
+        }
+    #endif
 }
 
 private extension AppDelegate {
@@ -102,4 +198,43 @@ private extension AppDelegate {
         String(localized: "apn_login_title"),
         String(localized: "apn_login_body"),
     ]
+
+    var mainWindow: UIWindow? {
+        let windowScenes = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+        let windows = windowScenes.flatMap(\.windows)
+        return windows.first(where: \.isKeyWindow) ?? windows.first
+    }
+
+    func topMostViewController(from viewController: UIViewController?) -> UIViewController? {
+        guard let viewController else { return nil }
+
+        if let presentedViewController = viewController.presentedViewController {
+            return topMostViewController(from: presentedViewController)
+        }
+
+        if let navigationController = viewController as? UINavigationController {
+            return topMostViewController(from: navigationController.visibleViewController)
+        }
+
+        if let tabBarController = viewController as? UITabBarController {
+            return topMostViewController(from: tabBarController.selectedViewController)
+        }
+
+        return viewController
+    }
+}
+
+func terminateApplication() -> Never {
+    #if targetEnvironment(macCatalyst)
+        exit(0)
+    #else
+        UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+        Task.detached {
+            try await Task.sleep(for: .seconds(1))
+            exit(0)
+        }
+        sleep(5)
+        fatalError()
+    #endif
 }

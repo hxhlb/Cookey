@@ -46,6 +46,15 @@ final class SessionUploadModel: ObservableObject {
         self.relayClientFactory = relayClientFactory
     }
 
+    var hasExecutingFlow: Bool {
+        switch phase {
+        case .idle, .done, .failed:
+            false
+        case .scanning, .resolvingPairKey, .validating, .browsing, .uploading:
+            true
+        }
+    }
+
     func startScan() {
         Logger.ui.infoFile("Starting QR scan flow")
         phase = .scanning

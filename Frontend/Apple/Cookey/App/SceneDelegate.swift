@@ -61,4 +61,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         Logger.ui.infoFile("Scene opened URL context: \(url.absoluteString)")
         appDelegate.sessionModel.handleURL(url)
     }
+
+    func sceneDidDisconnect(_: UIScene) {
+        #if targetEnvironment(macCatalyst)
+            Logger.ui.infoFile("Scene did disconnect")
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(200))
+                let remainingWindowScenes = UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }
+                guard remainingWindowScenes.isEmpty else { return }
+                exit(0)
+            }
+        #endif
+    }
 }
