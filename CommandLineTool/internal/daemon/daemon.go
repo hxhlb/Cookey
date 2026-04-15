@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
-	"syscall"
 	"time"
 
 	"cookey/internal/config"
@@ -39,16 +38,11 @@ func LaunchDetached(context config.BootstrapContext, manifest models.LoginManife
 	}
 
 	command := exec.Command(executablePath, "__daemon", encodedPayload)
-	command.Stdin = nil
-	devNull, err := os.OpenFile("/dev/null", os.O_RDWR, 0)
+	devNull, err := configureDetachedProcess(command)
 	if err != nil {
 		return 0, err
 	}
 	defer devNull.Close()
-	command.Stdin = devNull
-	command.Stdout = devNull
-	command.Stderr = devNull
-	command.SysProcAttr = &syscall.SysProcAttr{Setsid: true}
 
 	if err := command.Start(); err != nil {
 		return 0, err

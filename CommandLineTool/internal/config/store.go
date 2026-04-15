@@ -6,12 +6,10 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"runtime"
 	"sort"
 	"strings"
-	"syscall"
 	"time"
 
 	"cookey/internal/crypto"
@@ -416,15 +414,6 @@ func StatusSnapshot(rid string, context BootstrapContext) models.StatusSnapshot 
 	}
 }
 
-func IsProcessAlive(pid int32) bool {
-	if pid <= 0 {
-		return false
-	}
-
-	err := syscall.Kill(int(pid), 0)
-	return err == nil || errors.Is(err, syscall.EPERM)
-}
-
 func WriteSession(session models.SessionFile, rid string, paths AppPaths) error {
 	return WriteJSON(paths.SessionPath(rid), session, 0o600)
 }
@@ -628,34 +617,6 @@ func removeIfExists(path string) (bool, error) {
 		return false, err
 	}
 	return true, nil
-}
-
-func currentOSVersionString() string {
-	if runtime.GOOS == "darwin" {
-		productVersion, errVersion := exec.Command("sw_vers", "-productVersion").Output()
-		buildVersion, errBuild := exec.Command("sw_vers", "-buildVersion").Output()
-		if errVersion == nil && errBuild == nil {
-			return "Version " + strings.TrimSpace(string(productVersion)) + " (Build " + strings.TrimSpace(string(buildVersion)) + ")"
-		}
-	}
-
-	return runtime.GOOS
-}
-
-func machineIdentifier() string {
-	for _, candidate := range []string{"/etc/machine-id", "/var/lib/dbus/machine-id"} {
-		data, err := os.ReadFile(candidate)
-		if err != nil {
-			continue
-		}
-
-		value := strings.TrimSpace(string(data))
-		if value != "" {
-			return value
-		}
-	}
-
-	return ""
 }
 
 func currentArchitecture() string {

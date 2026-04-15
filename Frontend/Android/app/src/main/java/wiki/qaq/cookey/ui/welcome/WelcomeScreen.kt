@@ -162,7 +162,7 @@ private fun InstallPage() {
     val context = LocalContext.current
     var copied by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val installCommand = "npx cookey@latest"
+    val installCommand = "npx @cookey/cli@latest"
 
     PageContainer {
         Icon(

@@ -28,6 +28,11 @@ TARGETS = {
         "arch": "arm64",
         "binary_name": "cookey-linux-arm64",
     },
+    "win32-x64": {
+        "platform": "win32",
+        "arch": "x64",
+        "binary_name": "cookey-win32-x64.exe",
+    },
 }
 
 
@@ -46,6 +51,11 @@ def detect_target() -> dict[str, str]:
             runtime_arch = "x64"
         elif machine in {"aarch64", "arm64"}:
             runtime_arch = "arm64"
+        else:
+            runtime_arch = machine
+    elif runtime_platform == "win32":
+        if machine in {"x86_64", "amd64"}:
+            runtime_arch = "x64"
         else:
             runtime_arch = machine
     else:
@@ -69,9 +79,10 @@ def resolve_binary_path() -> str:
         )
 
     path = os.fspath(binary)
-    mode = os.stat(path).st_mode
-    if not mode & stat.S_IXUSR:
-        os.chmod(path, mode | stat.S_IXUSR)
+    if sys.platform != "win32":
+        mode = os.stat(path).st_mode
+        if not mode & stat.S_IXUSR:
+            os.chmod(path, mode | stat.S_IXUSR)
     return path
 
 

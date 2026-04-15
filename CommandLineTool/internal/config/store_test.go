@@ -2,16 +2,21 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	"cookey/internal/models"
 )
 
+func setTestHomeDir(t *testing.T, homeDir string) {
+	t.Helper()
+	t.Setenv("HOME", homeDir)
+	t.Setenv("USERPROFILE", homeDir)
+}
+
 func TestBootstrapDoesNotCreateIdentityByDefault(t *testing.T) {
 	homeDir := t.TempDir()
-	t.Setenv("HOME", homeDir)
+	setTestHomeDir(t, homeDir)
 
 	context, err := Bootstrap()
 	if err != nil {
@@ -35,9 +40,9 @@ func TestBootstrapDoesNotCreateIdentityByDefault(t *testing.T) {
 	}
 
 	for _, dir := range []string{
-		filepath.Join(homeDir, ".cookey"),
-		filepath.Join(homeDir, ".cookey", "sessions"),
-		filepath.Join(homeDir, ".cookey", "daemons"),
+		context.Paths.Root,
+		context.Paths.Sessions,
+		context.Paths.Daemons,
 	} {
 		if !fileExists(dir) {
 			t.Fatalf("Bootstrap() missing directory %q", dir)
@@ -47,7 +52,7 @@ func TestBootstrapDoesNotCreateIdentityByDefault(t *testing.T) {
 
 func TestBootstrapWithIdentityCreatesAndReusesIdentity(t *testing.T) {
 	homeDir := t.TempDir()
-	t.Setenv("HOME", homeDir)
+	setTestHomeDir(t, homeDir)
 
 	first, err := BootstrapWithIdentity()
 	if err != nil {
